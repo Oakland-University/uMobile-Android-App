@@ -14,8 +14,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import org.androidannotations.annotations.Bean;
 import org.umobile.R;
+import org.umobile.deserializers.LayoutDeserializer;
 import org.umobile.fragments.HomePageListFragment;
 import org.umobile.adapters.FolderListAdapter;
 
@@ -23,11 +27,14 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 import org.umobile.models.Folder;
+import org.umobile.models.Layout;
 import org.umobile.models.Portlet;
 import org.umobile.services.RestApi;
 import org.umobile.services.UmobileRestCallback;
+import org.umobile.utils.LayoutManager;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 @EActivity(R.layout.activity_home_page)
@@ -44,11 +51,14 @@ public class HomePage extends Activity implements AdapterView.OnItemClickListene
     @Bean
     RestApi restApi;
 
+    @Bean
+    LayoutManager layoutManager;
+
     private ActionBarDrawerToggle mDrawerToggle;
 
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
-    private Folder[] folders;
+    private List<Folder> folders;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,21 +69,6 @@ public class HomePage extends Activity implements AdapterView.OnItemClickListene
         // enable ActionBar app icon to behave as action to toggle nav drawer
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
-
-        restApi.getMainFeed(new UmobileRestCallback<String>() {
-                    @Override
-                    public void onError(Exception e, String responseBody) {
-                        Log.e(TAG, e.getMessage(), e);
-                    }
-
-                    @Override
-                    public void onSuccess(String response) {
-                        Log.d(TAG, ""+response);
-                    }
-                }
-        );
-
-
     }
 
     @AfterViews
@@ -82,9 +77,7 @@ public class HomePage extends Activity implements AdapterView.OnItemClickListene
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // set up the drawer's list view with items and click listener
-        Folder[] folders = {new Folder("Home",new ArrayList<Portlet>())
-                ,new Folder("Academics", new ArrayList<Portlet>())
-                ,new Folder("My Folder",new ArrayList<Portlet>())};
+        List<Folder> folders = layoutManager.getLayout().getFolders();
         mDrawerList.setAdapter(new FolderListAdapter(this,
                 R.layout.drawer_list_item, folders));
         mDrawerList.setOnItemClickListener(this);
@@ -142,10 +135,6 @@ public class HomePage extends Activity implements AdapterView.OnItemClickListene
     private void selectItem(int position) {
         // update the main content by replacing fragments
         Fragment fragment = new HomePageListFragment();
-        Bundle args = new Bundle();
-        int resourceId = R.raw.portlets;
-        args.putInt("JSON",resourceId);
-        fragment.setArguments(args);
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 

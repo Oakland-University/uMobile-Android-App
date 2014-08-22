@@ -1,5 +1,6 @@
 package org.umobile.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,25 +12,36 @@ public class Folder {
     private String name;
     List<Portlet> portlets;
 
-    public Folder(){}
-    public Folder(String name, List<Portlet> portlets) {
-        this.name = name;
-        this.portlets = portlets;
+    public static class Builder {
+        private String name;
+        private List<Portlet> portlets;
+
+
+        public Builder setPortlets(List<Portlet> portlets) {
+            this.portlets = portlets;
+            return this;
+        }
+
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Folder build() {
+            return new Folder(this);
+        }
+    }
+
+    private Folder(Builder builder) {
+        portlets = builder.portlets;
+        name = builder.name;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public List<Portlet> getPortlets() {
         return portlets;
-    }
-
-    public void setPortlets(List<Portlet> portlets) {
-        this.portlets = portlets;
     }
 }

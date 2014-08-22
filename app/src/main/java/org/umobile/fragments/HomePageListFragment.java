@@ -7,14 +7,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
 import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
 
+import org.androidannotations.annotations.AfterInject;
+import org.androidannotations.annotations.Bean;
+import org.androidannotations.annotations.EFragment;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.umobile.adapters.PortletListAdapter;
+import org.umobile.models.Portlet;
+import org.umobile.utils.LayoutManager;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedReader;
@@ -25,16 +30,22 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.List;
 
+import org.umobile.models.Portlet;
 import org.umobile.R;
 
+@EFragment
 public class HomePageListFragment extends ListFragment {
     private FadingActionBarHelper mFadingHelper;
     private Bundle mArguments;
     private View view;
-    private ArrayAdapter<String> adapter;
-    private ArrayList<String> portlets = null;
+    private PortletListAdapter adapter;
+    private List<Portlet> portlets = null;
     private final String TAG = HomePageListFragment.class.getName();
+
+    @Bean
+    LayoutManager layoutManager;
 
     public static final String ARG_IMAGE_RES = "image_source";
     public static final String ARG_ACTION_BG_RES = "image_action_bs_res";
@@ -50,14 +61,16 @@ public class HomePageListFragment extends ListFragment {
 
         return view;
     }
+    @AfterInject
+    void initialize() {
+
+    }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        mArguments = getArguments();
         int actionBarBg = R.drawable.ab_background_light;
-        int resourceId = mArguments.getInt("JSON");
 
         mFadingHelper = new FadingActionBarHelper()
                 .actionBarBackground(actionBarBg)
@@ -65,16 +78,10 @@ public class HomePageListFragment extends ListFragment {
                 .contentLayout(R.layout.activity_listview);
         mFadingHelper.initActionBar(activity);
 
-        try {
-            portlets = loadItems(resourceId);
-        }catch (IOException ie) {
-            Log.e(TAG,ie.getMessage(), ie);
-        }catch (XmlPullParserException xppe) {
-            Log.e(TAG, xppe.getMessage(), xppe);
-        }
-
+        Log.d("layout folder size = ", "" + layoutManager.getLayout().getFolders().size());
+        portlets = layoutManager.getLayout().getFolders().get(0).getPortlets();
         Log.d("PORTLETS SIZE = ", ""+portlets.size());
-        adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, portlets);
+        adapter = new PortletListAdapter(activity, R.layout.portlet_row, portlets);
         setListAdapter(adapter);
     }
     /**
@@ -128,13 +135,7 @@ public class HomePageListFragment extends ListFragment {
     }
 
     public void update(int resourseId) {
-        try {
-            portlets = loadItems(resourseId);
-        }catch (IOException ie) {
-            Log.e(TAG,ie.getMessage(), ie);
-        }catch (XmlPullParserException xppe) {
-            Log.e(TAG, xppe.getMessage(), xppe);
-        }
+        portlets = layoutManager.getLayout().getFolders().get(0).getPortlets();
         adapter.notifyDataSetChanged();
     }
 

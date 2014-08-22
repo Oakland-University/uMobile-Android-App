@@ -7,25 +7,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.umobile.R;
-import org.umobile.models.Folder;
+import org.umobile.models.Portlet;
 
 import java.util.List;
 
 /**
  * Created by schneis on 8/20/14.
  */
-public class FolderListAdapter extends ArrayAdapter<Folder> {
+public class PortletListAdapter extends ArrayAdapter<Portlet> {
 
     Context context;
     int layoutResourceId;
-    List<Folder> data = null;
+    List<Portlet> data = null;
     int size;
 
-    public FolderListAdapter(Context context, int layoutResourceId, List<Folder> data) {
+    public PortletListAdapter(Context context, int layoutResourceId, List<Portlet> data) {
         super(context, layoutResourceId, data);
         this.layoutResourceId = layoutResourceId;
         this.context = context;
@@ -35,27 +34,30 @@ public class FolderListAdapter extends ArrayAdapter<Folder> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
-        FolderHolder holder = null;
+        PortletHolder holder = null;
 
         if (row == null) {
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
             row = inflater.inflate(layoutResourceId, parent, false);
 
-            holder = new FolderHolder();
+            holder = new PortletHolder();
             holder.txtName = (TextView) row.findViewById(R.id.name);
+            holder.txtDescription = (TextView) row.findViewById(R.id.description);
 
             row.setTag(holder);
         } else {
-            holder = (FolderHolder) row.getTag();
+            holder = (PortletHolder) row.getTag();
         }
 
-        Folder folder = data.get(position);
-        holder.txtName.setText(folder.getName());
+        Portlet portlet = data.get(position);
+        holder.txtName.setText(portlet.getName());
+        holder.txtDescription.setText(portlet.getDescription());
 
         return row;
     }
 
-    static class FolderHolder {
+    static class PortletHolder {
         TextView txtName;
+        TextView txtDescription;
     }
 }
