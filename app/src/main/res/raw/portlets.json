@@ -1,0 +1,64 @@
+{
+  "portlets": [
+    {
+      "name": "First Portlet",
+      "description": "My first portlet",
+      "url": "http://www.google.com"
+    },
+    {
+      "name": "Second Portlet",
+      "description": "My second portlet",
+      "url": "http://www.google.com"
+    },
+    {
+      "name": "Third Portlet",
+      "description": "My third portlet",
+      "url": "http://www.google.com"
+    },
+    {
+      "name": "Second Portlet",
+      "description": "My second portlet",
+      "url": "http://www.google.com"
+    },
+    {
+      "name": "Third Portlet",
+      "description": "My third portlet",
+      "url": "http://www.google.com"
+    },
+    {
+      "name": "Second Portlet",
+      "description": "My second portlet",
+      "url": "http://www.google.com"
+    },
+    {
+      "name": "Third Portlet",
+      "description": "My third portlet",
+      "url": "http://www.google.com"
+    },
+    {
+      "name": "Second Portlet",
+      "description": "My second portlet",
+      "url": "http://www.google.com"
+    },
+    {
+      "name": "Third Portlet",
+      "description": "My third portlet",
+      "url": "http://www.google.com"
+    },
+    {
+      "name": "Second Portlet",
+      "description": "My second portlet",
+      "url": "http://www.google.com"
+    },
+    {
+      "name": "Third Portlet",
+      "description": "My third portlet",
+      "url": "http://www.google.com"
+    },
+    {
+      "name": "Forth Portlet",
+      "description": "My forth portlet",
+      "url": "http://www.google.com"
+    }
+  ]
+}
