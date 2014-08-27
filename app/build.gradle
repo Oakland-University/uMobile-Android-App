@@ -23,6 +23,7 @@ dependencies {
     compile "com.android.support:support-v4:19.1.0"
     compile group: 'org.springframework.android', name: 'spring-android-rest-template', version: '1.0.1.RELEASE'
     compile 'com.google.code.gson:gson:2.2.2'
+    compile 'com.squareup.picasso:picasso:2.3.4'
 }
 
 android {

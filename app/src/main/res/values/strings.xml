@@ -7,4 +7,7 @@
     <string name="drawer_open">Open drawer</string>
     <string name="drawer_close">close_drawer</string>
 
+    <!-- URL constants -->
+    <string name="rootUrl">https://mysail.oakland.edu</string>
+
 </resources>

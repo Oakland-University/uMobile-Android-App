@@ -40,6 +40,7 @@ public class LayoutDeserializer implements JsonDeserializer<Layout> {
                                 .setName(portlet.get("title").getAsString())
                                 .setDescription(portlet.get("description").getAsString())
                                 .setUrl(portlet.get("url").getAsString())
+                                .setIconUrl(portlet.get("iconUrl").getAsString())
                                 .build();
                         portlets.add(p);
                         Log.d("portlet name = " , p.getName());
