@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import org.androidannotations.annotations.Bean;
+import org.androidannotations.annotations.UiThread;
 import org.apereo.R;
 import org.apereo.fragments.HomePageListFragment;
 import org.apereo.adapters.FolderListAdapter;
@@ -31,7 +32,7 @@ import java.util.List;
 
 
 @EActivity(R.layout.activity_home_page)
-public class HomePage extends Activity implements AdapterView.OnItemClickListener {
+public class HomePage extends Activity implements HomePageListFragment.ActionListener, AdapterView.OnItemClickListener {
 
     private final String TAG = HomePage.class.getName();
 
@@ -127,7 +128,9 @@ public class HomePage extends Activity implements AdapterView.OnItemClickListene
 
     private void selectItem(int position) {
         // update the main content by replacing fragments
-        Fragment fragment = new HomePageListFragment_();
+
+        Fragment fragment = HomePageListFragment.getFragment(this);
+
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 
@@ -143,12 +146,13 @@ public class HomePage extends Activity implements AdapterView.OnItemClickListene
         getActionBar().setTitle(mTitle);
     }
 
-    public void lauchWebView(String url) {
+    @UiThread
+    @Override
+    public void launchWebView(String url) {
         PortletWebViewActivity_
                 .intent(this)
                 .url(url)
                 .flags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .start();
     }
-
 }

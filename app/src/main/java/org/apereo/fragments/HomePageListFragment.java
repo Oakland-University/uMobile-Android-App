@@ -1,6 +1,7 @@
 package org.apereo.fragments;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.ListFragment;
 import android.content.Context;
 import android.content.Intent;
@@ -43,6 +44,7 @@ public class HomePageListFragment extends ListFragment {
 
     public static final String ARG_IMAGE_RES = "image_source";
     public static final String ARG_ACTION_BG_RES = "image_action_bs_res";
+    private ActionListener actionListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -70,7 +72,7 @@ public class HomePageListFragment extends ListFragment {
                 Object o = parent.getItemAtPosition(position);
                 if (o instanceof Portlet) {
                     Portlet p = (Portlet) o;
-                    ((HomePage)getActivity()).lauchWebView(App.getRootUrl().concat(p.getUrl()));
+                    actionListener.launchWebView(App.getRootUrl().concat(p.getUrl()));
                 }
             }
         });
@@ -97,5 +99,18 @@ public class HomePageListFragment extends ListFragment {
         adapter.notifyDataSetChanged();
     }
 
+    public static Fragment getFragment(ActionListener actionListener) {
+        HomePageListFragment fragment = new HomePageListFragment_();
+        fragment.setActionListener(actionListener);
+        return fragment;
+    }
+
+    public void setActionListener(ActionListener actionListener) {
+        this.actionListener = actionListener;
+    }
+
+    public interface ActionListener {
+        public void launchWebView(String url);
+    }
 }
 
