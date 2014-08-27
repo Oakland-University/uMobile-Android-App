@@ -2,11 +2,14 @@ package org.apereo.fragments;
 
 import android.app.Activity;
 import android.app.ListFragment;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 
 import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
@@ -14,6 +17,10 @@ import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EFragment;
+import org.apereo.App;
+import org.apereo.activities.HomePage;
+import org.apereo.activities.PortletWebViewActivity;
+import org.apereo.activities.PortletWebViewActivity_;
 import org.apereo.adapters.PortletListAdapter;
 import org.apereo.models.Portlet;
 import org.apereo.utils.LayoutManager;
@@ -56,6 +63,18 @@ public class HomePageListFragment extends ListFragment {
         Log.d("PORTLETS SIZE = ", ""+portlets.size());
         adapter = new PortletListAdapter(activity, R.layout.portlet_row, portlets);
         setListAdapter(adapter);
+
+        getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Object o = parent.getItemAtPosition(position);
+                if (o instanceof Portlet) {
+                    Portlet p = (Portlet) o;
+                    ((HomePage)getActivity()).lauchWebView(App.getRootUrl().concat(p.getUrl()));
+                }
+            }
+        });
+
     }
 
     @Override

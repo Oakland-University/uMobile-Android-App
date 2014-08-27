@@ -3,6 +3,7 @@ package org.apereo.activities;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -140,6 +141,14 @@ public class HomePage extends Activity implements AdapterView.OnItemClickListene
     public void setTitle(CharSequence title) {
         mTitle = title;
         getActionBar().setTitle(mTitle);
+    }
+
+    public void lauchWebView(String url) {
+        PortletWebViewActivity_
+                .intent(this)
+                .url(url)
+                .flags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .start();
     }
 
 }

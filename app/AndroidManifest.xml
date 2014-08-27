@@ -24,6 +24,11 @@
             android:launchMode="singleTop"
             android:configChanges="keyboard|keyboardHidden|orientation">
         </activity>
+        <activity
+            android:name=".activities.PortletWebViewActivity_"
+            android:launchMode="singleTop"
+            android:configChanges="keyboard|keyboardHidden|orientation">
+        </activity>
     </application>
 
 </manifest>
