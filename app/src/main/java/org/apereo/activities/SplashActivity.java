@@ -93,5 +93,9 @@ public class SplashActivity extends BaseActivity {
         dialog.show();
     }
 
-
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(android.R.anim.fade_out, android.R.anim.fade_in);
+    }
 }
