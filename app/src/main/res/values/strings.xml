@@ -10,5 +10,8 @@
 
     <!-- URL constants -->
     <string name="rootUrl">https://mysail.oakland.edu</string>
+    <string name="error_title">Error</string>
+    <string name="error_download_feed">There was a connection problem. Please check your network settings and try again.</string>
+    <string name="dialog_ok">OK</string>
 
 </resources>

@@ -34,7 +34,7 @@ import java.util.List;
 
 
 @EActivity(R.layout.activity_home_page)
-public class HomePage extends Activity implements ActionListener, AdapterView.OnItemClickListener {
+public class HomePage extends BaseActivity implements ActionListener, AdapterView.OnItemClickListener {
 
     private final String TAG = HomePage.class.getName();
 

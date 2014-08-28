@@ -15,7 +15,7 @@ import org.apereo.R;
  * Created by schneis on 8/26/14.
  */
 @EActivity(R.layout.portlet_webview)
-public class PortletWebViewActivity extends Activity{
+public class PortletWebViewActivity extends BaseActivity{
 
     @ViewById(R.id.webview)
     WebView webView;

@@ -5,5 +5,9 @@ package org.apereo.constants;
  */
 public class AppConstants {
 
+    // string constants
     public static final String POSITION = "position";
+
+    // int constants
+    public static final int ERROR_GETTING_FEED = 0x01;
 }
