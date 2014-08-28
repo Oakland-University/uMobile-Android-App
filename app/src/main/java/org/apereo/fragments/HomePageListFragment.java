@@ -88,7 +88,7 @@ public class HomePageListFragment extends ListFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        int actionBarBg = R.drawable.ab_background_light;
+        int actionBarBg = R.drawable.ab_background;
 
         mArguments = getArguments();
 
