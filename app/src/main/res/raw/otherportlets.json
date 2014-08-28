@@ -1,0 +1,21 @@
+{
+  "folders": [
+   {
+     "title": "Other Services",
+    "portlets": [
+      {
+        "title": "Undergraduate Admissions",
+        "description": "Undergraduate Admissions",
+        "url": "http://www.oakland.edu/m/go?mobileapp=true",
+        "drawable": "admissions"
+      },
+      {
+        "title": "More Mobile Services",
+        "description": "Links to sites outside of MySail",
+        "url": "http://www.oakland.edu/m/?mobileapp=true",
+        "drawable": "links"
+      }
+      ]
+   }
+  ]
+}

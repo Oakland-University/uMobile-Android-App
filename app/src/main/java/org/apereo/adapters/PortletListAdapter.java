@@ -9,6 +9,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.apache.commons.lang.StringUtils;
+import org.apereo.App;
 import org.apereo.R;
 import org.apereo.models.Portlet;
 import org.apereo.utils.ImageManager;
@@ -55,7 +57,13 @@ public class PortletListAdapter extends ArrayAdapter<Portlet> {
         holder.txtName.setText(portlet.getName());
         holder.txtDescription.setText(portlet.getDescription());
 
-        ImageManager.setImageFromUrl(holder.portletIcon, portlet.getIconUrl());
+        if (StringUtils.equalsIgnoreCase(App.getInstance().getResources().getString(R.string.use_drawable), portlet.getIconUrl())) {
+            ImageManager.setImageFromDrawable(holder.portletIcon, portlet.getResID());
+        }
+        else {
+            ImageManager.setImageFromUrl(holder.portletIcon, portlet.getIconUrl());
+        }
+
         return row;
     }
 

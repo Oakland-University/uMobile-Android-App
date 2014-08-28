@@ -17,6 +17,7 @@ import android.widget.ListView;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.UiThread;
 import org.apereo.R;
+import org.apereo.constants.AppConstants;
 import org.apereo.fragments.HomePageListFragment;
 import org.apereo.adapters.FolderListAdapter;
 
@@ -86,12 +87,11 @@ public class HomePage extends Activity implements HomePageListFragment.ActionLis
                 R.string.drawer_close  /* "close drawer" description for accessibility */
         ) {
             public void onDrawerClosed(View view) {
-                getActionBar().setIcon(R.drawable.ic_launcher);
+                getActionBar().setIcon(R.drawable.umobile_icon);
                 getActionBar().setTitle(mTitle);
             }
 
             public void onDrawerOpened(View drawerView) {
-                getActionBar().setTitle(mDrawerTitle);
             }
         };
 
@@ -128,15 +128,18 @@ public class HomePage extends Activity implements HomePageListFragment.ActionLis
 
     private void selectItem(int position) {
         // update the main content by replacing fragments
+        Bundle args = new Bundle();
+        args.putInt(AppConstants.POSITION, position);
 
         Fragment fragment = HomePageListFragment.getFragment(this);
+        fragment.setArguments(args);
 
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 
         // update selected item and title, then close the drawer
         mDrawerList.setItemChecked(position, true);
-        setTitle("Title");
+        setTitle(layoutManager.getLayout().getFolders().get(position).getName());
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 

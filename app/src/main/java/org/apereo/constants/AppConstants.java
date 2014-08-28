@@ -5,4 +5,5 @@ package org.apereo.constants;
  */
 public class AppConstants {
 
+    public static final String POSITION = "position";
 }

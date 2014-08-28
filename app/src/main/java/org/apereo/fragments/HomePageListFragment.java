@@ -23,11 +23,13 @@ import org.apereo.activities.HomePage;
 import org.apereo.activities.PortletWebViewActivity;
 import org.apereo.activities.PortletWebViewActivity_;
 import org.apereo.adapters.PortletListAdapter;
+import org.apereo.constants.AppConstants;
 import org.apereo.models.Portlet;
 import org.apereo.utils.LayoutManager;
 import java.util.List;
 
 import org.apereo.R;
+import org.apereo.utils.Logger;
 
 @EFragment(R.layout.activity_listview)
 public class HomePageListFragment extends ListFragment {
@@ -38,12 +40,11 @@ public class HomePageListFragment extends ListFragment {
     private List<Portlet> portlets = null;
     private final String TAG = HomePageListFragment.class.getName();
     private Activity activity;
+    private int position;
 
     @Bean
     LayoutManager layoutManager;
 
-    public static final String ARG_IMAGE_RES = "image_source";
-    public static final String ARG_ACTION_BG_RES = "image_action_bs_res";
     private ActionListener actionListener;
 
     @Override
@@ -52,17 +53,16 @@ public class HomePageListFragment extends ListFragment {
         Log.d(TAG, "onCreateView");
 
         if (mArguments != null){
-            ImageView img = (ImageView) view.findViewById(R.id.image_header);
-            img.setImageResource(mArguments.getInt(ARG_IMAGE_RES));
+            position = mArguments.getInt(AppConstants.POSITION);
         }
 
         return view;
     }
     @AfterViews
     void initialize() {
-        Log.d("layout folder size = ", "" + layoutManager.getLayout().getFolders().size());
-        portlets = layoutManager.getLayout().getFolders().get(0).getPortlets();
-        Log.d("PORTLETS SIZE = ", ""+portlets.size());
+        Logger.d("folder name = ", layoutManager.getLayout().getFolders().get(position).getName());
+        portlets = layoutManager.getLayout().getFolders().get(position).getPortlets();
+        Logger.d("PORTLETS SIZE = ", ""+portlets.size());
         adapter = new PortletListAdapter(activity, R.layout.portlet_row, portlets);
         setListAdapter(adapter);
 
@@ -83,19 +83,22 @@ public class HomePageListFragment extends ListFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         int actionBarBg = R.drawable.ab_background_light;
+
+        mArguments = getArguments();
+
         mFadingHelper = new FadingActionBarHelper()
                 .actionBarBackground(actionBarBg)
                 .headerLayout(R.layout.header)
                 .contentLayout(R.layout.activity_listview);
         mFadingHelper.initActionBar(activity);
 
-        Log.d(TAG, "onAttach");
+        Logger.d(TAG, "onAttach");
         this.activity = activity;
 
 
     }
     public void update(int resourseId) {
-        portlets = layoutManager.getLayout().getFolders().get(0).getPortlets();
+        portlets = layoutManager.getLayout().getFolders().get(position).getPortlets();
         adapter.notifyDataSetChanged();
     }
 
