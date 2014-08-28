@@ -18,6 +18,7 @@ import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EFragment;
+import org.apache.commons.lang.StringUtils;
 import org.apereo.App;
 import org.apereo.activities.HomePage;
 import org.apereo.activities.PortletWebViewActivity;
@@ -72,7 +73,11 @@ public class HomePageListFragment extends ListFragment {
                 Object o = parent.getItemAtPosition(position);
                 if (o instanceof Portlet) {
                     Portlet p = (Portlet) o;
-                    actionListener.launchWebView(App.getRootUrl().concat(p.getUrl()));
+
+                    // TODO have a flag in portlet to decide this
+                    boolean concat  = !StringUtils.equalsIgnoreCase(p.getIconUrl(), getResources().getString(R.string.use_drawable));
+
+                    actionListener.launchWebView(concat ? App.getRootUrl().concat(p.getUrl()) : p.getUrl());
                 }
             }
         });
