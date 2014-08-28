@@ -25,6 +25,7 @@ import org.apereo.activities.PortletWebViewActivity;
 import org.apereo.activities.PortletWebViewActivity_;
 import org.apereo.adapters.PortletListAdapter;
 import org.apereo.constants.AppConstants;
+import org.apereo.interfaces.ActionListener;
 import org.apereo.models.Portlet;
 import org.apereo.utils.LayoutManager;
 import java.util.List;
@@ -115,10 +116,6 @@ public class HomePageListFragment extends ListFragment {
 
     public void setActionListener(ActionListener actionListener) {
         this.actionListener = actionListener;
-    }
-
-    public interface ActionListener {
-        public void launchWebView(String url);
     }
 }
 

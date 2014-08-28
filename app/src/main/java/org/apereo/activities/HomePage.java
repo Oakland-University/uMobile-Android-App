@@ -25,6 +25,7 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 import org.apereo.fragments.HomePageListFragment_;
+import org.apereo.interfaces.ActionListener;
 import org.apereo.models.Folder;
 import org.apereo.services.RestApi;
 import org.apereo.utils.LayoutManager;
@@ -33,7 +34,7 @@ import java.util.List;
 
 
 @EActivity(R.layout.activity_home_page)
-public class HomePage extends Activity implements HomePageListFragment.ActionListener, AdapterView.OnItemClickListener {
+public class HomePage extends Activity implements ActionListener, AdapterView.OnItemClickListener {
 
     private final String TAG = HomePage.class.getName();
 
