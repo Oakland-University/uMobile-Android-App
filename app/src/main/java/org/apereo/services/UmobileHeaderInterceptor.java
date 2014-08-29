@@ -12,6 +12,7 @@ import java.io.IOException;
 public class UmobileHeaderInterceptor implements ClientHttpRequestInterceptor {
 
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+
         return execution.execute(request, body);
     }
 }

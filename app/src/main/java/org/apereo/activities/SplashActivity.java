@@ -42,6 +42,11 @@ public class SplashActivity extends BaseActivity {
         restApi.getMainFeed(new UmobileRestCallback<String>() {
 
             @Override
+            public void onBegin() {
+                super.onBegin();
+            }
+
+            @Override
             public void onError(Exception e, String responseBody) {
                 Logger.e(TAG, e.getMessage(), e);
                 showErrorDialog(AppConstants.ERROR_GETTING_FEED);
@@ -56,7 +61,7 @@ public class SplashActivity extends BaseActivity {
 
                 Layout layout = g.fromJson(response, Layout.class);
                 layoutManager.setLayout(layout);
-                Log.d(TAG, " first name = " + layout.getFolders().get(0).getName());
+                Logger.d(TAG, " first name = " + layout.getFolders().get(0).getName());
                 HomePage_
                         .intent(SplashActivity.this)
                         .start();

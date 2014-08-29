@@ -66,6 +66,9 @@ public class LoginActivity extends Activity {
 
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                if(url.equalsIgnoreCase(getString(R.string.home_page))) {
+                    getLoggedInFeed();
+                }
                 Logger.d(TAG, "starting " + url);
                 super.onPageStarted(view, url, favicon);
 
@@ -92,8 +95,12 @@ public class LoginActivity extends Activity {
                     }
 
                     if (loggedin) {
-                        getLoggedInFeed();
+                      //  getLoggedInFeed();
                     }
+                }
+                else if (StringUtils.equalsIgnoreCase(url, getString(R.string.logout_url))) {
+                    restApi.setCookie("");
+                    getFeed();
                 }
                 Logger.d(TAG, "cookies from cas = " + cookie);
                 Logger.d(TAG, "cookies from mysail" + cookieManager.getCookie("https://mysail.oakland.edu/uPortal"));
@@ -104,18 +111,21 @@ public class LoginActivity extends Activity {
     }
 
     private void getLoggedInFeed() {
-        String cookie = CookieManager.getInstance().getCookie("https://mysail.oakland.edu/uPortal");
+        String cookie = CookieManager.getInstance().getCookie(getString(R.string.base_url));
 
         if (cookie != null) {
-            String[] temp = cookie.split("[;]");
+            String[] temp = cookie.split(" ");
             for (String key : temp) {
                 if (key.contains(AppConstants.JSESSIONID)) {
-                    String[] temp1 = key.split("[=]");
-                    restApi.setCookie(temp1[1]);
+                    restApi.setCookie(key);
                     break;
                 }
             }
         }
+        getFeed();
+    }
+
+    private void getFeed() {
         restApi.getMainFeed(new UmobileRestCallback<String>() {
             @Override
             public void onError(Exception e, String responseBody) {

@@ -1,12 +1,9 @@
 package org.apereo.activities;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -16,7 +13,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.UiThread;
@@ -28,8 +24,7 @@ import org.apereo.adapters.FolderListAdapter;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
-import org.apereo.fragments.HomePageListFragment_;
-import org.apereo.interfaces.ActionListener;
+import org.apereo.interfaces.IActionListener;
 import org.apereo.models.Folder;
 import org.apereo.services.RestApi;
 import org.apereo.utils.LayoutManager;
@@ -38,7 +33,7 @@ import java.util.List;
 
 
 @EActivity(R.layout.activity_home_page)
-public class HomePage extends BaseActivity implements ActionListener, AdapterView.OnItemClickListener {
+public class HomePage extends BaseActivity implements IActionListener, AdapterView.OnItemClickListener {
 
     private final String TAG = HomePage.class.getName();
 

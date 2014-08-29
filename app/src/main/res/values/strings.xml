@@ -14,8 +14,10 @@
     <string name="error_download_feed">There was a connection problem. Please check your network settings and try again.</string>
 
     <!-- URL constants -->
+    <string name="home_page">https://mysail.oakland.edu/uPortal/normal/render.uP</string>
     <string name="rootUrl">https://mysail.oakland.edu</string>
-    <string name="login_url">https://cas.oakland.edu/cas/login</string>
+    <string name="login_url">https://cas.oakland.edu/cas/login?service=https://mysail.oakland.edu/uPortal/Login</string>
     <string name="logout_url">https://cas.oakland.edu/cas/logout</string>
+    <string name="base_url">https://mysail.oakland.edu</string>
 
 </resources>

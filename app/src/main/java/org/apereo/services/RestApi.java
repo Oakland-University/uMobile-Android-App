@@ -13,6 +13,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apereo.constants.AppConstants;
+import org.apereo.utils.Logger;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
@@ -67,7 +68,10 @@ public class RestApi {
         callbackHandler.onBegin(callback);
         HttpClient client = new DefaultHttpClient();
         HttpGet httpGet = new HttpGet("https://mysail.oakland.edu/uPortal/layout.json");
+        Logger.d(TAG, "cookie = " + cookie);
+        httpGet.setHeader("Cookie", cookie);
         try {
+            powerClient.getMainFeed();
             String response = getResponse(client, httpGet);
             callbackHandler.onSuccess(callback, response);
         } catch (Exception e) {
@@ -79,7 +83,6 @@ public class RestApi {
 
     private String getResponse(HttpClient client, HttpGet httpGet) throws Exception {
         StringBuilder builder = new StringBuilder();
-        httpGet.addHeader(AppConstants.JSESSIONID, cookie);
         HttpResponse response = client.execute(httpGet);
         StatusLine statusLine = response.getStatusLine();
         int statusCode = statusLine.getStatusCode();

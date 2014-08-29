@@ -3,15 +3,12 @@ package org.apereo.fragments;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.ListFragment;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 
 import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
 
@@ -20,12 +17,9 @@ import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EFragment;
 import org.apache.commons.lang.StringUtils;
 import org.apereo.App;
-import org.apereo.activities.HomePage;
-import org.apereo.activities.PortletWebViewActivity;
-import org.apereo.activities.PortletWebViewActivity_;
 import org.apereo.adapters.PortletListAdapter;
 import org.apereo.constants.AppConstants;
-import org.apereo.interfaces.ActionListener;
+import org.apereo.interfaces.IActionListener;
 import org.apereo.models.Portlet;
 import org.apereo.utils.LayoutManager;
 import java.util.List;
@@ -47,7 +41,7 @@ public class HomePageListFragment extends ListFragment {
     @Bean
     LayoutManager layoutManager;
 
-    private ActionListener actionListener;
+    private IActionListener actionListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -60,6 +54,7 @@ public class HomePageListFragment extends ListFragment {
 
         return view;
     }
+
     @AfterViews
     void initialize() {
         Logger.d("folder name = ", layoutManager.getLayout().getFolders().get(position).getName());
@@ -108,13 +103,13 @@ public class HomePageListFragment extends ListFragment {
         adapter.notifyDataSetChanged();
     }
 
-    public static Fragment getFragment(ActionListener actionListener) {
+    public static Fragment getFragment(IActionListener actionListener) {
         HomePageListFragment fragment = new HomePageListFragment_();
         fragment.setActionListener(actionListener);
         return fragment;
     }
 
-    public void setActionListener(ActionListener actionListener) {
+    public void setActionListener(IActionListener actionListener) {
         this.actionListener = actionListener;
     }
 }
