@@ -5,14 +5,18 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.UiThread;
@@ -55,6 +59,9 @@ public class HomePage extends BaseActivity implements ActionListener, AdapterVie
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
     private List<Folder> folders;
+
+    private static final int MENU_LOGIN = Menu.FIRST;
+    private static final int MENU_LOGOUT = Menu.FIRST + 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +109,21 @@ public class HomePage extends BaseActivity implements ActionListener, AdapterVie
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.clear();
+        menu.add(0, MENU_LOGIN, Menu.NONE, R.string.login);
+        menu.add(0, MENU_LOGOUT, Menu.NONE, R.string.logout);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    private void login(String url) {
+        LoginActivity_
+                .intent(this)
+                .url(url)
+                .start();
+    }
+
+    @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
@@ -117,6 +139,10 @@ public class HomePage extends BaseActivity implements ActionListener, AdapterVie
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case MENU_LOGIN: login(getResources().getString(R.string.login_url)); break;
+            case MENU_LOGOUT: login(getResources().getString(R.string.logout_url)); break;
+        }
 
         return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
 

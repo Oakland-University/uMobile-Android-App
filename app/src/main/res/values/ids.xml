@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="login_url" type="id">https://cas.oakland.edu/cas/login</item>
+</resources>

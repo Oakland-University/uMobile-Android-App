@@ -12,6 +12,7 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apereo.constants.AppConstants;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
@@ -34,6 +35,8 @@ public class RestApi {
     UmobileHeaderInterceptor headerInterceptor;
     @Bean
     RestCallbackHandler callbackHandler;
+
+    private String cookie = "";
 
     @AfterInject
     void initialize() {
@@ -76,6 +79,7 @@ public class RestApi {
 
     private String getResponse(HttpClient client, HttpGet httpGet) throws Exception {
         StringBuilder builder = new StringBuilder();
+        httpGet.addHeader(AppConstants.JSESSIONID, cookie);
         HttpResponse response = client.execute(httpGet);
         StatusLine statusLine = response.getStatusLine();
         int statusCode = statusLine.getStatusCode();
@@ -92,5 +96,9 @@ public class RestApi {
         }
 
         return builder.toString();
+    }
+
+    public void setCookie(String cookie) {
+        this.cookie = cookie;
     }
 }

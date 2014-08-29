@@ -7,11 +7,15 @@
     <string name="drawer_open">Open drawer</string>
     <string name="drawer_close">close_drawer</string>
     <string name="use_drawable">use_drawable</string>
+    <string name="dialog_ok">OK</string>
+    <string name="login">LOGIN</string>
+    <string name="logout">LOGOUT</string>
+    <string name="error_title">Error</string>
+    <string name="error_download_feed">There was a connection problem. Please check your network settings and try again.</string>
 
     <!-- URL constants -->
     <string name="rootUrl">https://mysail.oakland.edu</string>
-    <string name="error_title">Error</string>
-    <string name="error_download_feed">There was a connection problem. Please check your network settings and try again.</string>
-    <string name="dialog_ok">OK</string>
+    <string name="login_url">https://cas.oakland.edu/cas/login</string>
+    <string name="logout_url">https://cas.oakland.edu/cas/logout</string>
 
 </resources>
