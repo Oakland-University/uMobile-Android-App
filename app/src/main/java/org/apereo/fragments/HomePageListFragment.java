@@ -73,7 +73,7 @@ public class HomePageListFragment extends ListFragment {
                     // TODO have a flag in portlet to decide this
                     boolean concat  = !StringUtils.equalsIgnoreCase(p.getIconUrl(), getResources().getString(R.string.use_drawable));
 
-                    actionListener.launchWebView(concat ? App.getRootUrl().concat(p.getUrl()) : p.getUrl());
+                    actionListener.launchWebView(p.getName(), concat ? App.getRootUrl().concat(p.getUrl()) : p.getUrl());
                 }
             }
         });

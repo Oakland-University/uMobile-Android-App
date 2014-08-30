@@ -17,6 +17,8 @@ import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
+
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
@@ -61,6 +63,9 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     @Extra
     String url;
 
+    @Extra
+    String portletName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +78,11 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     @AfterViews
     void initiailize() {
+        FadingActionBarHelper helper = new FadingActionBarHelper()
+                .actionBarBackground(R.drawable.ab_background)
+                .headerLayout(R.layout.header)
+                .contentLayout(R.layout.portlet_webview);
+        helper.initActionBar(this);
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // set up the drawer's list view with items and click listener
@@ -92,14 +102,17 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
         ) {
             public void onDrawerClosed(View view) {
                 getActionBar().setIcon(R.drawable.umobile_icon);
-                getActionBar().setTitle(mTitle);
+                getActionBar().setTitle(portletName);
             }
 
             public void onDrawerOpened(View drawerView) {
             }
+
         };
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
+        getActionBar().setTitle(portletName);
+
 
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);

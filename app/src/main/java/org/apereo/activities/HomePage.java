@@ -183,10 +183,11 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
 
     @UiThread
     @Override
-    public void launchWebView(String url) {
+    public void launchWebView(String portletName, String url) {
         PortletWebViewActivity_
                 .intent(this)
                 .url(url)
+                .portletName(portletName)
                 .flags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .start();
     }
