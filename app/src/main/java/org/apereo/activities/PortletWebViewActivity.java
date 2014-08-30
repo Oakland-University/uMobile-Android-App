@@ -22,6 +22,7 @@ import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.ViewById;
+import org.apereo.App;
 import org.apereo.R;
 import org.apereo.adapters.FolderListAdapter;
 import org.apereo.models.Folder;
@@ -113,8 +114,12 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         menu.clear();
-        menu.add(0, MENU_LOGIN, Menu.NONE, R.string.login);
-        menu.add(0, MENU_LOGOUT, Menu.NONE, R.string.logout);
+        if(App.getIsAuth()) {
+            menu.add(0, MENU_LOGOUT, Menu.NONE, R.string.logout);
+        }
+        else {
+            menu.add(0, MENU_LOGIN, Menu.NONE, R.string.login);
+        }
         return super.onPrepareOptionsMenu(menu);
     }
 

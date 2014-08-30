@@ -26,7 +26,7 @@
         </activity>
         <activity
             android:name=".activities.PortletWebViewActivity_"
-            android:theme="@style/AppTheme"
+            android:theme="@style/Widget.Light.ActionBar"
             android:configChanges="keyboard|keyboardHidden|orientation">
         </activity>
         <activity
