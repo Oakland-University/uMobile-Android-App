@@ -15,8 +15,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import org.androidannotations.annotations.Bean;
+import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.UiThread;
-import org.apereo.App;
 import org.apereo.R;
 import org.apereo.constants.AppConstants;
 import org.apereo.fragments.HomePageListFragment;
@@ -49,6 +49,9 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
 
     @Bean
     LayoutManager layoutManager;
+
+    @Extra
+    int ePosition;
 
     private ActionBarDrawerToggle mDrawerToggle;
 
@@ -101,19 +104,26 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-        selectItem(0);
+        selectItem(ePosition);
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         menu.clear();
-        if (App.getIsAuth()) {
-            menu.add(0, MENU_LOGOUT, Menu.NONE, R.string.logout);
-        }
-        else {
-            menu.add(0, MENU_LOGIN, Menu.NONE, R.string.login);
-        }
+        menu.add(0, MENU_LOGIN, Menu.NONE, R.string.login);
+        menu.add(0, MENU_LOGOUT, Menu.NONE, R.string.logout);
         return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case MENU_LOGIN: login(getResources().getString(R.string.login_url)); break;
+            case MENU_LOGOUT: login(getResources().getString(R.string.logout_url)); break;
+        }
+
+        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+
     }
 
     private void login(String url) {
@@ -137,16 +147,6 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case MENU_LOGIN: login(getResources().getString(R.string.login_url)); break;
-            case MENU_LOGOUT: login(getResources().getString(R.string.logout_url)); break;
-        }
-
-        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-
-    }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

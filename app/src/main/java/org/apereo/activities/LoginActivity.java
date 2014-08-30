@@ -38,7 +38,7 @@ public class LoginActivity extends BaseActivity {
 
     private static final String TAG = LoginActivity.class.getName();
 
-    @ViewById(R.id.webview)
+    @ViewById(R.id.webView)
     WebView webView;
 
     @Extra

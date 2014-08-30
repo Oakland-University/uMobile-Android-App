@@ -26,7 +26,6 @@
         </activity>
         <activity
             android:name=".activities.PortletWebViewActivity_"
-            android:launchMode="singleTop"
             android:theme="@style/AppTheme"
             android:configChanges="keyboard|keyboardHidden|orientation">
         </activity>
