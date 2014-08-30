@@ -1,6 +1,7 @@
 package org.apereo.activities;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -48,6 +49,7 @@ public class LoginActivity extends Activity {
 
     @Bean
     LayoutManager layoutManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,6 +146,7 @@ public class LoginActivity extends Activity {
                 layoutManager.setLayout(layout);
                 HomePage_
                         .intent(LoginActivity.this)
+                        .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         .start();
                 finish();
 
