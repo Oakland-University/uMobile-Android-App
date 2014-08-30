@@ -34,7 +34,7 @@ import org.apereo.utils.Logger;
  * Created by schneis on 8/28/14.
  */
 @EActivity(R.layout.portlet_webview)
-public class LoginActivity extends Activity {
+public class LoginActivity extends BaseActivity {
 
     private static final String TAG = LoginActivity.class.getName();
 
@@ -107,6 +107,13 @@ public class LoginActivity extends Activity {
 
     private void getFeed() {
         restApi.getMainFeed(new UmobileRestCallback<String>() {
+
+            @Override
+            public void onBegin() {
+                super.onBegin();
+                showSpinner();
+            }
+
             @Override
             public void onError(Exception e, String responseBody) {
                 Logger.e(TAG, responseBody, e);
@@ -128,6 +135,12 @@ public class LoginActivity extends Activity {
                         .start();
                 finish();
 
+            }
+
+            @Override
+            public void onFinish() {
+                super.onFinish();
+                dismissSpinner();
             }
         });
     }
