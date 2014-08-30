@@ -12,6 +12,8 @@ import org.androidannotations.annotations.EApplication;
 public class App extends Application {
     private static App instance;
 
+    private static boolean isAuth;
+
 
     @Override
     public void onCreate() {
@@ -24,6 +26,14 @@ public class App extends Application {
             throw new RuntimeException("Application instance is null");
         }
         return instance;
+    }
+
+    public static boolean getIsAuth() {
+        return isAuth;
+    }
+
+    public static void setIsAuth(boolean isAuth) {
+        App.isAuth = isAuth;
     }
 
     public static String getRootUrl() {

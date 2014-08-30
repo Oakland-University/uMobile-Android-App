@@ -69,6 +69,7 @@ public class LoginActivity extends Activity {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 if(url.equalsIgnoreCase(getString(R.string.home_page))) {
+                    App.setIsAuth(true);
                     getLoggedInFeed();
                 }
                 Logger.d(TAG, "starting " + url);
@@ -78,34 +79,11 @@ public class LoginActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                Logger.d(TAG, "finishing" + url);
-                String cookie = "empty";
-                boolean loggedin = false;
-                CookieManager cookieManager = CookieManager.getInstance();
-                if(StringUtils.equalsIgnoreCase(url, getResources().getString(R.string.login_url))) {
-                    Logger.d(TAG, url);
-                    cookie = cookieManager.getCookie(url);
-
-                    if (cookie != null) {
-                        String[] temp = cookie.split("[;]");
-                        for (String key : temp) {
-                            if (key.contains(AppConstants.LOGINKEY)) {
-                                loggedin = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (loggedin) {
-                      //  getLoggedInFeed();
-                    }
-                }
-                else if (StringUtils.equalsIgnoreCase(url, getString(R.string.logout_url))) {
+                if (StringUtils.equalsIgnoreCase(url, getString(R.string.logout_url))) {
+                    App.setIsAuth(false);
                     restApi.setCookie("");
                     getFeed();
                 }
-                Logger.d(TAG, "cookies from cas = " + cookie);
-                Logger.d(TAG, "cookies from mysail" + cookieManager.getCookie("https://mysail.oakland.edu/uPortal"));
                 super.onPageFinished(view, url);
             }
         });
