@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#6288C4"
+    android:padding="35dp">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textEmailAddress"
+        android:ems="10"
+        android:id="@+id/login_username"
+        android:hint="@string/username"
+        android:textColorHint="#C0CFE7"
+        android:layout_above="@+id/login_password"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword"
+        android:ems="10"
+        android:id="@+id/login_password"
+        android:hint="@string/password"
+        android:textColorHint="#C0CFE7"
+        android:layout_centerInParent="true" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:background="@drawable/umobile_header_transparent"
+        android:contentDescription="@string/umobile_header"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/remember_me"
+        android:id="@+id/checkBox"
+        android:checked="true"
+        android:textColor="#C0CFE7"
+        android:enabled="true"
+        android:clickable="true"
+        android:layout_below="@+id/login_password"
+        android:layout_alignRight="@+id/login_password"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/login"
+        android:id="@+id/textView2"
+        android:textColor="#C0CFE7"
+        android:clickable="true"
+        android:layout_marginTop="39dp"
+        android:layout_below="@+id/checkBox"
+        android:layout_alignRight="@+id/checkBox" />
+</RelativeLayout>
