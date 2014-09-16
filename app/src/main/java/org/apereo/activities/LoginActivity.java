@@ -84,10 +84,12 @@ public class LoginActivity extends BaseActivity {
         });
     }
 
-    protected void openBackgroundWebView(String username, String password) {
+    protected void openBackgroundWebView(final String username, final String password) {
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
+            private boolean initialLoginRequest = true;
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 return super.shouldOverrideUrlLoading(view, url);
@@ -95,7 +97,7 @@ public class LoginActivity extends BaseActivity {
 
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                if(url.equalsIgnoreCase(getString(R.string.home_page))) {
+                if (url.equalsIgnoreCase(getString(R.string.home_page))) {
                     App.setIsAuth(true);
                     getLoggedInFeed();
                 }
@@ -110,6 +112,15 @@ public class LoginActivity extends BaseActivity {
                     App.setIsAuth(false);
                     restApi.setCookie("");
                     getFeed();
+                } else if (initialLoginRequest) {
+                    initialLoginRequest = false;
+                    view.loadUrl("javascript:$('#username').val('" + username + "');");
+                    view.loadUrl("javascript:$('#password').val('" + password + "');");
+                    view.loadUrl("javascript:$('.btn-submit').click();");
+                } else {
+                    if (url.equalsIgnoreCase(getString(R.string.login_url))) {
+                        Logger.d(TAG, "login failure");
+                    }
                 }
                 super.onPageFinished(view, url);
             }
