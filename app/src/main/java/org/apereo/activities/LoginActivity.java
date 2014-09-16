@@ -1,9 +1,17 @@
 package org.apereo.activities;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.view.View;
 import android.webkit.CookieManager;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -13,6 +21,8 @@ import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.ViewById;
+import org.apache.commons.lang.StringUtils;
+import org.apereo.App;
 import org.apereo.R;
 import org.apereo.constants.AppConstants;
 import org.apereo.deserializers.LayoutDeserializer;
@@ -30,8 +40,15 @@ public class LoginActivity extends BaseActivity {
 
     private static final String TAG = LoginActivity.class.getName();
 
-    @ViewById(R.id.webView)
+    @ViewById(R.id.web_view)
     WebView webView;
+
+    @ViewById(R.id.login_username)
+    EditText userNameView;
+    @ViewById(R.id.login_password)
+    EditText passwordView;
+    @ViewById(R.id.login_button)
+    Button submitButton;
 
     @Extra
     String url;
@@ -42,7 +59,6 @@ public class LoginActivity extends BaseActivity {
     @Bean
     LayoutManager layoutManager;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +66,55 @@ public class LoginActivity extends BaseActivity {
 
     @AfterViews
     void initiailize() {
-        // TODO: Make UI functional
+        submitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!userNameView.getText().toString().equals("") ||
+                        !passwordView.getText().toString().equals("")) {
+                    String username = userNameView.getText().toString();
+                    String password = passwordView.getText().toString();
+                    openBackgroundWebView(username, password);
+                } else {
+                    Toast.makeText(
+                            getApplicationContext(),
+                            "Please enter a username and a password",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    protected void openBackgroundWebView(String username, String password) {
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return super.shouldOverrideUrlLoading(view, url);
+            }
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                if(url.equalsIgnoreCase(getString(R.string.home_page))) {
+                    App.setIsAuth(true);
+                    getLoggedInFeed();
+                }
+                Logger.d(TAG, "starting " + url);
+                super.onPageStarted(view, url, favicon);
+
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                if (StringUtils.equalsIgnoreCase(url, getString(R.string.logout_url))) {
+                    App.setIsAuth(false);
+                    restApi.setCookie("");
+                    getFeed();
+                }
+                super.onPageFinished(view, url);
+            }
+        });
+        webView.loadUrl(url);
     }
 
     private void getLoggedInFeed() {
@@ -106,6 +170,9 @@ public class LoginActivity extends BaseActivity {
                 dismissSpinner();
             }
         });
+    }
+
+    protected class MyWebClient extends WebChromeClient {
     }
 
 }
