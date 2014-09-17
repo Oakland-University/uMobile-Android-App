@@ -65,7 +65,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     @AfterViews
-    void initiailize() {
+    void initialize() {
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
