@@ -1,10 +1,8 @@
 package org.apereo.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
@@ -24,7 +22,6 @@ import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.ViewById;
-import org.apache.commons.lang.StringUtils;
 import org.apereo.App;
 import org.apereo.R;
 import org.apereo.constants.AppConstants;
@@ -105,7 +102,7 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 if (receivedError) {
-                    showLongToast(getString(R.string.error_download_feed));
+                    showLongToast(getString(R.string.error_network_connection));
                     super.onPageFinished(view, url);
                     finish();
                     return;
