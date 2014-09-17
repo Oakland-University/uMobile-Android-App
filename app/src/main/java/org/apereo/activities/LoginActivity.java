@@ -100,13 +100,27 @@ public class LoginActivity extends BaseActivity {
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
+            private boolean receivedError = false;
+
             @Override
             public void onPageFinished(WebView view, String url) {
-                Logger.d(TAG, "finished " + url);
+                if (receivedError) {
+                    showLongToast(getString(R.string.error_download_feed));
+                    super.onPageFinished(view, url);
+                    finish();
+                    return;
+                }
+
+                // logged out successfully
                 App.setIsAuth(false);
                 restApi.setCookie("");
                 getFeed();
                 super.onPageFinished(view, url);
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                receivedError = true;
             }
         });
         webView.loadUrl(url);
