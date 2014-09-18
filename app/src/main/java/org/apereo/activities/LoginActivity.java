@@ -9,7 +9,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -19,6 +18,7 @@ import com.google.gson.GsonBuilder;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
+import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.ViewById;
@@ -50,8 +50,6 @@ public class LoginActivity extends BaseActivity {
     EditText userNameView;
     @ViewById(R.id.login_password)
     EditText passwordView;
-    @ViewById(R.id.login_button)
-    Button submitButton;
 
     @Extra
     String url;
@@ -74,24 +72,8 @@ public class LoginActivity extends BaseActivity {
             openBackgroundLogoutWebView();
             return;
         }
-
-        submitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!userNameView.getText().toString().equals("") ||
-                        !passwordView.getText().toString().equals("")) {
-                    String username = userNameView.getText().toString();
-                    String password = passwordView.getText().toString();
-                    openBackgroundLoginWebView(username, password);
-                } else {
-                    Toast.makeText(
-                            getApplicationContext(),
-                            "Please enter a username and a password",
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
     }
+
 
     protected void openBackgroundLogoutWebView() {
         WebSettings webSettings = webView.getSettings();
@@ -209,6 +191,21 @@ public class LoginActivity extends BaseActivity {
                 dismissSpinner();
             }
         });
+    }
+
+    @Click(R.id.login_button)
+    public void loginClick() {
+        if (!userNameView.getText().toString().equals("") ||
+                !passwordView.getText().toString().equals("")) {
+            String username = userNameView.getText().toString();
+            String password = passwordView.getText().toString();
+            openBackgroundLoginWebView(username, password);
+        } else {
+            Toast.makeText(
+                    getApplicationContext(),
+                    "Please enter a username and a password",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     protected class MyWebClient extends WebChromeClient {
