@@ -1,14 +1,18 @@
 package org.apereo.activities;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 import android.webkit.CookieManager;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -18,8 +22,6 @@ import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.ViewById;
-import org.androidannotations.annotations.rest.Rest;
-import org.apache.commons.lang.StringUtils;
 import org.apereo.App;
 import org.apereo.R;
 import org.apereo.constants.AppConstants;
@@ -33,13 +35,23 @@ import org.apereo.utils.Logger;
 /**
  * Created by schneis on 8/28/14.
  */
-@EActivity(R.layout.portlet_webview)
+@EActivity(R.layout.login_page)
 public class LoginActivity extends BaseActivity {
 
     private static final String TAG = LoginActivity.class.getName();
 
-    @ViewById(R.id.webView)
+    @ViewById(R.id.login_container)
+    RelativeLayout container;
+
+    @ViewById(R.id.web_view)
     WebView webView;
+
+    @ViewById(R.id.login_username)
+    EditText userNameView;
+    @ViewById(R.id.login_password)
+    EditText passwordView;
+    @ViewById(R.id.login_button)
+    Button submitButton;
 
     @Extra
     String url;
@@ -50,39 +62,94 @@ public class LoginActivity extends BaseActivity {
     @Bean
     LayoutManager layoutManager;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
     @AfterViews
-    void initiailize() {
+    void initialize() {
+        if (url.equalsIgnoreCase(getString(R.string.logout_url))) {
+            container.setVisibility(View.GONE);
+            openBackgroundLogoutWebView();
+            return;
+        }
+
+        submitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!userNameView.getText().toString().equals("") ||
+                        !passwordView.getText().toString().equals("")) {
+                    String username = userNameView.getText().toString();
+                    String password = passwordView.getText().toString();
+                    openBackgroundLoginWebView(username, password);
+                } else {
+                    Toast.makeText(
+                            getApplicationContext(),
+                            "Please enter a username and a password",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    protected void openBackgroundLogoutWebView() {
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
+            private boolean receivedError = false;
+
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                return super.shouldOverrideUrlLoading(view, url);
+            public void onPageFinished(WebView view, String url) {
+                if (receivedError) {
+                    showLongToast(getString(R.string.error_network_connection));
+                    super.onPageFinished(view, url);
+                    finish();
+                    return;
+                }
+
+                // logged out successfully
+                App.setIsAuth(false);
+                restApi.setCookie("");
+                getFeed();
+                super.onPageFinished(view, url);
             }
 
             @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                receivedError = true;
+            }
+        });
+        webView.loadUrl(url);
+    }
+
+    protected void openBackgroundLoginWebView(final String username, final String password) {
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webView.setWebViewClient(new WebViewClient() {
+            private boolean initialLoginRequest = true;
+
+            @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                if(url.equalsIgnoreCase(getString(R.string.home_page))) {
+                if (url.equalsIgnoreCase(getString(R.string.home_page))) {
                     App.setIsAuth(true);
                     getLoggedInFeed();
                 }
-                Logger.d(TAG, "starting " + url);
                 super.onPageStarted(view, url, favicon);
 
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                if (StringUtils.equalsIgnoreCase(url, getString(R.string.logout_url))) {
-                    App.setIsAuth(false);
-                    restApi.setCookie("");
-                    getFeed();
+                if (initialLoginRequest) {
+                    initialLoginRequest = false;
+                    view.loadUrl("javascript:$('#username').val('" + username + "');");
+                    view.loadUrl("javascript:$('#password').val('" + password + "');");
+                    view.loadUrl("javascript:$('.btn-submit').click();");
+                } else {
+                    if (url.equalsIgnoreCase(getString(R.string.login_url))) {
+                        Logger.d(TAG, "login failure"); // TODO: handle this case
+                    }
                 }
                 super.onPageFinished(view, url);
             }
@@ -127,7 +194,6 @@ public class LoginActivity extends BaseActivity {
                         .create();
 
                 Layout layout = g.fromJson(response, Layout.class);
-                Logger.d(TAG, response);
                 layoutManager.setLayout(layout);
                 HomePage_
                         .intent(LoginActivity.this)
@@ -143,6 +209,9 @@ public class LoginActivity extends BaseActivity {
                 dismissSpinner();
             }
         });
+    }
+
+    protected class MyWebClient extends WebChromeClient {
     }
 
 }

@@ -4,9 +4,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.ScrollView;
-import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -80,7 +77,7 @@ public class SplashActivity extends BaseActivity {
 
         switch (msgId) {
             case AppConstants.ERROR_GETTING_FEED:
-                builder.setMessage(getString(R.string.error_download_feed));
+                builder.setMessage(getString(R.string.error_network_connection));
                 dialog = builder.setCancelable(false)
                         .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                             @Override

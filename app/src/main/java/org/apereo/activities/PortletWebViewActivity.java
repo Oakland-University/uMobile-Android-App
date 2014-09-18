@@ -77,7 +77,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     }
 
     @AfterViews
-    void initiailize() {
+    void initialize() {
         FadingActionBarHelper helper = new FadingActionBarHelper()
                 .actionBarBackground(R.drawable.ab_background)
                 .headerLayout(R.layout.header)

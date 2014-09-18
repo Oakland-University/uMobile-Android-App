@@ -8,10 +8,14 @@
     <string name="drawer_close">close_drawer</string>
     <string name="use_drawable">use_drawable</string>
     <string name="dialog_ok">OK</string>
-    <string name="login">LOGIN</string>
-    <string name="logout">LOGOUT</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
     <string name="error_title">Error</string>
-    <string name="error_download_feed">There was a connection problem. Please check your network settings and try again.</string>
+    <string name="error_network_connection">There was a connection problem. Please check your network settings and try again.</string>
+    <string name="remember_me">Remember me</string>
+    <string name="umobile_header">uMobile Header</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
 
     <!-- URL constants -->
     <string name="home_page">https://mysail.oakland.edu/uPortal/normal/render.uP</string>
