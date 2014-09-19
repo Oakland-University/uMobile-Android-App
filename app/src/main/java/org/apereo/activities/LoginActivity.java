@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.CookieManager;
-import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -206,9 +205,6 @@ public class LoginActivity extends BaseActivity {
                     "Please enter a username and a password",
                     Toast.LENGTH_SHORT).show();
         }
-    }
-
-    protected class MyWebClient extends WebChromeClient {
     }
 
 }

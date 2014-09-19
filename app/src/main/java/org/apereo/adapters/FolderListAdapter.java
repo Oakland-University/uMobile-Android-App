@@ -2,6 +2,7 @@ package org.apereo.adapters;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ public class FolderListAdapter extends ArrayAdapter<Folder> {
     int layoutResourceId;
     List<Folder> data = null;
     int size;
+    int selectedIndex;
 
     public FolderListAdapter(Context context, int layoutResourceId, List<Folder> data) {
         super(context, layoutResourceId, data);
@@ -41,6 +43,9 @@ public class FolderListAdapter extends ArrayAdapter<Folder> {
 
             holder = new FolderHolder();
             holder.txtName = (TextView) row.findViewById(R.id.name);
+            if (position == selectedIndex) {
+                holder.txtName.setTypeface(Typeface.DEFAULT_BOLD);
+            }
 
             row.setTag(holder);
         } else {
@@ -51,6 +56,10 @@ public class FolderListAdapter extends ArrayAdapter<Folder> {
         holder.txtName.setText(folder.getName());
 
         return row;
+    }
+
+    public void setSelectedIndex(int selectedIndex)  {
+        this.selectedIndex = selectedIndex;
     }
 
     static class FolderHolder {

@@ -38,7 +38,10 @@
             android:layout_marginTop="5dp"
             android:textSize="10sp"
             android:paddingLeft="10dp"
-            android:paddingRight="10dp"/>
+            android:paddingRight="10dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:enabled="false" />
     </LinearLayout>
     <ImageView
         android:id="@+id/carot"

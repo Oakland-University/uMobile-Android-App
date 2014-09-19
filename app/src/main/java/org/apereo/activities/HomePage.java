@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -13,19 +14,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-
-import org.androidannotations.annotations.Bean;
-import org.androidannotations.annotations.Extra;
-import org.androidannotations.annotations.UiThread;
-import org.apereo.App;
-import org.apereo.R;
-import org.apereo.constants.AppConstants;
-import org.apereo.fragments.HomePageListFragment;
-import org.apereo.adapters.FolderListAdapter;
+import android.widget.TextView;
 
 import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.Extra;
+import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
+import org.apereo.App;
+import org.apereo.R;
+import org.apereo.adapters.FolderListAdapter;
+import org.apereo.constants.AppConstants;
+import org.apereo.fragments.HomePageListFragment;
 import org.apereo.interfaces.IActionListener;
 import org.apereo.models.Folder;
 import org.apereo.services.RestApi;
@@ -155,10 +156,21 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        for (int i=0; i < parent.getCount(); i++) {
+            if (parent.getChildAt(i) != view) {
+                ((TextView) parent.getChildAt(i)).setTypeface(Typeface.DEFAULT);
+            } else  {
+                ((TextView) parent.getChildAt(i)).setTypeface(Typeface.DEFAULT_BOLD);
+            }
+        }
+
         selectItem(position);
     }
 
     private void selectItem(int position) {
+
+        ((FolderListAdapter) mDrawerList.getAdapter()).setSelectedIndex(position);
+
         // update the main content by replacing fragments
         Bundle args = new Bundle();
         args.putInt(AppConstants.POSITION, position);

@@ -1,24 +1,15 @@
 package org.apereo.activities;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.view.GravityCompat;
-import android.view.View;
 import android.widget.Toast;
 
-import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.UiThread;
 import org.apache.commons.lang.StringUtils;
 import org.apereo.R;
-import org.apereo.adapters.FolderListAdapter;
-import org.apereo.models.Folder;
-
-import java.util.List;
 
 /**
  * Created by schneis on 8/27/14.
@@ -75,15 +66,15 @@ public class BaseActivity extends Activity {
     @UiThread
     public void showSpinner(String msg) {
 
-        if(dialog == null) {
+        if (dialog == null) {
             dialog = new ProgressDialog(this);
             dialog.setCancelable(false);
         }
         dialog.show();
-        if(StringUtils.isEmpty(msg)) {
+        if (StringUtils.isEmpty(msg)) {
             dialog.setContentView(R.layout.spinner);
         }
-        else{
+        else {
             dialog.setMessage(msg);
         }
 
