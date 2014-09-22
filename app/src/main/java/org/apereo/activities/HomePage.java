@@ -4,7 +4,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -14,7 +13,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
@@ -114,8 +112,7 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
         menu.clear();
         if(App.getIsAuth()) {
             menu.add(0, MENU_LOGOUT, Menu.NONE, R.string.logout);
-        }
-        else {
+        } else {
             menu.add(0, MENU_LOGIN, Menu.NONE, R.string.login);
         }
         return super.onPrepareOptionsMenu(menu);
@@ -156,14 +153,6 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        for (int i=0; i < parent.getCount(); i++) {
-            if (parent.getChildAt(i) != view) {
-                ((TextView) parent.getChildAt(i)).setTypeface(Typeface.DEFAULT);
-            } else  {
-                ((TextView) parent.getChildAt(i)).setTypeface(Typeface.DEFAULT_BOLD);
-            }
-        }
-
         selectItem(position);
     }
 
@@ -184,6 +173,7 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
         // update selected item and title, then close the drawer
         mDrawerList.setItemChecked(position, true);
         setTitle(layoutManager.getLayout().getFolders().get(position).getName());
+
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 

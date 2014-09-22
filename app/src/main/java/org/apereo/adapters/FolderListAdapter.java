@@ -22,7 +22,6 @@ public class FolderListAdapter extends ArrayAdapter<Folder> {
     Context context;
     int layoutResourceId;
     List<Folder> data = null;
-    int size;
     int selectedIndex;
 
     public FolderListAdapter(Context context, int layoutResourceId, List<Folder> data) {
@@ -42,15 +41,14 @@ public class FolderListAdapter extends ArrayAdapter<Folder> {
             row = inflater.inflate(layoutResourceId, parent, false);
 
             holder = new FolderHolder();
-            holder.txtName = (TextView) row.findViewById(R.id.name);
-            if (position == selectedIndex) {
-                holder.txtName.setTypeface(Typeface.DEFAULT_BOLD);
-            }
 
             row.setTag(holder);
         } else {
             holder = (FolderHolder) row.getTag();
         }
+
+        holder.txtName = (TextView) row.findViewById(R.id.name);
+        holder.txtName.setTypeface(position == selectedIndex ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
 
         Folder folder = data.get(position);
         holder.txtName.setText(folder.getName());
