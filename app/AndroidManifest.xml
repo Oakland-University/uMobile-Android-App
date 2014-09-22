@@ -13,7 +13,7 @@
         <activity
             android:name=".activities.LaunchActivity_"
             android:label="@string/app_name"
-            android:theme="@android:style/Theme.Holo.Wallpaper.NoTitleBar">
+            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -39,6 +39,9 @@
             android:name=".activities.LoginActivity_"
             android:launchMode="singleTop"
             android:configChanges="keyboard|keyboardHidden|orientation">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.HomePage_" />
         </activity>
     </application>
 

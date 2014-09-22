@@ -3,6 +3,8 @@ package org.apereo.activities;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.WebSettings;
@@ -62,6 +64,7 @@ public class LoginActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @AfterViews
@@ -73,35 +76,29 @@ public class LoginActivity extends BaseActivity {
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
-    protected void openBackgroundLogoutWebView() {
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webView.setWebViewClient(new WebViewClient() {
-            private boolean receivedError = false;
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                if (receivedError) {
-                    showLongToast(getString(R.string.error_network_connection));
-                    super.onPageFinished(view, url);
-                    finish();
-                    return;
-                }
-
-                // logged out successfully
-                App.setIsAuth(false);
-                restApi.setCookie("");
-                getFeed();
-                super.onPageFinished(view, url);
-            }
-
-            @Override
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                receivedError = true;
-            }
-        });
-        webView.loadUrl(url);
+    @Click(R.id.login_button)
+    public void loginClick() {
+        if (!userNameView.getText().toString().isEmpty() ||
+                !passwordView.getText().toString().isEmpty()) {
+            String username = userNameView.getText().toString();
+            String password = passwordView.getText().toString();
+            openBackgroundLoginWebView(username, password);
+        } else {
+            Toast.makeText(
+                    getApplicationContext(),
+                    "Please enter a username and a password",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     protected void openBackgroundLoginWebView(final String username, final String password) {
@@ -133,6 +130,36 @@ public class LoginActivity extends BaseActivity {
                     }
                 }
                 super.onPageFinished(view, url);
+            }
+        });
+        webView.loadUrl(url);
+    }
+
+    protected void openBackgroundLogoutWebView() {
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webView.setWebViewClient(new WebViewClient() {
+            private boolean receivedError = false;
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                if (receivedError) {
+                    showLongToast(getString(R.string.error_network_connection));
+                    super.onPageFinished(view, url);
+                    finish();
+                    return;
+                }
+
+                // logged out successfully
+                App.setIsAuth(false);
+                restApi.setCookie("");
+                getFeed();
+                super.onPageFinished(view, url);
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                receivedError = true;
             }
         });
         webView.loadUrl(url);
@@ -190,21 +217,6 @@ public class LoginActivity extends BaseActivity {
                 dismissSpinner();
             }
         });
-    }
-
-    @Click(R.id.login_button)
-    public void loginClick() {
-        if (!userNameView.getText().toString().equals("") ||
-                !passwordView.getText().toString().equals("")) {
-            String username = userNameView.getText().toString();
-            String password = passwordView.getText().toString();
-            openBackgroundLoginWebView(username, password);
-        } else {
-            Toast.makeText(
-                    getApplicationContext(),
-                    "Please enter a username and a password",
-                    Toast.LENGTH_SHORT).show();
-        }
     }
 
 }
