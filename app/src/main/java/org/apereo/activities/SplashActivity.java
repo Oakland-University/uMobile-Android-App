@@ -36,6 +36,7 @@ public class SplashActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getActionBar().hide();
         restApi.getMainFeed(new UmobileRestCallback<String>() {
 
             @Override
@@ -72,8 +73,6 @@ public class SplashActivity extends BaseActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setIcon(R.drawable.umobile_icon);
         Dialog dialog = builder.setTitle(getString(R.string.error_title)).create();
-
-
 
         switch (msgId) {
             case AppConstants.ERROR_GETTING_FEED:
