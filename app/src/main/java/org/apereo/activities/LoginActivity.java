@@ -1,5 +1,6 @@
 package org.apereo.activities;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -201,6 +202,10 @@ public class LoginActivity extends BaseActivity {
 
                 Layout layout = g.fromJson(response, Layout.class);
                 layoutManager.setLayout(layout);
+                HomePage_
+                        .intent(LoginActivity.this)
+                        .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        .start();
                 finish();
             }
 
