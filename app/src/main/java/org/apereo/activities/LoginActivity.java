@@ -1,9 +1,7 @@
 package org.apereo.activities;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.CookieManager;
@@ -80,7 +78,7 @@ public class LoginActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
+                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -203,12 +201,7 @@ public class LoginActivity extends BaseActivity {
 
                 Layout layout = g.fromJson(response, Layout.class);
                 layoutManager.setLayout(layout);
-                HomePage_
-                        .intent(LoginActivity.this)
-                        .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        .start();
                 finish();
-
             }
 
             @Override

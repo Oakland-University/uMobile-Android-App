@@ -39,9 +39,6 @@
             android:name=".activities.LoginActivity_"
             android:launchMode="singleTop"
             android:configChanges="keyboard|keyboardHidden|orientation">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.HomePage_" />
         </activity>
     </application>
 
