@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -104,6 +105,7 @@ public class SplashActivity extends BaseActivity {
     }
 
     private void getLoggedInFeed() {
+        CookieSyncManager.createInstance(this);
         String cookie = CookieManager.getInstance().getCookie(getString(R.string.base_url));
 
         if (cookie != null) {
