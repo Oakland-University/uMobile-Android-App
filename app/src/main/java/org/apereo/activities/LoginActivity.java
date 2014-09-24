@@ -11,7 +11,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -87,16 +86,13 @@ public class LoginActivity extends BaseActivity {
 
     @Click(R.id.login_button)
     public void loginClick() {
-        if (!userNameView.getText().toString().isEmpty() ||
+        if (!userNameView.getText().toString().isEmpty() &&
                 !passwordView.getText().toString().isEmpty()) {
             String username = userNameView.getText().toString();
             String password = passwordView.getText().toString();
             openBackgroundLoginWebView(username, password);
         } else {
-            Toast.makeText(
-                    getApplicationContext(),
-                    "Please enter a username and a password",
-                    Toast.LENGTH_SHORT).show();
+            showShortToast(getResources().getString(R.string.form_error));
         }
     }
 
@@ -125,7 +121,7 @@ public class LoginActivity extends BaseActivity {
                     view.loadUrl("javascript:$('.btn-submit').click();");
                 } else {
                     if (url.equalsIgnoreCase(getString(R.string.login_url))) {
-                        Logger.d(TAG, "login failure"); // TODO: handle this case
+                        showLongToast(getResources().getString(R.string.information_error));
                     }
                 }
                 super.onPageFinished(view, url);

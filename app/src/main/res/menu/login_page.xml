@@ -3,8 +3,6 @@
     tools:context=".HomePage" >
     <item android:id="@+id/login_action_bar_button"
         android:title="@string/login"
-        android:showAsAction="always" />
-    <item android:id="@+id/logout_action_bar_button"
-        android:title="@string/logout"
+        android:orderInCategory="100"
         android:showAsAction="always" />
 </menu>
