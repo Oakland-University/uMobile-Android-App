@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.webkit.CookieManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -11,6 +12,7 @@ import com.google.gson.GsonBuilder;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.UiThread;
+import org.apereo.App;
 import org.apereo.R;
 import org.apereo.constants.AppConstants;
 import org.apereo.deserializers.LayoutDeserializer;
@@ -37,6 +39,7 @@ public class SplashActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActionBar().hide();
+        getLoggedInFeed();
         restApi.getMainFeed(new UmobileRestCallback<String>() {
 
             @Override
@@ -98,5 +101,20 @@ public class SplashActivity extends BaseActivity {
     public void finish() {
         super.finish();
         overridePendingTransition(android.R.anim.fade_out, android.R.anim.fade_in);
+    }
+
+    private void getLoggedInFeed() {
+        String cookie = CookieManager.getInstance().getCookie(getString(R.string.base_url));
+
+        if (cookie != null) {
+            String[] temp = cookie.split(" ");
+            for (String key : temp) {
+                if (key.contains(AppConstants.JSESSIONID)) {
+                    restApi.setCookie(key);
+                    App.setIsAuth(true);
+                    break;
+                }
+            }
+        }
     }
 }
