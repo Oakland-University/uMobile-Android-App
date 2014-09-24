@@ -9,23 +9,23 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
+import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.UiThread;
+import org.androidannotations.annotations.ViewById;
 import org.apereo.App;
 import org.apereo.R;
+import org.apereo.adapters.FolderListAdapter;
 import org.apereo.constants.AppConstants;
 import org.apereo.fragments.HomePageListFragment;
-import org.apereo.adapters.FolderListAdapter;
-
-import org.androidannotations.annotations.AfterViews;
-import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.ViewById;
 import org.apereo.interfaces.IActionListener;
 import org.apereo.models.Folder;
 import org.apereo.services.RestApi;
@@ -109,13 +109,22 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.home_page, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.clear();
         if(App.getIsAuth()) {
-            menu.add(0, MENU_LOGOUT, Menu.NONE, R.string.logout);
-        }
-        else {
-            menu.add(0, MENU_LOGIN, Menu.NONE, R.string.login);
+            MenuItem item = menu.findItem(R.id.login_action_bar_button);
+            item.setVisible(false);
+            this.invalidateOptionsMenu();
+        } else {
+            MenuItem item = menu.findItem(R.id.logout_action_bar_button);
+            item.setVisible(false);
+            this.invalidateOptionsMenu();
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -123,8 +132,12 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case MENU_LOGIN: login(getResources().getString(R.string.login_url)); break;
-            case MENU_LOGOUT: login(getResources().getString(R.string.logout_url)); break;
+            case R.id.login_action_bar_button:
+                login(getResources().getString(R.string.login_url));
+                break;
+            case R.id.logout_action_bar_button:
+                login(getResources().getString(R.string.logout_url));
+                break;
         }
 
         return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
@@ -159,6 +172,9 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
     }
 
     private void selectItem(int position) {
+
+        ((FolderListAdapter) mDrawerList.getAdapter()).setSelectedIndex(position);
+
         // update the main content by replacing fragments
         Bundle args = new Bundle();
         args.putInt(AppConstants.POSITION, position);
@@ -172,6 +188,7 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
         // update selected item and title, then close the drawer
         mDrawerList.setItemChecked(position, true);
         setTitle(layoutManager.getLayout().getFolders().get(position).getName());
+
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 

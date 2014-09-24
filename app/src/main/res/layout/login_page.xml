@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/login_layout"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="#6288C4"
+    android:layout_height="match_parent"
+    android:background="@drawable/splash_gradient"
     android:padding="35dp"
     android:clickable="true">
 
@@ -18,24 +17,21 @@
         android:focusableInTouchMode="false"
         android:visibility="gone" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/imageView"
-        android:background="@drawable/umobile_header_transparent"
-        android:contentDescription="@string/umobile_header"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-
     <RelativeLayout
         android:id="@+id/login_container"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:background="#6288C4"
-        android:layout_below="@+id/imageView"
-        android:padding="35dp"
         android:clickable="true">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView"
+            android:background="@drawable/umobile_header_transparent"
+            android:contentDescription="@string/umobile_header"
+            android:layout_above="@+id/login_username"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="25dp" />
 
         <EditText
             android:layout_width="match_parent"
@@ -47,11 +43,11 @@
             android:textColor="#FFFFFF"
             android:textColorHint="#C0CFE7"
             android:layout_above="@+id/login_password"
-            android:layout_centerHorizontal="true"
             android:layout_marginBottom="10dp"
             android:singleLine="true"
             android:background="#00000000"
-            android:padding="10dp" />
+            android:padding="10dp"
+            android:layout_alignParentRight="true" />
 
         <EditText
             android:layout_width="match_parent"
@@ -71,7 +67,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/login"
+            android:text="@string/sign_in"
             android:id="@+id/login_button"
             android:textColor="#FFFFFF"
             android:clickable="true"
@@ -90,6 +86,7 @@
             android:clickable="true"
             android:layout_below="@+id/login_button"
             android:layout_alignRight="@+id/login_button" />
+
     </RelativeLayout>
 
 </RelativeLayout>
