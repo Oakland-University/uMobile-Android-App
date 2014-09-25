@@ -148,7 +148,6 @@ public class LoginActivity extends BaseActivity {
                 // logged out successfully
                 App.setIsAuth(false);
                 restApi.setCookie("");
-                CookieManager.getInstance().removeAllCookie();
                 getFeed();
                 super.onPageFinished(view, url);
             }
