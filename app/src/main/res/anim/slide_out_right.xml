@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/res/anim/slide_out_left.xml
+/* //device/apps/common/res/anim/slide_in_right.xml
 **
-** Copyright 2007, The Android Open Source Project
+** Copyright 2007, Google Inc.
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -22,6 +22,6 @@
     android:interpolator="@android:anim/accelerate_decelerate_interpolator">
     <translate
         android:fromXDelta="0"
-        android:toXDelta="-100%p"
+        android:toXDelta="100%p"
         android:duration="@android:integer/config_mediumAnimTime"/>
 </set>
