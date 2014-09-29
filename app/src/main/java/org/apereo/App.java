@@ -37,7 +37,7 @@ public class App extends Application {
     }
 
     public static String getRootUrl() {
-        return getInstance().getResources().getString(R.string.rootUrl);
+        return getInstance().getResources().getString(R.string.root_url);
     }
 
     public static boolean isDebugMode() {
