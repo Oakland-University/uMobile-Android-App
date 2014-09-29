@@ -144,6 +144,15 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
 
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
+            mDrawerLayout.closeDrawer(mDrawerList);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     private void login(String url) {
         LoginActivity_
                 .intent(this)
