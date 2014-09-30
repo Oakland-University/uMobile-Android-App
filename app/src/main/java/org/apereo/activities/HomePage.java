@@ -58,10 +58,6 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
 
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
-    private List<Folder> folders;
-
-    private static final int MENU_LOGIN = Menu.FIRST;
-    private static final int MENU_LOGOUT = Menu.FIRST + 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +78,7 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
         // set up the drawer's list view with items and click listener
         List<Folder> folders = layoutManager.getLayout().getFolders();
         mDrawerList.setAdapter(new FolderListAdapter(this,
-                R.layout.drawer_list_item, folders));
+                R.layout.drawer_list_item, folders, ePosition));
         mDrawerList.setOnItemClickListener(this);
 
         // ActionBarDrawerToggle ties together the the proper interactions
@@ -183,6 +179,7 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
     private void selectItem(int position) {
 
         ((FolderListAdapter) mDrawerList.getAdapter()).setSelectedIndex(position);
+        ePosition = position;
 
         // update the main content by replacing fragments
         Bundle args = new Bundle();
@@ -213,6 +210,7 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
         PortletWebViewActivity_
                 .intent(this)
                 .url(url)
+                .folderPosition(ePosition)
                 .portletName(portletName)
                 .flags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .start();

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="theme_accent" type="color">#FF8800</item>
+    <item name="theme_light" type="color">#6288C4</item>
+    <item name="theme_dark" type="color">#4D6DB5</item>
+
+</resources>

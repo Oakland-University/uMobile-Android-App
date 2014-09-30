@@ -24,11 +24,12 @@ public class FolderListAdapter extends ArrayAdapter<Folder> {
     List<Folder> data = null;
     int selectedIndex;
 
-    public FolderListAdapter(Context context, int layoutResourceId, List<Folder> data) {
+    public FolderListAdapter(Context context, int layoutResourceId, List<Folder> data, int selectedIndex) {
         super(context, layoutResourceId, data);
         this.layoutResourceId = layoutResourceId;
         this.context = context;
         this.data = data;
+        this.selectedIndex = selectedIndex;
     }
 
     @Override
@@ -48,7 +49,16 @@ public class FolderListAdapter extends ArrayAdapter<Folder> {
         }
 
         holder.txtName = (TextView) row.findViewById(R.id.name);
-        holder.txtName.setTypeface(position == selectedIndex ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
+
+        if (position == selectedIndex) {
+            holder.txtName.setTypeface(Typeface.DEFAULT_BOLD);
+            holder.txtName.setTextColor(
+                    context.getResources().getColor(android.R.color.primary_text_dark));
+        } else  {
+            holder.txtName.setTypeface(Typeface.DEFAULT);
+            holder.txtName.setTextColor(
+                    context.getResources().getColor(android.R.color.secondary_text_light));
+        }
 
         Folder folder = data.get(position);
         holder.txtName.setText(folder.getName());
@@ -56,7 +66,7 @@ public class FolderListAdapter extends ArrayAdapter<Folder> {
         return row;
     }
 
-    public void setSelectedIndex(int selectedIndex)  {
+    public void setSelectedIndex(int selectedIndex) {
         this.selectedIndex = selectedIndex;
     }
 
