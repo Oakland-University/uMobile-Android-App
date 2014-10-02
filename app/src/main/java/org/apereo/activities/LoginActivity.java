@@ -2,7 +2,9 @@ package org.apereo.activities;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.CookieManager;
@@ -63,6 +65,7 @@ public class LoginActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActionBar().setDisplayHomeAsUpEnabled(true);
+
     }
 
     @AfterViews
@@ -72,6 +75,9 @@ public class LoginActivity extends BaseActivity {
             openBackgroundLogoutWebView();
             return;
         }
+
+        passwordView.setTypeface(Typeface.DEFAULT);
+        passwordView.setTransformationMethod(new PasswordTransformationMethod());
     }
 
     @Override
