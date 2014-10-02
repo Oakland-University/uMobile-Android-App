@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.CookieManager;
@@ -78,6 +79,17 @@ public class LoginActivity extends BaseActivity {
 
         passwordView.setTypeface(Typeface.DEFAULT);
         passwordView.setTransformationMethod(new PasswordTransformationMethod());
+
+        passwordView.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    loginClick();
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -103,6 +115,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     protected void openBackgroundLoginWebView(final String username, final String password) {
+        showSpinner();
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
@@ -127,6 +140,7 @@ public class LoginActivity extends BaseActivity {
                     view.loadUrl("javascript:$('.btn-submit').click();");
                 } else {
                     if (url.equalsIgnoreCase(getString(R.string.login_url))) {
+                        dismissSpinner();
                         showLongToast(getResources().getString(R.string.information_error));
                     }
                 }
@@ -137,6 +151,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     protected void openBackgroundLogoutWebView() {
+        showSpinner();
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
@@ -148,6 +163,8 @@ public class LoginActivity extends BaseActivity {
                     showLongToast(getString(R.string.error_network_connection));
                     super.onPageFinished(view, url);
                     finish();
+
+                    dismissSpinner();
                     return;
                 }
 
@@ -187,7 +204,6 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onBegin() {
                 super.onBegin();
-                showSpinner();
             }
 
             @Override
