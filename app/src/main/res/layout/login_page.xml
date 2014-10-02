@@ -4,7 +4,7 @@
     android:id="@+id/login_layout"
     android:layout_width="fill_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/splash_gradient"
+    android:background="@drawable/gradient_background"
     android:padding="35dp"
     android:clickable="true">
 
@@ -36,7 +36,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textEmailAddress"
+            android:inputType="textWebEditText"
             android:ems="10"
             android:id="@+id/login_username"
             android:hint="@string/username"
@@ -53,6 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
+            android:password="true"
             android:ems="10"
             android:id="@+id/login_password"
             android:hint="@string/password"

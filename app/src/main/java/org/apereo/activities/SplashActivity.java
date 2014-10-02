@@ -23,7 +23,7 @@ import org.apereo.utils.Logger;
 /**
  * Created by schneis on 8/27/14.
  */
-@EActivity(R.layout.splash)
+@EActivity(R.layout.activity_splash)
 public class SplashActivity extends BaseActivity {
 
     private final String TAG = SplashActivity.class.getName();

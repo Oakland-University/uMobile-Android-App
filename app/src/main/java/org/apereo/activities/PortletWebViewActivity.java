@@ -65,6 +65,9 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     @Extra
     String portletName;
 
+    @Extra
+    int folderPosition;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,8 +80,9 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     @AfterViews
     void initialize() {
+
         FadingActionBarHelper helper = new FadingActionBarHelper()
-                .actionBarBackground(R.drawable.ab_background)
+                .actionBarBackground(R.color.theme_accent)
                 .headerLayout(R.layout.header)
                 .contentLayout(R.layout.portlet_webview);
         helper.initActionBar(this);
@@ -87,8 +91,9 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
         // set up the drawer's list view with items and click listener
         List<Folder> folders = layoutManager.getLayout().getFolders();
         mDrawerList.setAdapter(new FolderListAdapter(this,
-                R.layout.drawer_list_item, folders));
+                R.layout.drawer_list_item, folders, folderPosition));
         mDrawerList.setOnItemClickListener(this);
+        mDrawerList.setItemChecked(folderPosition, true);
 
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the sliding drawer and the action bar app icon
@@ -112,7 +117,6 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         getActionBar().setTitle(portletName);
 
-
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient());
@@ -121,6 +125,15 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
         Logger.d(TAG, url);
         webView.loadUrl(url);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
+            mDrawerLayout.closeDrawer(mDrawerList);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -182,12 +195,12 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ((FolderListAdapter) mDrawerList.getAdapter()).setSelectedIndex(position);
+        mDrawerList.setItemChecked(position, true);
         selectItem(position);
     }
 
     private void selectItem(int position) {
-        ((FolderListAdapter) mDrawerList.getAdapter()).setSelectedIndex(position);
-
         HomePage_
                 .intent(this)
                 .ePosition(position)
