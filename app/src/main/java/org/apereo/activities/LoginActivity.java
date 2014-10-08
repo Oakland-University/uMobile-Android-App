@@ -1,5 +1,7 @@
 package org.apereo.activities;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -90,6 +92,17 @@ public class LoginActivity extends BaseActivity {
                 !passwordView.getText().toString().isEmpty()) {
             String username = userNameView.getText().toString();
             String password = passwordView.getText().toString();
+
+            Account newAccount = new Account(username, "org.apereo.umobile");
+            AccountManager accountManager =
+                    (AccountManager) App.getInstance().getSystemService(ACCOUNT_SERVICE);
+
+            if (accountManager.addAccountExplicitly(newAccount, password, null)) {
+                Logger.d("SWIGGINS", "ACCOUNT?>!?!>!>");
+            } else {
+                Logger.d("SWIGGINS", "NO ACCOUNT!>!>");
+            }
+
             openBackgroundLoginWebView(username, password);
         } else {
             showShortToast(getResources().getString(R.string.form_error));

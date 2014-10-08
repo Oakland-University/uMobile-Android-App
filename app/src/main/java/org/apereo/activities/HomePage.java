@@ -1,5 +1,7 @@
 package org.apereo.activities;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
@@ -30,6 +32,7 @@ import org.apereo.interfaces.IActionListener;
 import org.apereo.models.Folder;
 import org.apereo.services.RestApi;
 import org.apereo.utils.LayoutManager;
+import org.apereo.utils.Logger;
 
 import java.util.List;
 
@@ -72,6 +75,12 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
         // enable ActionBar app icon to behave as action to toggle nav drawer
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
+
+        AccountManager am = AccountManager.get(App.getInstance());
+        for (Account a : am.getAccountsByType("org.apereo.umobile")) {
+            Logger.d("SWIGGINS", a.toString());
+            //Logger.d("SWIGGINS", am.getPassword(a));
+        }
     }
 
     @AfterViews
