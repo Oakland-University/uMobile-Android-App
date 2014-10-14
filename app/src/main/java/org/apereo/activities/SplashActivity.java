@@ -6,6 +6,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -119,5 +121,21 @@ public class SplashActivity extends BaseActivity {
     public void finish() {
         super.finish();
         overridePendingTransition(android.R.anim.fade_out, android.R.anim.fade_in);
+    }
+
+    private void getLoggedInFeed() {
+        CookieSyncManager.createInstance(this);
+        String cookie = CookieManager.getInstance().getCookie(getString(R.string.base_url));
+
+        if (cookie != null) {
+            String[] temp = cookie.split(" ");
+            for (String key : temp) {
+                if (key.contains(AppConstants.JSESSIONID)) {
+                    restApi.setCookie(key);
+                    App.setIsAuth(true);
+                    break;
+                }
+            }
+        }
     }
 }
