@@ -18,6 +18,7 @@
     <string name="umobile_header">uMobile Header</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
+    <string name="account_type">apereo.org.umobile</string>
 
     <!-- URL constants -->
     <string name="home_page">https://mysail.oakland.edu/uPortal/normal/render.uP</string>
