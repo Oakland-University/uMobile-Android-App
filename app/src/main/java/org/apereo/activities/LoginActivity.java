@@ -1,5 +1,7 @@
 package org.apereo.activities;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
@@ -12,6 +14,7 @@ import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 
@@ -42,6 +45,8 @@ public class LoginActivity extends BaseActivity {
 
     private static final String TAG = LoginActivity.class.getName();
 
+    private final String ACCOUNT_TYPE = App.getInstance().getResources().getString(R.string.account_type);
+
     @ViewById(R.id.login_container)
     RelativeLayout container;
 
@@ -52,7 +57,13 @@ public class LoginActivity extends BaseActivity {
     EditText userNameView;
     @ViewById(R.id.login_password)
     EditText passwordView;
+    @ViewById(R.id.rememberMe)
+    CheckBox rememberMe;
 
+    @Extra
+    String username;
+    @Extra
+    String password;
     @Extra
     String url;
 
@@ -61,6 +72,9 @@ public class LoginActivity extends BaseActivity {
 
     @Bean
     LayoutManager layoutManager;
+
+    AccountManager accountManager =
+            (AccountManager) App.getInstance().getSystemService(ACCOUNT_SERVICE);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +104,7 @@ public class LoginActivity extends BaseActivity {
                 return false;
             }
         });
+        checkAccount();
     }
 
     @Override
@@ -102,19 +117,35 @@ public class LoginActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void checkAccount() {
+        if (username != null) {
+            Account newAccount = new Account(username, ACCOUNT_TYPE);
+
+            accountManager.addAccountExplicitly(newAccount, password, null);
+
+            openBackgroundLoginWebView();
+        }
+    }
+
+
     @Click(R.id.login_button)
-    public void loginClick() {
+    protected void loginClick() {
         if (!userNameView.getText().toString().isEmpty() &&
                 !passwordView.getText().toString().isEmpty()) {
-            String username = userNameView.getText().toString();
-            String password = passwordView.getText().toString();
-            openBackgroundLoginWebView(username, password);
+            username = userNameView.getText().toString();
+            password = passwordView.getText().toString();
+
+            if (rememberMe.isChecked()) {
+                checkAccount();
+            } else {
+                openBackgroundLoginWebView();
+            }
         } else {
             showShortToast(getResources().getString(R.string.form_error));
         }
     }
 
-    protected void openBackgroundLoginWebView(final String username, final String password) {
+    protected void openBackgroundLoginWebView() {
         showSpinner();
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -124,8 +155,8 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 if (url.equalsIgnoreCase(getString(R.string.home_page))) {
-                    App.setIsAuth(true);
                     getLoggedInFeed();
+                    App.setIsAuth(true);
                 }
                 super.onPageStarted(view, url, favicon);
 
@@ -169,8 +200,9 @@ public class LoginActivity extends BaseActivity {
                 }
 
                 // logged out successfully
-                App.setIsAuth(false);
                 restApi.setCookie("");
+                removeAccount();
+                App.setIsAuth(false);
                 getFeed();
                 super.onPageFinished(view, url);
             }
@@ -181,6 +213,13 @@ public class LoginActivity extends BaseActivity {
             }
         });
         webView.loadUrl(url);
+    }
+
+    private void removeAccount() {
+        if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
+            accountManager.removeAccount(
+                    accountManager.getAccountsByType(ACCOUNT_TYPE)[0], null, null);
+        }
     }
 
     private void getLoggedInFeed() {

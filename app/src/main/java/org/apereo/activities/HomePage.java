@@ -33,7 +33,6 @@ import org.apereo.utils.LayoutManager;
 
 import java.util.List;
 
-
 @EActivity(R.layout.activity_home_page)
 public class HomePage extends BaseActivity implements IActionListener, AdapterView.OnItemClickListener {
 
@@ -68,6 +67,7 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
         // enable ActionBar app icon to behave as action to toggle nav drawer
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
+
     }
 
     @AfterViews
@@ -169,7 +169,6 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
         // Pass any configuration change to the drawer toggles
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
-
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

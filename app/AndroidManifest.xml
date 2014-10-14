@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.apereo" >
 
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -40,6 +43,21 @@
             android:launchMode="singleTop"
             android:configChanges="keyboard|keyboardHidden|orientation">
         </activity>
+        <service
+            android:name=".services.AuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+        <provider
+            android:name="org.apereo.utils.StubProvider"
+            android:authorities="org.apereo.umobile.datasync.provider"
+            android:exported="false"
+            android:syncable="false">
+        </provider>
     </application>
 
 </manifest>
