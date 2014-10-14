@@ -29,9 +29,8 @@
             android:id="@+id/imageView"
             android:background="@drawable/umobile_header_transparent"
             android:contentDescription="@string/umobile_header"
-            android:layout_above="@+id/login_username"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="25dp" />
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
 
         <EditText
             android:layout_width="match_parent"
@@ -80,10 +79,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/remember_me"
-            android:id="@+id/checkBox"
+            android:id="@+id/rememberMe"
             android:checked="true"
             android:textColor="#C0CFE7"
-            android:clickable="true"
             android:layout_below="@+id/login_button"
             android:layout_alignRight="@+id/login_button" />
 

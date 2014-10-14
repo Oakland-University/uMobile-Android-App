@@ -1,7 +1,5 @@
 package org.apereo.activities;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
@@ -32,10 +30,8 @@ import org.apereo.interfaces.IActionListener;
 import org.apereo.models.Folder;
 import org.apereo.services.RestApi;
 import org.apereo.utils.LayoutManager;
-import org.apereo.utils.Logger;
 
 import java.util.List;
-
 
 @EActivity(R.layout.activity_home_page)
 public class HomePage extends BaseActivity implements IActionListener, AdapterView.OnItemClickListener {
@@ -61,10 +57,6 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
 
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
-    private List<Folder> folders;
-
-    private static final int MENU_LOGIN = Menu.FIRST;
-    private static final int MENU_LOGOUT = Menu.FIRST + 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,11 +68,6 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
 
-        AccountManager am = AccountManager.get(App.getInstance());
-        for (Account a : am.getAccountsByType("org.apereo.umobile")) {
-            Logger.d("SWIGGINS", a.toString());
-            //Logger.d("SWIGGINS", am.getPassword(a));
-        }
     }
 
     @AfterViews
@@ -173,7 +160,6 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
         // Pass any configuration change to the drawer toggles
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
-
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
