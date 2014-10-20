@@ -14,7 +14,6 @@ public class ImageManager {
 
     public static void setImageFromUrl(ImageView imageView, String path) {
         try {
-            Picasso.with(imageView.getContext()).setIndicatorsEnabled(true);
             Picasso.with(imageView.getContext())
                     .load(App.getRootUrl().concat(path))
                     .error(R.drawable.umobile_icon)
@@ -27,7 +26,6 @@ public class ImageManager {
 
     public static void setImageFromDrawable(ImageView imageView, int resNo) {
         try {
-            Picasso.with(imageView.getContext()).setIndicatorsEnabled(true);
             Picasso.with(imageView.getContext())
                     .load(resNo)
                     .error(R.drawable.umobile_icon)
