@@ -107,7 +107,8 @@ public class LoginActivity extends BaseActivity {
                 return false;
             }
         });
-        checkAccount();
+
+        checkAccount(true);
     }
 
     @Override
@@ -120,13 +121,16 @@ public class LoginActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void checkAccount() {
+    private void checkAccount(boolean initialCheck) {
         if (username != null) {
             Account newAccount = new Account(username, ACCOUNT_TYPE);
 
             accountManager.addAccountExplicitly(newAccount, password, null);
 
-            openBackgroundLoginWebView();
+            if (initialCheck) {
+                container.setVisibility(View.GONE);
+                openBackgroundLoginWebView();
+            }
         }
     }
 
@@ -154,7 +158,9 @@ public class LoginActivity extends BaseActivity {
     }
 
     protected void openBackgroundLoginWebView() {
+        getActionBar().setDisplayHomeAsUpEnabled(false);
         showSpinner();
+
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
@@ -163,6 +169,9 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 if (url.equalsIgnoreCase(getString(R.string.home_page))) {
+                    if (rememberMe.isChecked()) {
+                        checkAccount(false);
+                    }
                     getLoggedInFeed();
                     App.setIsAuth(true);
                 }
