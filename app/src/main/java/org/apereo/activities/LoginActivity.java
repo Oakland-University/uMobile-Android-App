@@ -17,6 +17,7 @@ import android.webkit.WebViewClient;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -59,6 +60,8 @@ public class LoginActivity extends BaseActivity {
     EditText passwordView;
     @ViewById(R.id.rememberMe)
     CheckBox rememberMe;
+    @ViewById(R.id.forgot_password)
+    TextView forgotPassword;
 
     @Extra
     String username;
@@ -135,14 +138,19 @@ public class LoginActivity extends BaseActivity {
             username = userNameView.getText().toString();
             password = passwordView.getText().toString();
 
-            if (rememberMe.isChecked()) {
-                checkAccount();
-            } else {
-                openBackgroundLoginWebView();
-            }
+            openBackgroundLoginWebView();
         } else {
             showShortToast(getResources().getString(R.string.form_error));
         }
+    }
+
+
+    @Click(R.id.forgot_password)
+    protected void forgotPasswordClick() {
+        PortletWebViewActivity_
+                .intent(LoginActivity.this)
+                .url(App.getInstance().getResources().getString(R.string.forgot_password_url))
+                .start();
     }
 
     protected void openBackgroundLoginWebView() {

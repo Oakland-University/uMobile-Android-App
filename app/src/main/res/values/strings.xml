@@ -18,6 +18,7 @@
     <string name="umobile_header">uMobile Header</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
+    <string name="forgot_password">Forgot password?</string>
     <string name="account_type">apereo.org.umobile</string>
 
     <!-- URL constants -->
@@ -25,6 +26,7 @@
     <string name="root_url">https://mysail.oakland.edu</string>
     <string name="login_url">https://cas.oakland.edu/cas/login?service=https://mysail.oakland.edu/uPortal/Login</string>
     <string name="logout_url">https://cas.oakland.edu/cas/logout</string>
+    <string name="forgot_password_url">https://netid.oakland.edu/profile/</string>
     <string name="base_url">https://mysail.oakland.edu</string>
 
 </resources>
