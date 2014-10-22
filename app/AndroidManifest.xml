@@ -31,7 +31,7 @@
         <activity
             android:name=".activities.PortletWebViewActivity_"
             android:theme="@style/AppTheme"
-            android:configChanges="keyboard|keyboardHidden|orientation">
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity>
         <activity
             android:name=".activities.SplashActivity_"
