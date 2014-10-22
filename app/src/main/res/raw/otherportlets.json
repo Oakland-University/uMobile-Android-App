@@ -14,6 +14,12 @@
         "description": "Links to sites outside of MySail",
         "url": "http://www.oakland.edu/m/?mobileapp=true",
         "drawable": "links"
+      },
+      {
+        "title": "About Us",
+        "description": "Find out more about Oakland University",
+        "url": "http://www.oakland.edu/about",
+        "drawable": "about"
       }
       ]
    }
