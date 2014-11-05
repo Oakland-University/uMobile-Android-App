@@ -105,7 +105,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
                 R.string.drawer_close  /* "close drawer" description for accessibility */
         ) {
             public void onDrawerClosed(View view) {
-                getActionBar().setIcon(R.drawable.umobile_icon);
+                getActionBar().setIcon(R.drawable.ic_launcher);
                 getActionBar().setTitle(portletName);
             }
 

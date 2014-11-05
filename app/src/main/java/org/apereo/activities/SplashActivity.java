@@ -93,7 +93,7 @@ public class SplashActivity extends BaseActivity {
     @UiThread
     protected void showErrorDialog(int msgId) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setIcon(R.drawable.umobile_icon);
+        builder.setIcon(R.drawable.ic_launcher);
         Dialog dialog = builder.setTitle(getString(R.string.error_title)).create();
 
         switch (msgId) {
