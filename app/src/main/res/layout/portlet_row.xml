@@ -1,13 +1,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content" >
 
     <ImageView
         android:id="@+id/portletIcon"
         android:layout_width="@dimen/imageview_size"
         android:layout_height="@dimen/imageview_size"
         android:layout_alignParentLeft="true"
-        android:layout_margin="5dp"/>
+        android:layout_margin="5dp" />
 
     <LinearLayout
         android:id="@+id/title_and_description_layout"
@@ -15,7 +15,7 @@
         android:layout_height="60dp"
         android:layout_toRightOf="@id/portletIcon"
         android:layout_toLeftOf="@+id/carot"
-        android:orientation="vertical">
+        android:orientation="vertical" >
         <TextView
             android:id="@+id/name"
             android:layout_width="match_parent"
@@ -26,7 +26,7 @@
             android:layout_marginTop="10dp"
             android:textSize="18sp"
             android:paddingLeft="10dp"
-            android:paddingRight="10dp"/>
+            android:paddingRight="10dp" />
 
         <TextView
             android:id="@+id/description"
@@ -51,6 +51,6 @@
         android:layout_alignParentRight="true"
         android:layout_marginRight="5dp"
         android:rotation="180"
-        android:src="@drawable/ic_ab_back_holo_light"/>
+        android:src="@drawable/ic_ab_back_holo_light" />
 
 </RelativeLayout>
