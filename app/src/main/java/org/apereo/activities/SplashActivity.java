@@ -81,7 +81,6 @@ public class SplashActivity extends BaseActivity {
 
                     Layout layout = g.fromJson(response, Layout.class);
                     layoutManager.setLayout(layout);
-                    Logger.d(TAG, " first name = " + layout.getFolders().get(0).getName());
                     HomePage_
                             .intent(SplashActivity.this)
                             .start();
@@ -123,19 +122,4 @@ public class SplashActivity extends BaseActivity {
         overridePendingTransition(android.R.anim.fade_out, android.R.anim.fade_in);
     }
 
-    private void getLoggedInFeed() {
-        CookieSyncManager.createInstance(this);
-        String cookie = CookieManager.getInstance().getCookie(getString(R.string.base_url));
-
-        if (cookie != null) {
-            String[] temp = cookie.split(" ");
-            for (String key : temp) {
-                if (key.contains(AppConstants.JSESSIONID)) {
-                    restApi.setCookie(key);
-                    App.setIsAuth(true);
-                    break;
-                }
-            }
-        }
-    }
 }

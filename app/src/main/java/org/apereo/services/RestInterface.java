@@ -1,6 +1,5 @@
 package org.apereo.services;
 
-
 import org.androidannotations.annotations.rest.Accept;
 import org.androidannotations.annotations.rest.Get;
 import org.androidannotations.annotations.rest.Rest;

@@ -82,7 +82,6 @@ public class LayoutDeserializer implements JsonDeserializer<Layout> {
                             .setDrawable(portlet.has("drawable") ? portlet.get("drawable").getAsString() : "")
                             .build();
                     portlets.add(p);
-                    Log.d("portlet name = " , p.getName());
                 }
 
             }

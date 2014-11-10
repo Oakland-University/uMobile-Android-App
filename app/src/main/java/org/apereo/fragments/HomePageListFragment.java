@@ -46,7 +46,6 @@ public class HomePageListFragment extends ListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = mFadingHelper.createView(inflater);
-        Log.d(TAG, "onCreateView");
 
         if (mArguments != null){
             position = mArguments.getInt(AppConstants.POSITION);
@@ -57,9 +56,7 @@ public class HomePageListFragment extends ListFragment {
 
     @AfterViews
     void initialize() {
-        Logger.d("folder name = ", layoutManager.getLayout().getFolders().get(position).getName());
         portlets = layoutManager.getLayout().getFolders().get(position).getPortlets();
-        Logger.d("PORTLETS SIZE = ", ""+portlets.size());
         adapter = new PortletListAdapter(activity, R.layout.portlet_row, portlets);
         setListAdapter(adapter);
 
@@ -93,7 +90,6 @@ public class HomePageListFragment extends ListFragment {
                 .contentLayout(R.layout.activity_listview);
         mFadingHelper.initActionBar(activity);
 
-        Logger.d(TAG, "onAttach");
         this.activity = activity;
 
 

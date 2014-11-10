@@ -12,7 +12,6 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apereo.constants.AppConstants;
 import org.apereo.utils.Logger;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
@@ -68,7 +67,6 @@ public class RestApi {
         callbackHandler.onBegin(callback);
         HttpClient client = new DefaultHttpClient();
         HttpGet httpGet = new HttpGet("https://mysail.oakland.edu/uPortal/layout.json");
-        Logger.d(TAG, "cookie = " + cookie);
         httpGet.setHeader("Cookie", cookie);
         try {
             powerClient.getMainFeed();
