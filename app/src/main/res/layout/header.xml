@@ -5,4 +5,4 @@
     android:layout_height="wrap_content"
     android:adjustViewBounds="true"
     android:scaleType="center"
-    android:src="@drawable/umobile_header"/>
+    android:src="@drawable/umobile_header" />

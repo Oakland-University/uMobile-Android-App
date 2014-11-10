@@ -1,7 +1,5 @@
 package org.apereo.utils;
 
-import android.util.Log;
-
 import org.apereo.App;
 
 import java.io.BufferedReader;
@@ -17,7 +15,7 @@ import java.io.Writer;
  */
 public class RawJSONLoader {
 
-     public static String loadFeed(int rawResourceId) throws IOException {
+    public static String loadFeed(int rawResourceId) throws IOException {
 
         InputStream is = App.getInstance().getResources().openRawResource(rawResourceId);
         Writer writer = new StringWriter();

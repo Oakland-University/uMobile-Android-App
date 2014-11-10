@@ -56,6 +56,5 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             String authority,
             ContentProviderClient provider,
             SyncResult syncResult) {
-        Logger.d("SWIGGINS", "YO");
     }
 }

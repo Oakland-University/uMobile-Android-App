@@ -145,14 +145,10 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if(App.getIsAuth()) {
-            MenuItem item = menu.findItem(R.id.login_action_bar_button);
-            item.setVisible(false);
-            this.invalidateOptionsMenu();
+        if (App.getIsAuth()) {
+            menu.findItem(R.id.login_action_bar_button).setVisible(false);
         } else {
-            MenuItem item = menu.findItem(R.id.logout_action_bar_button);
-            item.setVisible(false);
-            this.invalidateOptionsMenu();
+            menu.findItem(R.id.logout_action_bar_button).setVisible(false);
         }
         return super.onPrepareOptionsMenu(menu);
     }
