@@ -91,7 +91,7 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
                 R.string.drawer_close  /* "close drawer" description for accessibility */
         ) {
             public void onDrawerClosed(View view) {
-                getActionBar().setIcon(R.drawable.umobile_icon);
+                getActionBar().setIcon(R.drawable.ic_launcher);
                 getActionBar().setTitle(mTitle);
             }
 

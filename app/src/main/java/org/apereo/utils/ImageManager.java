@@ -16,7 +16,7 @@ public class ImageManager {
         try {
             Picasso.with(imageView.getContext())
                     .load(App.getRootUrl().concat(path))
-                    .error(R.drawable.umobile_icon)
+                    .error(R.drawable.ic_launcher)
                     .into(imageView);
         } catch (Exception e) {
             Logger.e("image", e.getMessage(), e);
@@ -28,7 +28,7 @@ public class ImageManager {
         try {
             Picasso.with(imageView.getContext())
                     .load(resNo)
-                    .error(R.drawable.umobile_icon)
+                    .error(R.drawable.ic_launcher)
                     .into(imageView);
         } catch (Exception e) {
         }
