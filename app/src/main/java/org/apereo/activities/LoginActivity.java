@@ -3,7 +3,6 @@ package org.apereo.activities;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
@@ -23,11 +22,21 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.ViewById;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apereo.App;
 import org.apereo.R;
 import org.apereo.constants.AppConstants;
@@ -37,6 +46,23 @@ import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
 import org.apereo.utils.LayoutManager;
 import org.apereo.utils.Logger;
+
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by schneis on 8/28/14.
@@ -159,43 +185,114 @@ public class LoginActivity extends BaseActivity {
 
     protected void openBackgroundLoginWebView() {
         getActionBar().setDisplayHomeAsUpEnabled(false);
-        showSpinner();
+        //showSpinner();
+        doget();
+    }
 
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webView.setWebViewClient(new WebViewClient() {
-            private boolean initialLoginRequest = true;
+    @Background
+    public void doget() {
+        URL url;
+        BufferedReader reader;
+        String lt = null;
+        String execution = null;
+        String cookieHeader = null;
+        String portletHeader = null;
 
-            @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                if (url.equalsIgnoreCase(getString(R.string.home_page))) {
-                    if (rememberMe.isChecked()) {
-                        checkAccount(false);
-                    }
-                    getLoggedInFeed();
-                    App.setIsAuth(true);
+        // region GET
+        try {
+            url = new URL("https://castest.oakland.edu/cas/login?service=https://mysaildev.oakland.edu/uPortal/Login");
+            HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
+            reader = new BufferedReader(new InputStreamReader(getConnection.getInputStream()));
+            String line;
+            while((line = reader.readLine()) != null){
+                if(line.contains("<input type=\"hidden\" name=\"lt\" value=")) {
+                    lt = line.substring(41, line.lastIndexOf("\""));
                 }
-                super.onPageStarted(view, url, favicon);
-
+                if(line.contains("<input type=\"hidden\" name=\"execution\" value=\"")) {
+                    execution = line.substring(48, line.lastIndexOf("\""));
+                }
+                //Logger.d("======", line);
             }
 
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                if (initialLoginRequest) {
-                    initialLoginRequest = false;
-                    view.loadUrl("javascript:$('#username').val('" + username + "');");
-                    view.loadUrl("javascript:$('#password').val('" + password + "');");
-                    view.loadUrl("javascript:$('.btn-submit').click();");
-                } else {
-                    if (url.equalsIgnoreCase(getString(R.string.login_url))) {
-                        dismissSpinner();
-                        showLongToast(getResources().getString(R.string.information_error));
-                    }
-                }
-                super.onPageFinished(view, url);
+            cookieHeader = getConnection.getHeaderField("Set-Cookie");
+            Logger.d("========", cookieHeader);
+            Logger.d("========", "" + getConnection.getResponseCode());
+            Logger.d("========", lt);
+            Logger.d("========", execution);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // endregion
+
+        // region POST
+        String js = cookieHeader.split("=")[0].toLowerCase() + "=" + cookieHeader.split("=")[1].split(";")[0];
+        String postPath = "https://castest.oakland.edu/cas/login;"+js+"?service=https://mysaildev.oakland.edu/uPortal/Login";
+        URL postUrl;
+        HttpURLConnection postConnection;
+        try {
+            postUrl = new URL(postPath);
+            postConnection = (HttpURLConnection) postUrl.openConnection();
+            List<NameValuePair> postData = new ArrayList<NameValuePair>(6);
+            postData.add(new BasicNameValuePair("username", username));
+            postData.add(new BasicNameValuePair("password", password));
+            postData.add(new BasicNameValuePair("lt", lt));
+            postData.add(new BasicNameValuePair("execution", execution));
+            postData.add(new BasicNameValuePair("_eventId", "submit"));
+            postData.add(new BasicNameValuePair("submit", "Sign+In"));
+
+            postConnection.setDoOutput(true);
+            postConnection.setChunkedStreamingMode(0);
+            OutputStream os = new BufferedOutputStream(postConnection.getOutputStream());
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+            writer.write(getQuery(postData));
+            writer.flush();
+            writer.close();
+            os.close();
+            postConnection.connect();
+            Logger.d(TAG, "sending POST");
+            Logger.d(TAG, "" + postConnection.getResponseCode());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // endregion
+
+        // region GET to verify authentication
+        try {
+            Logger.d(TAG, "sending auth GET");
+            url = new URL("https://mysaildev.oakland.edu/uPortal/");
+            HttpURLConnection getConnection = null;
+            try {
+                getConnection = (HttpURLConnection) url.openConnection();
+                Logger.d(TAG, "" + getConnection.getHeaderFields());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        });
-        webView.loadUrl(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        // endregion
+    }
+
+    // http://stackoverflow.com/a/13486223/2546659
+    private String getQuery(List<NameValuePair> params) throws UnsupportedEncodingException {
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+
+        for (NameValuePair pair : params)
+        {
+            if (first)
+                first = false;
+            else
+                result.append("&");
+
+            result.append(URLEncoder.encode(pair.getName(), "UTF-8"));
+            result.append("=");
+            result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
+        }
+
+        return result.toString();
     }
 
     protected void openBackgroundLogoutWebView() {
