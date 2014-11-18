@@ -204,21 +204,48 @@ public class LoginActivity extends BaseActivity {
         HttpURLConnection getConnection = null;
 
         // region POST
-        String postPath = "https://castest.oakland.edu/cas/v1/tickets";
+        String postPath = "https://castest.oakland.edu/cas/login?service=https://mysaildev.oakland.edu/uPortal/Login";
         URL postUrl;
         HttpURLConnection postConnection = null;
         Map<String, List<String>> headers = null;
         try {
+            url = new URL("https://castest.oakland.edu/cas/login?service=https://mysaildev.oakland.edu/uPortal/Login");
+            getConnection = (HttpURLConnection) url.openConnection();
+            reader = new BufferedReader(new InputStreamReader(getConnection.getInputStream()));
+            String line;
+            while((line = reader.readLine()) != null){
+                if(line.contains("<input type=\"hidden\" name=\"lt\" value=")) {
+                    lt = line.substring(41, line.lastIndexOf("\""));
+                }
+                if(line.contains("<input type=\"hidden\" name=\"execution\" value=\"")) {
+                    execution = line.substring(48, line.lastIndexOf("\""));
+                }
+                //Logger.d("======", line);
+            }
+
+            cookieHeader = getConnection.getHeaderField("Set-Cookie");
+            Logger.d("========", cookieHeader);
+            Logger.d("========", "" + getConnection.getResponseCode());
+            Logger.d("========", lt);
+            Logger.d("========", execution);
+
+
+
             //POSTS to CAS USER&PASSWORD
             //Auth success and TGT Created
             Logger.d(TAG, "POSTING TO: " + postPath);
             postUrl = new URL(postPath);
             postConnection = (HttpURLConnection) postUrl.openConnection();
             postConnection.setInstanceFollowRedirects(true);
+            postConnection.setRequestProperty("Cookie", cookieHeader);
             HttpURLConnection.setFollowRedirects(true);
             List<NameValuePair> postData = new ArrayList<NameValuePair>(6);
             postData.add(new BasicNameValuePair("username", username));
             postData.add(new BasicNameValuePair("password", password));
+            postData.add(new BasicNameValuePair("lt", lt));
+            postData.add(new BasicNameValuePair("execution", execution));
+            postData.add(new BasicNameValuePair("_eventId", "submit"));
+            postData.add(new BasicNameValuePair("submit", "Sign In"));
             postConnection.setDoOutput(true);
             postConnection.setChunkedStreamingMode(0);
             OutputStream os = new BufferedOutputStream(postConnection.getOutputStream());
@@ -232,93 +259,68 @@ public class LoginActivity extends BaseActivity {
             Logger.d(TAG, "" + postConnection.getHeaderFields());
             Logger.d(TAG, "End sending POST");
 
-            //Service Ticket Created
-            String requestST = postConnection.getHeaderField("Location");
-            requestST = requestST.replace("http", "https");
-            Logger.d(TAG, "POSTING TO: " + requestST);
-            Logger.d(TAG, requestST);
-            URL postST = new URL(requestST);
-            HttpURLConnection postConnection2 = (HttpURLConnection) postST.openConnection();
-            //postConnection2.setInstanceFollowRedirects(true);
-            List<NameValuePair> postData2 = new ArrayList<NameValuePair>(6);
-            postData2.add(new BasicNameValuePair("service", "https://mysaildev.oakland.edu/uPortal/Login"));
-            postConnection2.setDoOutput(true);
-            postConnection2.setChunkedStreamingMode(0);
-            OutputStream os2 = new BufferedOutputStream(postConnection2.getOutputStream());
-            BufferedWriter writer2 = new BufferedWriter(new OutputStreamWriter(os2, "UTF-8"));
-            writer2.write(getQuery(postData2));
-            writer2.flush();
-            writer2.close();
-            os2.close();
-            postConnection2.connect();
-            Logger.d(TAG, "" + postConnection2.getResponseCode());
-            Logger.d(TAG, "" + postConnection2.getHeaderFields());
-            BufferedReader in = new BufferedReader(new InputStreamReader(postConnection2.getInputStream()));
-            String serviceTicket;
-            serviceTicket = in.readLine();
-            Logger.d(TAG, "ST = " + serviceTicket);
-            Logger.d(TAG, "End sending POST");
+//            //Service Ticket Created
+//            String requestST = postConnection.getHeaderField("Location");
+//            requestST = requestST.replace("http", "https");
+//            Logger.d(TAG, "POSTING TO: " + requestST);
+//            Logger.d(TAG, requestST);
+//            URL postST = new URL(requestST);
+//            HttpURLConnection postConnection2 = (HttpURLConnection) postST.openConnection();
+//            //postConnection2.setInstanceFollowRedirects(true);
+//            List<NameValuePair> postData2 = new ArrayList<NameValuePair>(6);
+//            postData2.add(new BasicNameValuePair("service", "https://mysaildev.oakland.edu/uPortal/Login"));
+//            postConnection2.setDoOutput(true);
+//            postConnection2.setChunkedStreamingMode(0);
+//            OutputStream os2 = new BufferedOutputStream(postConnection2.getOutputStream());
+//            BufferedWriter writer2 = new BufferedWriter(new OutputStreamWriter(os2, "UTF-8"));
+//            writer2.write(getQuery(postData2));
+//            writer2.flush();
+//            writer2.close();
+//            os2.close();
+//            postConnection2.connect();
+//            Logger.d(TAG, "" + postConnection2.getResponseCode());
+//            Logger.d(TAG, "" + postConnection2.getHeaderFields());
+//            BufferedReader in = new BufferedReader(new InputStreamReader(postConnection2.getInputStream()));
+//            String serviceTicket;
+//            serviceTicket = in.readLine();
+//            Logger.d(TAG, "ST = " + serviceTicket);
+//            Logger.d(TAG, "End sending POST");
+//
+//            //Proxy Granting Ticket and Service ticket validated
+//            url = new URL("https://mysaildev.oakland.edu/uPortal/Login?ticket="+serviceTicket);
+//            Logger.d(TAG, "GET TO: " + url.toString());
+//            getConnection = (HttpURLConnection) url.openConnection();
+//            Logger.d(TAG, requestST.substring(requestST.lastIndexOf("/")+1));
+//            getConnection.connect();
+//            Logger.d(TAG, "" + getConnection.getResponseCode());
+//            Logger.d(TAG, "" + getConnection.getHeaderFields());
+//            String cookie = getConnection.getHeaderField("Set-Cookie");
+//            Logger.d(TAG, "End sending GET");
 
-            //Proxy Granting Ticket and Service ticket validated
-            url = new URL("https://mysaildev.oakland.edu/uPortal/Login?ticket="+serviceTicket);
-            Logger.d(TAG, "GET TO: " + url.toString());
-            getConnection = (HttpURLConnection) url.openConnection();
-            Logger.d(TAG, requestST.substring(requestST.lastIndexOf("/")+1));
-            getConnection.connect();
-            Logger.d(TAG, "" + getConnection.getResponseCode());
-            Logger.d(TAG, "" + getConnection.getHeaderFields());
-            String cookie = getConnection.getHeaderField("Set-Cookie");
-            Logger.d(TAG, "End sending GET");
-
-            //url = new URL("https://mysaildev.oakland.edu/uPortal/Login");
-            url = new URL(getConnection.getHeaderField("Location"));
-            Logger.d(TAG, "GET TO: " + url.toString());
-            getConnection = (HttpURLConnection) url.openConnection();
-            getConnection.setRequestProperty("Cookie", cookie);
-            getConnection.connect();
-            Logger.d(TAG, "" + getConnection.getHeaderFields());
-            Logger.d(TAG, "End sending GET");
-
-            url = new URL(getConnection.getHeaderField("Location"));
-            Logger.d(TAG, "GET TO: " + url.toString());
-            getConnection = (HttpURLConnection) url.openConnection();
-            getConnection.setRequestProperty("Cookie", cookie);
-            getConnection.connect();
-            Logger.d(TAG, "" + getConnection.getHeaderFields());
-            Logger.d(TAG, "End sending GET");
-
-            url = new URL(getConnection.getHeaderField("Location"));
-            Logger.d(TAG, "GET TO: " + url.toString());
-            getConnection = (HttpURLConnection) url.openConnection();
-            getConnection.setRequestProperty("Cookie", cookie);
-            getConnection.connect();
-            Logger.d(TAG, "" + getConnection.getHeaderFields());
-            Logger.d(TAG, "End sending GET");
-
-            url = new URL(getConnection.getHeaderField("Location"));
-            Logger.d(TAG, "GET TO: " + url.toString());
-            getConnection = (HttpURLConnection) url.openConnection();
-            getConnection.setRequestProperty("Cookie", cookie);
-            getConnection.connect();
-            Logger.d(TAG, "" + getConnection.getHeaderFields());
-            String portletcookie = getConnection.getHeaderField("Set-Cookie");
-            Logger.d(TAG, "End sending GET");
+            getConnection = postConnection;
+            for(int i=0; i<2; i++) {
+                //url = new URL("https://mysaildev.oakland.edu/uPortal/Login");
+                url = new URL(getConnection.getHeaderField("Location"));
+                Logger.d(TAG, "GET TO: " + url.toString());
+                getConnection = (HttpURLConnection) url.openConnection();
+                getConnection.setRequestProperty("Cookie", cookieHeader);
+                getConnection.connect();
+                Logger.d(TAG, "" + getConnection.getHeaderFields());
+                Logger.d(TAG, "End sending GET");
+            }
 
             url = new URL("https://mysaildev.oakland.edu/uPortal/layout.json");
             Logger.d(TAG, "GET TO: " + url.toString());
             getConnection = (HttpURLConnection) url.openConnection();
-            getConnection.setRequestProperty("Cookie", cookie+", "+portletcookie);
+            getConnection.setRequestProperty("Cookie", cookieHeader);
             getConnection.connect();
             Logger.d(TAG, "" + getConnection.getHeaderFields());
-            in = new BufferedReader(new InputStreamReader(getConnection.getInputStream()));
-            String line;
+            BufferedReader in = new BufferedReader(new InputStreamReader(getConnection.getInputStream()));
             while((line = in.readLine()) != null){
                 Logger.d(TAG, line);
             }
             Logger.d(TAG, "End sending GET");
 
-            Logger.d(TAG, cookie+";"+portletcookie);
-//
 //            url = new URL(getConnection.getHeaderField("Location").split(";")[0]);
 //            //url = new URL("https://mysaildev.oakland.edu/uPortal/");
 //            Logger.d(TAG, "GET TO: " + url.toString());
