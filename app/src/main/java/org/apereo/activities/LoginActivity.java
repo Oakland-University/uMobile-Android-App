@@ -51,9 +51,11 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -63,6 +65,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by schneis on 8/28/14.
@@ -198,48 +201,24 @@ public class LoginActivity extends BaseActivity {
         String cookieHeader = null;
         String portletHeader = null;
 
-        // region GET
-        try {
-            url = new URL("https://castest.oakland.edu/cas/login?service=https://mysaildev.oakland.edu/uPortal/Login");
-            HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
-            reader = new BufferedReader(new InputStreamReader(getConnection.getInputStream()));
-            String line;
-            while((line = reader.readLine()) != null){
-                if(line.contains("<input type=\"hidden\" name=\"lt\" value=")) {
-                    lt = line.substring(41, line.lastIndexOf("\""));
-                }
-                if(line.contains("<input type=\"hidden\" name=\"execution\" value=\"")) {
-                    execution = line.substring(48, line.lastIndexOf("\""));
-                }
-                //Logger.d("======", line);
-            }
-
-            cookieHeader = getConnection.getHeaderField("Set-Cookie");
-            Logger.d("========", cookieHeader);
-            Logger.d("========", "" + getConnection.getResponseCode());
-            Logger.d("========", lt);
-            Logger.d("========", execution);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        // endregion
+        HttpURLConnection getConnection = null;
 
         // region POST
-        String js = cookieHeader.split("=")[0].toLowerCase() + "=" + cookieHeader.split("=")[1].split(";")[0];
-        String postPath = "https://castest.oakland.edu/cas/login;"+js+"?service=https://mysaildev.oakland.edu/uPortal/Login";
+        String postPath = "https://castest.oakland.edu/cas/v1/tickets";
         URL postUrl;
-        HttpURLConnection postConnection;
+        HttpURLConnection postConnection = null;
+        Map<String, List<String>> headers = null;
         try {
+            //POSTS to CAS USER&PASSWORD
+            //Auth success and TGT Created
+            Logger.d(TAG, "POSTING TO: " + postPath);
             postUrl = new URL(postPath);
             postConnection = (HttpURLConnection) postUrl.openConnection();
+            postConnection.setInstanceFollowRedirects(true);
+            HttpURLConnection.setFollowRedirects(true);
             List<NameValuePair> postData = new ArrayList<NameValuePair>(6);
             postData.add(new BasicNameValuePair("username", username));
             postData.add(new BasicNameValuePair("password", password));
-            postData.add(new BasicNameValuePair("lt", lt));
-            postData.add(new BasicNameValuePair("execution", execution));
-            postData.add(new BasicNameValuePair("_eventId", "submit"));
-            postData.add(new BasicNameValuePair("submit", "Sign+In"));
-
             postConnection.setDoOutput(true);
             postConnection.setChunkedStreamingMode(0);
             OutputStream os = new BufferedOutputStream(postConnection.getOutputStream());
@@ -249,31 +228,192 @@ public class LoginActivity extends BaseActivity {
             writer.close();
             os.close();
             postConnection.connect();
-            Logger.d(TAG, "sending POST");
             Logger.d(TAG, "" + postConnection.getResponseCode());
+            Logger.d(TAG, "" + postConnection.getHeaderFields());
+            Logger.d(TAG, "End sending POST");
+
+            //Service Ticket Created
+            String requestST = postConnection.getHeaderField("Location");
+            requestST = requestST.replace("http", "https");
+            Logger.d(TAG, "POSTING TO: " + requestST);
+            Logger.d(TAG, requestST);
+            URL postST = new URL(requestST);
+            HttpURLConnection postConnection2 = (HttpURLConnection) postST.openConnection();
+            //postConnection2.setInstanceFollowRedirects(true);
+            List<NameValuePair> postData2 = new ArrayList<NameValuePair>(6);
+            postData2.add(new BasicNameValuePair("service", "https://mysaildev.oakland.edu/uPortal/Login"));
+            postConnection2.setDoOutput(true);
+            postConnection2.setChunkedStreamingMode(0);
+            OutputStream os2 = new BufferedOutputStream(postConnection2.getOutputStream());
+            BufferedWriter writer2 = new BufferedWriter(new OutputStreamWriter(os2, "UTF-8"));
+            writer2.write(getQuery(postData2));
+            writer2.flush();
+            writer2.close();
+            os2.close();
+            postConnection2.connect();
+            Logger.d(TAG, "" + postConnection2.getResponseCode());
+            Logger.d(TAG, "" + postConnection2.getHeaderFields());
+            BufferedReader in = new BufferedReader(new InputStreamReader(postConnection2.getInputStream()));
+            String serviceTicket;
+            serviceTicket = in.readLine();
+            Logger.d(TAG, "ST = " + serviceTicket);
+            Logger.d(TAG, "End sending POST");
+
+            //Proxy Granting Ticket and Service ticket validated
+            url = new URL("https://mysaildev.oakland.edu/uPortal/Login?ticket="+serviceTicket);
+            Logger.d(TAG, "GET TO: " + url.toString());
+            getConnection = (HttpURLConnection) url.openConnection();
+            Logger.d(TAG, requestST.substring(requestST.lastIndexOf("/")+1));
+            getConnection.connect();
+            Logger.d(TAG, "" + getConnection.getResponseCode());
+            Logger.d(TAG, "" + getConnection.getHeaderFields());
+            String cookie = getConnection.getHeaderField("Set-Cookie");
+            Logger.d(TAG, "End sending GET");
+
+            //url = new URL("https://mysaildev.oakland.edu/uPortal/Login");
+            url = new URL(getConnection.getHeaderField("Location"));
+            Logger.d(TAG, "GET TO: " + url.toString());
+            getConnection = (HttpURLConnection) url.openConnection();
+            getConnection.setRequestProperty("Cookie", cookie);
+            getConnection.connect();
+            Logger.d(TAG, "" + getConnection.getHeaderFields());
+            Logger.d(TAG, "End sending GET");
+
+            url = new URL(getConnection.getHeaderField("Location"));
+            Logger.d(TAG, "GET TO: " + url.toString());
+            getConnection = (HttpURLConnection) url.openConnection();
+            getConnection.setRequestProperty("Cookie", cookie);
+            getConnection.connect();
+            Logger.d(TAG, "" + getConnection.getHeaderFields());
+            Logger.d(TAG, "End sending GET");
+
+            url = new URL(getConnection.getHeaderField("Location"));
+            Logger.d(TAG, "GET TO: " + url.toString());
+            getConnection = (HttpURLConnection) url.openConnection();
+            getConnection.setRequestProperty("Cookie", cookie);
+            getConnection.connect();
+            Logger.d(TAG, "" + getConnection.getHeaderFields());
+            Logger.d(TAG, "End sending GET");
+
+            url = new URL(getConnection.getHeaderField("Location"));
+            Logger.d(TAG, "GET TO: " + url.toString());
+            getConnection = (HttpURLConnection) url.openConnection();
+            getConnection.setRequestProperty("Cookie", cookie);
+            getConnection.connect();
+            Logger.d(TAG, "" + getConnection.getHeaderFields());
+            String portletcookie = getConnection.getHeaderField("Set-Cookie");
+            Logger.d(TAG, "End sending GET");
+
+            url = new URL("https://mysaildev.oakland.edu/uPortal/layout.json");
+            Logger.d(TAG, "GET TO: " + url.toString());
+            getConnection = (HttpURLConnection) url.openConnection();
+            getConnection.setRequestProperty("Cookie", cookie+", "+portletcookie);
+            getConnection.connect();
+            Logger.d(TAG, "" + getConnection.getHeaderFields());
+            in = new BufferedReader(new InputStreamReader(getConnection.getInputStream()));
+            String line;
+            while((line = in.readLine()) != null){
+                Logger.d(TAG, line);
+            }
+            Logger.d(TAG, "End sending GET");
+
+            Logger.d(TAG, cookie+";"+portletcookie);
+//
+//            url = new URL(getConnection.getHeaderField("Location").split(";")[0]);
+//            //url = new URL("https://mysaildev.oakland.edu/uPortal/");
+//            Logger.d(TAG, "GET TO: " + url.toString());
+//            getConnection = (HttpURLConnection) url.openConnection();
+//            getConnection.setRequestProperty("Set-Cookie", cook);
+//            getConnection.connect();
+//            Logger.d(TAG, "" + getConnection.getHeaderFields());
+//            in = new BufferedReader(new InputStreamReader(getConnection.getInputStream()));
+//            while((line = in.readLine()) != null){
+//                Logger.d(TAG, line);
+//            }
+//            Logger.d(TAG, "End sending GET");
+//            if(code==302) {
+//                headers = postConnection.getHeaderFields();
+//                postConnection.disconnect();
+//                postUrl = new URL(headers.get("Location").get(0));
+//                postConnection = (HttpURLConnection) postUrl.openConnection();
+//                for (Map.Entry<String, List<String>> entry : headers.entrySet())  {
+//                    for (String s : entry.getValue()) {
+//                        if (entry.getKey() != null && s != null)
+//                            if(entry.getKey().contains("Location")) {
+//                                continue;
+//                            }else {
+//                                postConnection.setRequestProperty(entry.getKey(), s);
+//                            }
+//                    }
+//                }
+//                postConnection.connect();
+//                Logger.d(TAG, "" + postConnection.getResponseCode());
+//                Logger.d(TAG, "" + postConnection.getHeaderFields());
+//
+//                headers = postConnection.getHeaderFields();
+//                postConnection.disconnect();
+//                postUrl = new URL(headers.get("Location").get(0));
+//                postConnection = (HttpURLConnection) postUrl.openConnection();
+//                for (Map.Entry<String, List<String>> entry : headers.entrySet())  {
+//                    for (String s : entry.getValue()) {
+//                        if (entry.getKey() != null && s != null)
+//                            if(entry.getKey().contains("Location")) {
+//                                continue;
+//                            }else {
+//                                postConnection.setRequestProperty(entry.getKey(), s);
+//                            }
+//                    }
+//                }
+//                postConnection.connect();
+//                Logger.d(TAG, "" + postConnection.getResponseCode());
+//                Logger.d(TAG, "" + postConnection.getHeaderFields());
+//                Logger.d(TAG, "" + postConnection.getResponseMessage());
+//            }
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            postConnection.disconnect();
         }
         // endregion
 
         // region GET to verify authentication
-        try {
-            Logger.d(TAG, "sending auth GET");
-            url = new URL("https://mysaildev.oakland.edu/uPortal/");
-            HttpURLConnection getConnection = null;
-            try {
-                getConnection = (HttpURLConnection) url.openConnection();
-                Logger.d(TAG, "" + getConnection.getHeaderFields());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+//        Logger.d(TAG, "sending auth GET");
+//        try {
+//            url = new URL("https://mysaildev.oakland.edu/uPortal/");
+//            getConnection = (HttpURLConnection) url.openConnection();
+//            for (Map.Entry<String, List<String>> entry : headers.entrySet())  {
+//                for (String s : entry.getValue()) {
+//                    if (entry.getKey() != null && s != null)
+//                        if(entry.getKey().contains("Set-Cookie")) {
+//                            getConnection.setRequestProperty(entry.getKey(), s);
+//                        }
+//                }
+//            }
+//            getConnection.connect();
+//            Logger.d(TAG, "" + getConnection.getHeaderFields());
+//            BufferedReader in = new BufferedReader(new InputStreamReader(getConnection.getInputStream()));
+//            String line;
+//            while((line = in.readLine()) != null){
+//                Logger.d(TAG, line);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            getConnection.disconnect();
+//        }
         // endregion
     }
+
+    public String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {
+        Reader reader = null;
+        reader = new InputStreamReader(stream, "UTF-8");
+        char[] buffer = new char[len];
+        reader.read(buffer);
+        return new String(buffer);
+    }
+
 
     // http://stackoverflow.com/a/13486223/2546659
     private String getQuery(List<NameValuePair> params) throws UnsupportedEncodingException {
