@@ -6,15 +6,19 @@ import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
 import org.androidannotations.annotations.rest.RestService;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apereo.App;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 
 /**
@@ -57,31 +61,40 @@ public class RestApi {
         return powerClient;
     }
 
-
     @Background
     public void getMainFeed(UmobileRestCallback<String> callback) {
         callbackHandler.onBegin(callback);
-        HttpURLConnection getConnection = null;
+        HttpClient client = new DefaultHttpClient();
+        HttpGet httpGet = new HttpGet("https://mysail.oakland.edu/uPortal/layout.json");
+        httpGet.setHeader("Cookie", App.getCookie());
         try {
             powerClient.getMainFeed();
-            getConnection = (HttpURLConnection) new URL("https://mysail.oakland.edu/uPortal/layout.json").openConnection();
-            getConnection.setRequestProperty("Cookie", App.getCookie());
-            String response = getResponse(getConnection);
+            String response = getResponse(client, httpGet);
             callbackHandler.onSuccess(callback, response);
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (Exception e) {
+            callbackHandler.onError(callback, e, "getMainFeed");
+        } finally {
+            callbackHandler.onFinish(callback);
         }
     }
 
-    private String getResponse(HttpURLConnection connection) throws Exception {
+    private String getResponse(HttpClient client, HttpGet httpGet) throws Exception {
         StringBuilder builder = new StringBuilder();
-        connection.connect();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            builder.append(line);
+        HttpResponse response = client.execute(httpGet);
+        StatusLine statusLine = response.getStatusLine();
+        int statusCode = statusLine.getStatusCode();
+        if (statusCode == 200) {
+            HttpEntity entity = response.getEntity();
+            InputStream content = entity.getContent();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line);
+            }
+        } else {
+            throw new Exception("Not a 200 status code");
         }
+
         return builder.toString();
     }
 

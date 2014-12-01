@@ -180,6 +180,7 @@ public class LoginActivity extends BaseActivity {
 
     @Background
     public void doget() {
+        showSpinner();
 
         URL url;
         BufferedReader reader;
@@ -373,7 +374,12 @@ public class LoginActivity extends BaseActivity {
                 Layout layout = g.fromJson(response, Layout.class);
                 layoutManager.setLayout(layout);
 
+                if (rememberMe.isChecked()) {
+                    checkAccount(false);
+                }
+
                 App.setIsAuth(true);
+                dismissSpinner();
 
                 HomePage_
                         .intent(LoginActivity.this)
