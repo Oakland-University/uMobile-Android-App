@@ -35,46 +35,20 @@ public class CasClient {
     private static final String TAG = CasClient.class.getName();
 
     private String cookie;
-    private HttpURLConnection postConnection, postConnection2;
+    private HttpURLConnection postConnection, postConnection2; // to be closed outside their methods
 
     private Resources resources;
 
     @Background
-    public void authenticate(String username, String password, Context context, UmobileRestCallback<String> callback) {
-        resources = context.getResources();
+    public void authenticate(String username, String password, Context context,
+                             UmobileRestCallback<String> callback) {
 
+        resources = context.getResources();
 
         try {
             List<NameValuePair> postData = getAndParsePostData(username, password);
-            String serviceTicketLocation = sendPostForServiceTicket(postData);
-
-            Logger.d(TAG, serviceTicketLocation);
-            serviceTicketLocation = serviceTicketLocation.replace("http", "https");
-            Logger.d(TAG, "POSTING TO: " + serviceTicketLocation);
-            Logger.d(TAG, serviceTicketLocation);
-            URL postST = new URL(serviceTicketLocation);
-            postConnection2 = (HttpURLConnection) postST.openConnection();
-            postConnection2.setInstanceFollowRedirects(true);
-            postConnection2.setRequestProperty("Cookie", cookie);
-            List<NameValuePair> postData2 = new ArrayList<NameValuePair>(6);
-            postData2.add(new BasicNameValuePair("service",
-                    resources.getString(R.string.login_service)));
-            postConnection2.setDoOutput(true);
-            postConnection2.setChunkedStreamingMode(0);
-            OutputStream os2 = new BufferedOutputStream(postConnection2.getOutputStream());
-            BufferedWriter writer2 = new BufferedWriter(new OutputStreamWriter(os2, "UTF-8"));
-            writer2.write(getQuery(postData2));
-            writer2.flush();
-            writer2.close();
-            os2.close();
-            postConnection2.connect();
-            Logger.d(TAG, "" + postConnection2.getHeaderFields());
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(postConnection2.getInputStream()));
-            String serviceTicket;
-            serviceTicket = in.readLine();
-            Logger.d(TAG, "ST = " + serviceTicket);
-            Logger.d(TAG, "End sending POST");
+            String location = sendPostForServiceTicketLocation(postData);
+            String serviceTicket = sendPostForServiceTicket(location);
 
             // Proxy Granting Ticket and Service ticket validated
             URL url = new URL(resources.getString(R.string.login_service) + "?ticket=" + serviceTicket);
@@ -132,7 +106,9 @@ public class CasClient {
         return postData;
     }
 
-    private String sendPostForServiceTicket(List<NameValuePair> postData) throws IOException {
+    private String sendPostForServiceTicketLocation(List<NameValuePair> postData)
+            throws IOException {
+
         String postPath = resources.getString(R.string.ticket_url);
         Logger.d(TAG, "POSTING TO: " + postPath);
         URL postUrl = new URL(postPath);
@@ -154,11 +130,42 @@ public class CasClient {
 
         // Service ticket created.
         String serviceTicketLocation = postConnection.getHeaderField("Location");
+        serviceTicketLocation = serviceTicketLocation.replace("http", "https");
 
         String tgt = serviceTicketLocation.split("tickets/")[1];
         App.setTgt(tgt);
 
         return serviceTicketLocation;
+    }
+
+    private String sendPostForServiceTicket(String location) throws IOException {
+        Logger.d(TAG, "POSTING TO: " + location);
+        Logger.d(TAG, location);
+        URL postST = new URL(location);
+        postConnection2 = (HttpURLConnection) postST.openConnection();
+        postConnection2.setInstanceFollowRedirects(true);
+        postConnection2.setRequestProperty("Cookie", cookie);
+        List<NameValuePair> postData = new ArrayList<NameValuePair>(6);
+        postData.add(new BasicNameValuePair("service",
+                resources.getString(R.string.login_service)));
+        postConnection2.setDoOutput(true);
+        postConnection2.setChunkedStreamingMode(0);
+        OutputStream os2 = new BufferedOutputStream(postConnection2.getOutputStream());
+        BufferedWriter writer2 = new BufferedWriter(new OutputStreamWriter(os2, "UTF-8"));
+        writer2.write(getQuery(postData));
+        writer2.flush();
+        writer2.close();
+        os2.close();
+        postConnection2.connect();
+        Logger.d(TAG, "" + postConnection2.getHeaderFields());
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(postConnection2.getInputStream()));
+        String serviceTicket;
+        serviceTicket = in.readLine();
+        Logger.d(TAG, "ST = " + serviceTicket);
+        Logger.d(TAG, "End sending POST");
+
+        return serviceTicket;
     }
 
     // http://stackoverflow.com/a/13486223/2546659
