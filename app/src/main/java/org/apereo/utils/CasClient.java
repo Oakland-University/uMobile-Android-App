@@ -97,7 +97,6 @@ public class CasClient {
             throws IOException {
 
         String postPath = resources.getString(R.string.ticket_url);
-        Logger.d(TAG, "POSTING TO: " + postPath);
         URL postUrl = new URL(postPath);
         postConnection = (HttpURLConnection) postUrl.openConnection();
         postConnection.setInstanceFollowRedirects(true);
@@ -112,8 +111,6 @@ public class CasClient {
         writer.close();
         os.close();
         postConnection.connect();
-        Logger.d(TAG, "" + postConnection.getHeaderFields());
-        Logger.d(TAG, "End sending POST");
 
         // Service ticket created.
         String serviceTicketLocation = postConnection.getHeaderField("Location");
@@ -126,8 +123,6 @@ public class CasClient {
     }
 
     private String sendPostForServiceTicket(String location) throws IOException {
-        Logger.d(TAG, "POSTING TO: " + location);
-        Logger.d(TAG, location);
         URL postST = new URL(location);
         postConnection2 = (HttpURLConnection) postST.openConnection();
         postConnection2.setInstanceFollowRedirects(true);
@@ -144,13 +139,10 @@ public class CasClient {
         writer2.close();
         os2.close();
         postConnection2.connect();
-        Logger.d(TAG, "" + postConnection2.getHeaderFields());
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(postConnection2.getInputStream()));
         String serviceTicket;
         serviceTicket = in.readLine();
-        Logger.d(TAG, "ST = " + serviceTicket);
-        Logger.d(TAG, "End sending POST");
 
         return serviceTicket;
     }
@@ -158,15 +150,12 @@ public class CasClient {
     private void validateServiceTicket(String serviceTicket) throws IOException {
         // Proxy Granting Ticket and Service ticket validated
         URL url = new URL(resources.getString(R.string.login_service) + "?ticket=" + serviceTicket);
-        Logger.d(TAG, "GET TO: " + url.toString());
         HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
         getConnection.setRequestProperty("Cookie", cookie);
         getConnection.connect();
-        Logger.d(TAG, "" + getConnection.getHeaderFields());
-        Logger.d(TAG, "End sending GET");
     }
 
-    // http://stackoverflow.com/a/13486223/2546659
+    // URL encoding. (http://stackoverflow.com/a/13486223/2546659)
     private String getQuery(List<NameValuePair> params) throws UnsupportedEncodingException {
         StringBuilder result = new StringBuilder();
 
