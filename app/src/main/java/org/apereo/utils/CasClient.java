@@ -169,14 +169,14 @@ public class CasClient {
     // http://stackoverflow.com/a/13486223/2546659
     private String getQuery(List<NameValuePair> params) throws UnsupportedEncodingException {
         StringBuilder result = new StringBuilder();
-        boolean first = true;
 
-        for (NameValuePair pair : params)
-        {
-            if (first)
+        boolean first = true;
+        for (NameValuePair pair : params) {
+            if (first) {
                 first = false;
-            else
+            } else {
                 result.append("&");
+            }
 
             result.append(URLEncoder.encode(pair.getName(), "UTF-8"));
             result.append("=");
