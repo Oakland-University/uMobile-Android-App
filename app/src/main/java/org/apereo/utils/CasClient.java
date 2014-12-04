@@ -1,10 +1,14 @@
 package org.apereo.utils;
 
+import android.content.Context;
+import android.content.res.Resources;
+
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.EBean;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.apereo.App;
+import org.apereo.R;
 import org.apereo.services.UmobileRestCallback;
 
 import java.io.BufferedOutputStream;
@@ -31,22 +35,23 @@ public class CasClient {
     private static final String TAG = CasClient.class.getName();
 
     @Background
-    public void authenticate(String username, String password, UmobileRestCallback<String> callback) {
+    public void authenticate(String username, String password, Context context, UmobileRestCallback<String> callback) {
+        Resources resources = context.getResources();
+
         URL url;
         BufferedReader reader;
         String lt = null;
         String execution = null;
         String cookie = null;
-        String portletHeader = null;
 
         HttpURLConnection getConnection = null;
         HttpURLConnection postConnection = null;
-        String postPath = "https://cas.oakland.edu/cas/v1/tickets";
+        String postPath = resources.getString(R.string.ticket_url);
         URL postUrl;
 
         try {
             // Auth success and TGT Created
-            url = new URL("https://cas.oakland.edu/cas/login?service=https://mysail.oakland.edu/uPortal/Login");
+            url = new URL(resources.getString(R.string.login_url));
             getConnection = (HttpURLConnection) url.openConnection();
             reader = new BufferedReader(new InputStreamReader(getConnection.getInputStream()));
             String line;
@@ -97,7 +102,8 @@ public class CasClient {
             postConnection2.setInstanceFollowRedirects(true);
             postConnection2.setRequestProperty("Cookie", cookie);
             List<NameValuePair> postData2 = new ArrayList<NameValuePair>(6);
-            postData2.add(new BasicNameValuePair("service", "https://mysail.oakland.edu/uPortal/Login"));
+            postData2.add(new BasicNameValuePair("service",
+                    resources.getString(R.string.login_service)));
             postConnection2.setDoOutput(true);
             postConnection2.setChunkedStreamingMode(0);
             OutputStream os2 = new BufferedOutputStream(postConnection2.getOutputStream());
@@ -108,14 +114,15 @@ public class CasClient {
             os2.close();
             postConnection2.connect();
             Logger.d(TAG, "" + postConnection2.getHeaderFields());
-            BufferedReader in = new BufferedReader(new InputStreamReader(postConnection2.getInputStream()));
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(postConnection2.getInputStream()));
             String serviceTicket;
             serviceTicket = in.readLine();
             Logger.d(TAG, "ST = " + serviceTicket);
             Logger.d(TAG, "End sending POST");
 
             // Proxy Granting Ticket and Service ticket validated
-            url = new URL("https://mysail.oakland.edu/uPortal/Login?ticket="+serviceTicket);
+            url = new URL(resources.getString(R.string.login_service) + "?ticket=" + serviceTicket);
             Logger.d(TAG, "GET TO: " + url.toString());
             getConnection = (HttpURLConnection) url.openConnection();
             getConnection.setRequestProperty("Cookie", cookie);

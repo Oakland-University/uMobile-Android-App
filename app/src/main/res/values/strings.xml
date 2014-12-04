@@ -25,7 +25,9 @@
     <string name="home_page">https://mysail.oakland.edu/uPortal/normal/render.uP</string>
     <string name="root_url">https://mysail.oakland.edu</string>
     <string name="login_url">https://cas.oakland.edu/cas/login?service=https://mysail.oakland.edu/uPortal/Login</string>
+    <string name="login_service">https://mysail.oakland.edu/uPortal/Login</string>
     <string name="logout_url">https://cas.oakland.edu/cas/logout</string>
+    <string name="ticket_url">https://cas.oakland.edu/cas/v1/tickets</string>
     <string name="forgot_password_url">https://netid.oakland.edu/profile/</string>
     <string name="base_url">https://mysail.oakland.edu</string>
 

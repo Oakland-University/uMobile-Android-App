@@ -161,7 +161,7 @@ public class LoginActivity extends BaseActivity {
     protected void logIn() {
         getActionBar().setDisplayHomeAsUpEnabled(false);
         showSpinner();
-        casClient.authenticate(username, password, new UmobileRestCallback<String>() {
+        casClient.authenticate(username, password, this, new UmobileRestCallback<String>() {
             @Override
             public void onSuccess(String response) {
                 getFeed();
