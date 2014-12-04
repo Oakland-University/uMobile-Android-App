@@ -49,29 +49,16 @@ public class CasClient {
             List<NameValuePair> postData = getAndParsePostData(username, password);
             String location = sendPostForServiceTicketLocation(postData);
             String serviceTicket = sendPostForServiceTicket(location);
-
-            // Proxy Granting Ticket and Service ticket validated
-            URL url = new URL(resources.getString(R.string.login_service) + "?ticket=" + serviceTicket);
-            Logger.d(TAG, "GET TO: " + url.toString());
-            HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
-            getConnection.setRequestProperty("Cookie", cookie);
-            getConnection.connect();
-            Logger.d(TAG, "" + getConnection.getHeaderFields());
-            Logger.d(TAG, "End sending GET");
+            validateServiceTicket(serviceTicket);
 
             callback.onSuccess(null);
-
         } catch (MalformedURLException e) {
             callback.onError(e, null);
         } catch (IOException e) {
             callback.onError(e, null);
         } finally {
-            if (postConnection != null) {
-                postConnection.disconnect();
-            }
-            if (postConnection2 != null) {
-                postConnection2.disconnect();
-            }
+            if (postConnection != null) { postConnection.disconnect(); }
+            if (postConnection2 != null) { postConnection2.disconnect(); }
         }
     }
 
@@ -166,6 +153,17 @@ public class CasClient {
         Logger.d(TAG, "End sending POST");
 
         return serviceTicket;
+    }
+
+    private void validateServiceTicket(String serviceTicket) throws IOException {
+        // Proxy Granting Ticket and Service ticket validated
+        URL url = new URL(resources.getString(R.string.login_service) + "?ticket=" + serviceTicket);
+        Logger.d(TAG, "GET TO: " + url.toString());
+        HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
+        getConnection.setRequestProperty("Cookie", cookie);
+        getConnection.connect();
+        Logger.d(TAG, "" + getConnection.getHeaderFields());
+        Logger.d(TAG, "End sending GET");
     }
 
     // http://stackoverflow.com/a/13486223/2546659
