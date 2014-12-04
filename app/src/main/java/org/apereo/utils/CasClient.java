@@ -46,34 +46,13 @@ public class CasClient {
 
         try {
             List<NameValuePair> postData = getAndParsePostData(username, password);
+            String serviceTicketLocation = sendPostForServiceTicket(postData);
 
-            String postPath = resources.getString(R.string.ticket_url);
-            Logger.d(TAG, "POSTING TO: " + postPath);
-            URL postUrl = new URL(postPath);
-            postConnection = (HttpURLConnection) postUrl.openConnection();
-            postConnection.setInstanceFollowRedirects(true);
-            postConnection.setRequestProperty("Cookie", cookie);
-            HttpURLConnection.setFollowRedirects(true);
-            postConnection.setDoOutput(true);
-            postConnection.setChunkedStreamingMode(0);
-            OutputStream os = new BufferedOutputStream(postConnection.getOutputStream());
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-            writer.write(getQuery(postData));
-            writer.flush();
-            writer.close();
-            os.close();
-            postConnection.connect();
-            Logger.d(TAG, "" + postConnection.getHeaderFields());
-            Logger.d(TAG, "End sending POST");
-
-            // Service Ticket Created
-            String requestST = postConnection.getHeaderField("Location");
-            Logger.d(TAG, requestST);
-            String tgt = requestST.split("tickets/")[1];
-            requestST = requestST.replace("http", "https");
-            Logger.d(TAG, "POSTING TO: " + requestST);
-            Logger.d(TAG, requestST);
-            URL postST = new URL(requestST);
+            Logger.d(TAG, serviceTicketLocation);
+            serviceTicketLocation = serviceTicketLocation.replace("http", "https");
+            Logger.d(TAG, "POSTING TO: " + serviceTicketLocation);
+            Logger.d(TAG, serviceTicketLocation);
+            URL postST = new URL(serviceTicketLocation);
             postConnection2 = (HttpURLConnection) postST.openConnection();
             postConnection2.setInstanceFollowRedirects(true);
             postConnection2.setRequestProperty("Cookie", cookie);
@@ -106,9 +85,6 @@ public class CasClient {
             Logger.d(TAG, "" + getConnection.getHeaderFields());
             Logger.d(TAG, "End sending GET");
 
-            App.setCookie(cookie);
-            App.setTgt(tgt);
-
             callback.onSuccess(null);
 
         } catch (MalformedURLException e) {
@@ -127,8 +103,6 @@ public class CasClient {
 
     private List<NameValuePair> getAndParsePostData(String username, String password)
             throws IOException {
-
-        // Auth success and TGT Created
         String lt = null;
         String execution = null;
 
@@ -144,8 +118,6 @@ public class CasClient {
                 execution = line.substring(48, line.lastIndexOf("\""));
             }
         }
-        cookie = getConnection.getHeaderField("Set-Cookie");
-
         List<NameValuePair> postData = new ArrayList<NameValuePair>(6);
         postData.add(new BasicNameValuePair("username", username));
         postData.add(new BasicNameValuePair("password", password));
@@ -154,7 +126,39 @@ public class CasClient {
         postData.add(new BasicNameValuePair("_eventId", "submit"));
         postData.add(new BasicNameValuePair("submit", "Sign In"));
 
+        cookie = getConnection.getHeaderField("Set-Cookie");
+        App.setCookie(cookie);
+
         return postData;
+    }
+
+    private String sendPostForServiceTicket(List<NameValuePair> postData) throws IOException {
+        String postPath = resources.getString(R.string.ticket_url);
+        Logger.d(TAG, "POSTING TO: " + postPath);
+        URL postUrl = new URL(postPath);
+        postConnection = (HttpURLConnection) postUrl.openConnection();
+        postConnection.setInstanceFollowRedirects(true);
+        postConnection.setRequestProperty("Cookie", cookie);
+        HttpURLConnection.setFollowRedirects(true);
+        postConnection.setDoOutput(true);
+        postConnection.setChunkedStreamingMode(0);
+        OutputStream os = new BufferedOutputStream(postConnection.getOutputStream());
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+        writer.write(getQuery(postData));
+        writer.flush();
+        writer.close();
+        os.close();
+        postConnection.connect();
+        Logger.d(TAG, "" + postConnection.getHeaderFields());
+        Logger.d(TAG, "End sending POST");
+
+        // Service ticket created.
+        String serviceTicketLocation = postConnection.getHeaderField("Location");
+
+        String tgt = serviceTicketLocation.split("tickets/")[1];
+        App.setTgt(tgt);
+
+        return serviceTicketLocation;
     }
 
     // http://stackoverflow.com/a/13486223/2546659
