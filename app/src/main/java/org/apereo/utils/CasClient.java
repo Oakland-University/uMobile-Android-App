@@ -46,10 +46,11 @@ public class CasClient {
         resources = context.getResources();
 
         try {
+            // Perform the CAS authentication dance.
             List<NameValuePair> postData = getAndParsePostData(username, password);
-            String location = sendPostForServiceTicketLocation(postData);
-            String serviceTicket = sendPostForServiceTicket(location);
-            validateServiceTicket(serviceTicket);
+            String stLocation = sendPostForServiceTicketLocation(postData);
+            String st = sendPostForServiceTicket(stLocation);
+            validateServiceTicket(st);
 
             callback.onSuccess(null);
         } catch (MalformedURLException e) {
@@ -148,14 +149,13 @@ public class CasClient {
     }
 
     private void validateServiceTicket(String serviceTicket) throws IOException {
-        // Proxy Granting Ticket and Service ticket validated
         URL url = new URL(resources.getString(R.string.login_service) + "?ticket=" + serviceTicket);
         HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
         getConnection.setRequestProperty("Cookie", cookie);
         getConnection.connect();
     }
 
-    // URL encoding. (http://stackoverflow.com/a/13486223/2546659)
+    // URL encoding helper method. (http://stackoverflow.com/a/13486223/2546659)
     private String getQuery(List<NameValuePair> params) throws UnsupportedEncodingException {
         StringBuilder result = new StringBuilder();
 
