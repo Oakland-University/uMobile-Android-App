@@ -34,50 +34,26 @@ public class CasClient {
 
     private static final String TAG = CasClient.class.getName();
 
+    private String cookie;
+    private HttpURLConnection postConnection, postConnection2;
+
+    private Resources resources;
+
     @Background
     public void authenticate(String username, String password, Context context, UmobileRestCallback<String> callback) {
-        Resources resources = context.getResources();
+        resources = context.getResources();
 
-        URL url;
-        BufferedReader reader;
-        String lt = null;
-        String execution = null;
-        String cookie = null;
-
-        HttpURLConnection getConnection = null;
-        HttpURLConnection postConnection = null;
-        String postPath = resources.getString(R.string.ticket_url);
-        URL postUrl;
 
         try {
-            // Auth success and TGT Created
-            url = new URL(resources.getString(R.string.login_url));
-            getConnection = (HttpURLConnection) url.openConnection();
-            reader = new BufferedReader(new InputStreamReader(getConnection.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.contains("<input type=\"hidden\" name=\"lt\" value=")) {
-                    lt = line.substring(41, line.lastIndexOf("\""));
-                }
-                if (line.contains("<input type=\"hidden\" name=\"execution\" value=\"")) {
-                    execution = line.substring(48, line.lastIndexOf("\""));
-                }
-            }
-            cookie = getConnection.getHeaderField("Set-Cookie");
+            List<NameValuePair> postData = getAndParsePostData(username, password);
 
+            String postPath = resources.getString(R.string.ticket_url);
             Logger.d(TAG, "POSTING TO: " + postPath);
-            postUrl = new URL(postPath);
+            URL postUrl = new URL(postPath);
             postConnection = (HttpURLConnection) postUrl.openConnection();
             postConnection.setInstanceFollowRedirects(true);
             postConnection.setRequestProperty("Cookie", cookie);
             HttpURLConnection.setFollowRedirects(true);
-            List<NameValuePair> postData = new ArrayList<NameValuePair>(6);
-            postData.add(new BasicNameValuePair("username", username));
-            postData.add(new BasicNameValuePair("password", password));
-            postData.add(new BasicNameValuePair("lt", lt));
-            postData.add(new BasicNameValuePair("execution", execution));
-            postData.add(new BasicNameValuePair("_eventId", "submit"));
-            postData.add(new BasicNameValuePair("submit", "Sign In"));
             postConnection.setDoOutput(true);
             postConnection.setChunkedStreamingMode(0);
             OutputStream os = new BufferedOutputStream(postConnection.getOutputStream());
@@ -98,7 +74,7 @@ public class CasClient {
             Logger.d(TAG, "POSTING TO: " + requestST);
             Logger.d(TAG, requestST);
             URL postST = new URL(requestST);
-            HttpURLConnection postConnection2 = (HttpURLConnection) postST.openConnection();
+            postConnection2 = (HttpURLConnection) postST.openConnection();
             postConnection2.setInstanceFollowRedirects(true);
             postConnection2.setRequestProperty("Cookie", cookie);
             List<NameValuePair> postData2 = new ArrayList<NameValuePair>(6);
@@ -122,9 +98,9 @@ public class CasClient {
             Logger.d(TAG, "End sending POST");
 
             // Proxy Granting Ticket and Service ticket validated
-            url = new URL(resources.getString(R.string.login_service) + "?ticket=" + serviceTicket);
+            URL url = new URL(resources.getString(R.string.login_service) + "?ticket=" + serviceTicket);
             Logger.d(TAG, "GET TO: " + url.toString());
-            getConnection = (HttpURLConnection) url.openConnection();
+            HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
             getConnection.setRequestProperty("Cookie", cookie);
             getConnection.connect();
             Logger.d(TAG, "" + getConnection.getHeaderFields());
@@ -140,9 +116,45 @@ public class CasClient {
         } catch (IOException e) {
             callback.onError(e, null);
         } finally {
-            if (postConnection != null)
+            if (postConnection != null) {
                 postConnection.disconnect();
+            }
+            if (postConnection2 != null) {
+                postConnection2.disconnect();
+            }
         }
+    }
+
+    private List<NameValuePair> getAndParsePostData(String username, String password)
+            throws IOException {
+
+        // Auth success and TGT Created
+        String lt = null;
+        String execution = null;
+
+        URL url = new URL(resources.getString(R.string.login_url));
+        HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(getConnection.getInputStream()));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.contains("<input type=\"hidden\" name=\"lt\" value=")) {
+                lt = line.substring(41, line.lastIndexOf("\""));
+            }
+            if (line.contains("<input type=\"hidden\" name=\"execution\" value=\"")) {
+                execution = line.substring(48, line.lastIndexOf("\""));
+            }
+        }
+        cookie = getConnection.getHeaderField("Set-Cookie");
+
+        List<NameValuePair> postData = new ArrayList<NameValuePair>(6);
+        postData.add(new BasicNameValuePair("username", username));
+        postData.add(new BasicNameValuePair("password", password));
+        postData.add(new BasicNameValuePair("lt", lt));
+        postData.add(new BasicNameValuePair("execution", execution));
+        postData.add(new BasicNameValuePair("_eventId", "submit"));
+        postData.add(new BasicNameValuePair("submit", "Sign In"));
+
+        return postData;
     }
 
     // http://stackoverflow.com/a/13486223/2546659
