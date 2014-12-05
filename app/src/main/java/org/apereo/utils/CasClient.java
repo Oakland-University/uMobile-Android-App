@@ -10,7 +10,6 @@ import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.apereo.App;
 import org.apereo.R;
 import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
