@@ -30,5 +30,10 @@
     <string name="ticket_url">https://cas.oakland.edu/cas/v1/tickets</string>
     <string name="forgot_password_url">https://netid.oakland.edu/profile/</string>
     <string name="base_url">https://mysail.oakland.edu</string>
+    <string name="layout_json_url">https://mysail.oakland.edu/uPortal/layout.json</string>
+
+    <!-- Cookie domains -->
+    <string name="uportal_domain">mysail.oakland.edu</string>
+    <string name="cas_domain">cas.oakland.edu</string>
 
 </resources>

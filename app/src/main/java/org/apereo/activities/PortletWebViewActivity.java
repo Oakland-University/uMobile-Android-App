@@ -82,19 +82,6 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     @AfterViews
     void initialize() {
-
-        CookieManager.getInstance().removeSessionCookie();
-
-        String cookie = App.getCookie();
-        String tgt = App.getTgt();
-
-        CookieSyncManager.getInstance().sync();
-
-        CookieManager.getInstance().setCookie(url, cookie);
-        CookieManager.getInstance().setCookie("cas.oakland.edu", "CASTGC=" + tgt);
-
-        CookieSyncManager.getInstance().sync();
-
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // set up the drawer's list view with items and click listener

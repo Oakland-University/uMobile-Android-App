@@ -14,10 +14,6 @@ public class App extends Application {
 
     private static boolean isAuth;
 
-    private static String cookie;
-
-    private static String tgt;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -41,22 +37,6 @@ public class App extends Application {
 
     public static String getRootUrl() {
         return getInstance().getResources().getString(R.string.root_url);
-    }
-
-    public static void setCookie(String cookie) {
-        App.cookie = cookie;
-    }
-
-    public static void setTgt(String tgt) {
-        App.tgt = tgt;
-    }
-
-    public static String getCookie() {
-        return App.cookie;
-    }
-
-    public static String getTgt() {
-        return App.tgt;
     }
 
     public static boolean isDebugMode() {

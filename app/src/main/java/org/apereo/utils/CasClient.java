@@ -2,13 +2,17 @@ package org.apereo.utils;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 
 import org.androidannotations.annotations.Background;
+import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.apereo.App;
 import org.apereo.R;
+import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
 
 import java.io.BufferedOutputStream;
@@ -32,9 +36,12 @@ import java.util.List;
 @EBean
 public class CasClient {
 
+    @Bean
+    RestApi restApi;
+
     private static final String TAG = CasClient.class.getName();
 
-    private String cookie;
+    private String cookie, tgt;
     private HttpURLConnection postConnection, postConnection2; // to be closed outside their methods
 
     private Resources resources;
@@ -51,6 +58,7 @@ public class CasClient {
             String stLocation = sendPostForServiceTicketLocation(postData);
             String st = sendPostForServiceTicket(stLocation);
             validateServiceTicket(st);
+            syncCookies();
 
             callback.onSuccess(null);
         } catch (MalformedURLException e) {
@@ -89,7 +97,7 @@ public class CasClient {
         postData.add(new BasicNameValuePair("submit", "Sign In"));
 
         cookie = getConnection.getHeaderField("Set-Cookie");
-        App.setCookie(cookie);
+        restApi.setCookie(cookie);
 
         return postData;
     }
@@ -117,8 +125,7 @@ public class CasClient {
         String serviceTicketLocation = postConnection.getHeaderField("Location");
         serviceTicketLocation = serviceTicketLocation.replace("http", "https");
 
-        String tgt = serviceTicketLocation.split("tickets/")[1];
-        App.setTgt(tgt);
+        tgt = serviceTicketLocation.split("tickets/")[1];
 
         return serviceTicketLocation;
     }
@@ -153,6 +160,17 @@ public class CasClient {
         HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
         getConnection.setRequestProperty("Cookie", cookie);
         getConnection.connect();
+    }
+
+    private void syncCookies() {
+        CookieManager.getInstance().removeSessionCookie();
+
+        String uportalDomain = resources.getString(R.string.uportal_domain);
+        String casDomain = resources.getString(R.string.cas_domain);
+        CookieManager.getInstance().setCookie(uportalDomain, cookie);
+        CookieManager.getInstance().setCookie(casDomain, "CASTGC=" + tgt);
+
+        CookieSyncManager.getInstance().sync();
     }
 
     // URL encoding helper method. (http://stackoverflow.com/a/13486223/2546659)

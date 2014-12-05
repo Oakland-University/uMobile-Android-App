@@ -9,6 +9,8 @@ import android.text.method.PasswordTransformationMethod;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -195,8 +197,13 @@ public class LoginActivity extends BaseActivity {
                 // logged out successfully
                 restApi.setCookie("");
                 removeAccount();
+                CookieManager.getInstance().removeSessionCookie();
+                CookieManager.getInstance().removeAllCookie();
+                CookieSyncManager.getInstance().sync();
                 App.setIsAuth(false);
+
                 getFeed();
+
                 super.onPageFinished(view, url);
             }
 
@@ -216,7 +223,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     private void getFeed() {
-        restApi.getMainFeed(new UmobileRestCallback<String>() {
+        restApi.getMainFeed(this, new UmobileRestCallback<String>() {
 
             @Override
             public void onBegin() {
