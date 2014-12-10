@@ -15,6 +15,7 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apereo.App;
 import org.apereo.R;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
@@ -69,9 +70,15 @@ public class RestApi {
     @Background
     public void getMainFeed(Context context, UmobileRestCallback<String> callback) {
         callbackHandler.onBegin(callback);
+
         HttpClient client = new DefaultHttpClient();
         HttpGet httpGet = new HttpGet(context.getResources().getString(R.string.layout_json_url));
-        httpGet.setHeader("Cookie", cookie);
+
+        if (!cookie.isEmpty()) {
+            App.setIsAuth(true);
+            httpGet.setHeader("Cookie", cookie);
+        }
+
         try {
             powerClient.getMainFeed();
             String response = getResponse(client, httpGet);
