@@ -2,6 +2,7 @@ package org.apereo.activities;
 
 import android.app.Activity;
 import android.os.Bundle;
+
 import org.androidannotations.annotations.EActivity;
 
 /**

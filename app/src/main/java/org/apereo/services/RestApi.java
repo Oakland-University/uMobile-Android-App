@@ -1,10 +1,13 @@
 package org.apereo.services;
 
 
+import android.content.Context;
+
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
+import org.androidannotations.annotations.EBean.Scope;
 import org.androidannotations.annotations.rest.RestService;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -12,7 +15,7 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apereo.utils.Logger;
+import org.apereo.R;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
@@ -25,7 +28,7 @@ import java.io.InputStreamReader;
  * @author macklinu
  * @author berberk
  */
-@EBean
+@EBean(scope = Scope.Singleton)
 public class RestApi {
     private static final String TAG = "RestApi";
 
@@ -36,6 +39,8 @@ public class RestApi {
     @Bean
     RestCallbackHandler callbackHandler;
 
+    // Since CookieSyncManager synchronizes cookies asynchronously, this field
+    // is necessary in order to retrieve the JSESSIONID cookie immediately.
     private String cookie = "";
 
     @AfterInject
@@ -61,12 +66,11 @@ public class RestApi {
         return powerClient;
     }
 
-
     @Background
-    public void getMainFeed(UmobileRestCallback<String> callback) {
+    public void getMainFeed(Context context, UmobileRestCallback<String> callback) {
         callbackHandler.onBegin(callback);
         HttpClient client = new DefaultHttpClient();
-        HttpGet httpGet = new HttpGet("https://mysail.oakland.edu/uPortal/layout.json");
+        HttpGet httpGet = new HttpGet(context.getResources().getString(R.string.layout_json_url));
         httpGet.setHeader("Cookie", cookie);
         try {
             powerClient.getMainFeed();

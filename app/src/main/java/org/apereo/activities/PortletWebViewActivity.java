@@ -10,13 +10,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.CookieSyncManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.ListView;
-
-import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
@@ -76,16 +75,12 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
         // enable ActionBar app icon to behave as action to toggle nav drawer
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
+
+        CookieSyncManager.createInstance(this);
     }
 
     @AfterViews
     void initialize() {
-
-        FadingActionBarHelper helper = new FadingActionBarHelper()
-                .actionBarBackground(R.color.theme_accent)
-                .headerLayout(R.layout.header)
-                .contentLayout(R.layout.portlet_webview);
-        helper.initActionBar(this);
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // set up the drawer's list view with items and click listener
@@ -131,6 +126,8 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
             mDrawerLayout.closeDrawer(mDrawerList);
+        } else if (webView.canGoBack()) {
+            webView.goBack();
         } else {
             super.onBackPressed();
         }

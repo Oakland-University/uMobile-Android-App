@@ -14,7 +14,6 @@ public class App extends Application {
 
     private static boolean isAuth;
 
-
     @Override
     public void onCreate() {
         super.onCreate();

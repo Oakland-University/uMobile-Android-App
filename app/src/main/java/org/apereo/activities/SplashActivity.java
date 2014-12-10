@@ -6,8 +6,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -59,7 +57,7 @@ public class SplashActivity extends BaseActivity {
                     .password(accountManager.getPassword(account))
                     .start();
         } else {
-            restApi.getMainFeed(new UmobileRestCallback<String>() {
+            restApi.getMainFeed(this, new UmobileRestCallback<String>() {
 
                 @Override
                 public void onBegin() {
