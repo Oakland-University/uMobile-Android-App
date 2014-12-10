@@ -24,7 +24,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.HomePage_" >
+            android:name=".activities.HomePage_"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name=".activities.PortletWebViewActivity_"
