@@ -249,7 +249,6 @@ public class LoginActivity extends BaseActivity {
                     checkAccount(false);
                 }
 
-                App.setIsAuth(true);
                 dismissSpinner();
 
                 HomePage_
