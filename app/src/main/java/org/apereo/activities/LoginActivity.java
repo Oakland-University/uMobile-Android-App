@@ -86,7 +86,6 @@ public class LoginActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActionBar().setDisplayHomeAsUpEnabled(true);
-
     }
 
     @AfterViews
@@ -170,8 +169,13 @@ public class LoginActivity extends BaseActivity {
             }
 
             @Override
-            public void onError(Exception e, String responseBody) {
-                Logger.e(TAG, e.getMessage(), e);
+            public void onError(final Exception e, final String responseBody) {
+                dismissSpinner();
+                if (e != null && !e.getMessage().isEmpty()) {
+                    showLongToast(e.getMessage());
+                } else if (!responseBody.isEmpty()) {
+                    showLongToast(responseBody);
+                }
             }
         });
     }
