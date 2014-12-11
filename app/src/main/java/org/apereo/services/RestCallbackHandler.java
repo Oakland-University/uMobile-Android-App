@@ -19,8 +19,8 @@ public class RestCallbackHandler {
 
     public <T> void onError(UmobileRestCallback<T> callback, Exception e, String msg) {
         if (callback != null) {
-            String responseBody = null;
-            callback.onError(e, responseBody);
+            T response = null;
+            callback.onError(e, response);
         }
     }
 

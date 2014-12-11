@@ -7,7 +7,7 @@ public interface RestCallback<T> {
     }
 
     public interface OnError<T> extends RestCallback<T> {
-        public void onError(Exception e, String responseBody);
+        public void onError(Exception e, T response);
     }
 
     public interface OnFinish<T> extends RestCallback<T> {
