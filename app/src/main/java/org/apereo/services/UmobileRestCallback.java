@@ -3,7 +3,7 @@ package org.apereo.services;
 public abstract class UmobileRestCallback<T> implements RestCallback.OnBegin<T>, RestCallback.OnSuccess<T>, RestCallback.OnError<T>, RestCallback.OnFinish<T> {
 
     @Override
-    public abstract void onError(Exception e, String responseBody);
+    public abstract void onError(Exception e, T response);
 
     @Override
     public abstract void onSuccess(T response);
