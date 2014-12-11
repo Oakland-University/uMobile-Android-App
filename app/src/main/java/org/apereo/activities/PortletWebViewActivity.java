@@ -27,7 +27,6 @@ import org.apereo.R;
 import org.apereo.adapters.FolderListAdapter;
 import org.apereo.models.Folder;
 import org.apereo.utils.LayoutManager;
-import org.apereo.utils.Logger;
 
 import java.util.List;
 
@@ -118,7 +117,6 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
         //TODO find better way to do this
         url = url.replaceAll("/f/welcome","");
 
-        Logger.d(TAG, url);
         webView.loadUrl(url);
     }
 

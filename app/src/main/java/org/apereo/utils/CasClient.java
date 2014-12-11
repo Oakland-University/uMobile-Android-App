@@ -55,11 +55,15 @@ public class CasClient {
             // Perform the CAS authentication dance.
             List<NameValuePair> postData = getAndParsePostData(username, password);
             String stLocation = sendPostForServiceTicketLocation(postData);
-            String st = sendPostForServiceTicket(stLocation);
-            validateServiceTicket(st);
-            syncCookies();
+            if (stLocation != null) {
+                String st = sendPostForServiceTicket(stLocation);
+                validateServiceTicket(st);
+                syncCookies();
 
-            callback.onSuccess(null);
+                callback.onSuccess(null);
+            } else {
+                callback.onError(null, "Username or password is incorrect.");
+            }
         } catch (MalformedURLException e) {
             callback.onError(e, null);
         } catch (IOException e) {
@@ -122,9 +126,11 @@ public class CasClient {
 
         // Service ticket created.
         String serviceTicketLocation = postConnection.getHeaderField("Location");
-        serviceTicketLocation = serviceTicketLocation.replace("http", "https");
 
-        tgt = serviceTicketLocation.split("tickets/")[1];
+        if (serviceTicketLocation != null) {
+            serviceTicketLocation = serviceTicketLocation.replace("http", "https");
+            tgt = serviceTicketLocation.split("tickets/")[1];
+        }
 
         return serviceTicketLocation;
     }
