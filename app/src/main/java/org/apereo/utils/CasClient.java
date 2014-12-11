@@ -1,5 +1,6 @@
 package org.apereo.utils;
 
+import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.webkit.CookieManager;
@@ -10,6 +11,7 @@ import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.apereo.App;
 import org.apereo.R;
 import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
@@ -43,13 +45,14 @@ public class CasClient {
     private String cookie, tgt;
     private HttpURLConnection postConnection, postConnection2; // to be closed outside their methods
 
-    private Resources resources;
+    private final Resources resources = App.getInstance().getResources();
+    private final String ACCOUNT_TYPE = resources.getString(R.string.account_type);
+
+    AccountManager accountManager;
 
     @Background
     public void authenticate(String username, String password, Context context,
                              UmobileRestCallback<String> callback) {
-
-        resources = context.getResources();
 
         try {
             // Perform the CAS authentication dance.
@@ -71,6 +74,55 @@ public class CasClient {
         } finally {
             if (postConnection != null) { postConnection.disconnect(); }
             if (postConnection2 != null) { postConnection2.disconnect(); }
+        }
+    }
+
+    @Background
+    public void logOut(UmobileRestCallback<Integer> callback) {
+        Integer responseCode = sendLogOutRequest();
+        if (responseCode == 200) {
+            restApi.setCookie("");
+            removeAccount();
+            clearCookies();
+            App.setIsAuth(false);
+
+            callback.onSuccess(responseCode);
+        } else {
+            callback.onError(null, responseCode);
+        }
+    }
+
+    private void clearCookies() {
+        CookieManager.getInstance().removeSessionCookie();
+        CookieManager.getInstance().removeAllCookie();
+        CookieSyncManager.getInstance().sync();
+    }
+
+    private void removeAccount() {
+        // Lazily instantiate the account manager if necessary.
+        if (accountManager == null) {
+            accountManager =
+                    (AccountManager) App.getInstance().getSystemService(Context.ACCOUNT_SERVICE);
+        }
+
+        // Remove the account.
+        if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
+            accountManager.removeAccount(
+                    accountManager.getAccountsByType(ACCOUNT_TYPE)[0], null, null);
+        }
+    }
+
+    // Attempts to log out and returns the HTTP response code encountered; 200 if OK.
+    private int sendLogOutRequest() {
+        try {
+            URL url = new URL(App.getInstance().getResources().getString(R.string.logout_url));
+            HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
+            getConnection.setRequestProperty("Cookie", cookie);
+            getConnection.connect();
+            return getConnection.getResponseCode();
+        } catch (IOException e) {
+            Logger.e(TAG, "error sending logout request", e);
+            return UmobileRestCallback.UNKNOWN_ERROR_CODE;
         }
     }
 
