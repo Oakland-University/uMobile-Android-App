@@ -2,6 +2,7 @@ package org.apereo.activities;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -15,6 +16,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
@@ -25,11 +29,16 @@ import org.apereo.App;
 import org.apereo.R;
 import org.apereo.adapters.FolderListAdapter;
 import org.apereo.constants.AppConstants;
+import org.apereo.deserializers.LayoutDeserializer;
 import org.apereo.fragments.HomePageListFragment;
 import org.apereo.interfaces.IActionListener;
 import org.apereo.models.Folder;
+import org.apereo.models.Layout;
 import org.apereo.services.RestApi;
+import org.apereo.services.UmobileRestCallback;
+import org.apereo.utils.CasClient;
 import org.apereo.utils.LayoutManager;
+import org.apereo.utils.Logger;
 
 import java.util.List;
 
@@ -48,6 +57,9 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
     RestApi restApi;
 
     @Bean
+    CasClient casClient;
+
+    @Bean
     LayoutManager layoutManager;
 
     @Extra
@@ -55,24 +67,21 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
 
     private ActionBarDrawerToggle mDrawerToggle;
 
-    private CharSequence mDrawerTitle;
     private CharSequence mTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mTitle = mDrawerTitle = getTitle();
+        mTitle = getTitle();
 
         // enable ActionBar app icon to behave as action to toggle nav drawer
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
-
     }
 
     @AfterViews
     void init() {
-
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // set up the drawer's list view with items and click listener
@@ -125,15 +134,33 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.login_action_bar_button:
-                login(getResources().getString(R.string.login_url));
+                logIn(getResources().getString(R.string.login_url));
                 break;
             case R.id.logout_action_bar_button:
-                login(getResources().getString(R.string.logout_url));
+                showSpinner();
+
+                casClient.logOut(new UmobileRestCallback<Integer>() {
+                    @Override
+                    public void onError(Exception e, Integer response) {
+                        Logger.e(TAG, "error logging out (received status code " + response + ")", e);
+                    }
+
+                    @Override
+                    public void onSuccess(Integer response) {
+                        getFeed();
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        dismissSpinner();
+                    }
+                });
+
                 break;
         }
 
         return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-
     }
 
     @Override
@@ -145,7 +172,7 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
         }
     }
 
-    private void login(String url) {
+    private void logIn(String url) {
         LoginActivity_
                 .intent(this)
                 .url(url)
@@ -197,6 +224,61 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
     public void setTitle(CharSequence title) {
         mTitle = title;
         getActionBar().setTitle(mTitle);
+    }
+
+    private void getFeed() {
+        restApi.getMainFeed(this, new UmobileRestCallback<String>() {
+            @Override
+            public void onError(Exception e, String responseBody) {
+                Logger.e(TAG, responseBody, e);
+            }
+
+            @Override
+            public void onSuccess(String response) {
+                Gson g = new GsonBuilder()
+                        .registerTypeAdapter(Layout.class, new LayoutDeserializer())
+                        .create();
+
+                Layout layout = g.fromJson(response, Layout.class);
+                layoutManager.setLayout(layout);
+
+                reconfigureViews();
+            }
+
+            @Override
+            public void onFinish() {
+                super.onFinish();
+                dismissSpinner();
+            }
+        });
+    }
+
+    // Resets the activity's UI based on the current JSON layout, for example after logging out.
+    @UiThread
+    protected void reconfigureViews() {
+        // Update the portlet list.
+        Bundle args = new Bundle();
+        args.putInt(AppConstants.POSITION, 0);
+
+        Fragment fragment = HomePageListFragment.getFragment(this);
+        fragment.setArguments(args);
+
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
+        ft.replace(R.id.content_frame, fragment);
+        ft.commit();
+
+        // Update the login/logout button.
+        invalidateOptionsMenu();
+
+        // Update the side drawer contents.
+        List<Folder> folders = layoutManager.getLayout().getFolders();
+        mDrawerList.setAdapter(new FolderListAdapter(this,
+                R.layout.drawer_list_item, folders, ePosition));
+
+        // Switch back to the first tab.
+        selectItem(0);
     }
 
     @UiThread

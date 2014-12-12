@@ -74,6 +74,7 @@ public class CasClient {
         } finally {
             if (postConnection != null) { postConnection.disconnect(); }
             if (postConnection2 != null) { postConnection2.disconnect(); }
+            callback.onFinish();
         }
     }
 
@@ -90,6 +91,7 @@ public class CasClient {
         } else {
             callback.onError(null, responseCode);
         }
+        callback.onFinish();
     }
 
     private void clearCookies() {

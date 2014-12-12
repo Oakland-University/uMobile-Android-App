@@ -86,26 +86,6 @@ public class LoginActivity extends BaseActivity {
 
     @AfterViews
     void initialize() {
-        if (url.equalsIgnoreCase(getString(R.string.logout_url))) {
-            container.setVisibility(View.GONE);
-            showSpinner();
-
-            casClient.logOut(new UmobileRestCallback<Integer>() {
-                @Override
-                public void onError(Exception e, Integer response) {
-                    dismissSpinner();
-                    showShortToast(getString(R.string.error_logging_out));
-                }
-
-                @Override
-                public void onSuccess(Integer response) {
-                    dismissSpinner();
-                    getFeed();
-                }
-            });
-            return;
-        }
-
         passwordView.setTypeface(Typeface.DEFAULT);
         passwordView.setTransformationMethod(new PasswordTransformationMethod());
 
@@ -194,14 +174,8 @@ public class LoginActivity extends BaseActivity {
         restApi.getMainFeed(this, new UmobileRestCallback<String>() {
 
             @Override
-            public void onBegin() {
-                super.onBegin();
-            }
-
-            @Override
             public void onError(Exception e, String responseBody) {
                 Logger.e(TAG, responseBody, e);
-
             }
 
             @Override
@@ -216,8 +190,6 @@ public class LoginActivity extends BaseActivity {
                 if (rememberMe.isChecked()) {
                     checkAccount(false);
                 }
-
-                dismissSpinner();
 
                 HomePage_
                         .intent(LoginActivity.this)
