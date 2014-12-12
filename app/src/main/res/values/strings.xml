@@ -13,7 +13,8 @@
     <string name="error_title">Error</string>
     <string name="form_error">Please enter a username and password.</string>
     <string name="information_error">Please check your username and password.</string>
-    <string name="error_logging_out">Unable to log out. Please try again later.</string>
+    <string name="error_logging_in">There was a problem logging in. Please try again.</string>
+    <string name="error_logging_out">There was a problem logging out. Please try again.</string>
     <string name="error_network_connection">There was a connection problem. Please check your network settings and try again.</string>
     <string name="remember_me">Remember me</string>
     <string name="umobile_header">uMobile Header</string>

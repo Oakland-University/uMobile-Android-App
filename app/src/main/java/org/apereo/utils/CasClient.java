@@ -65,7 +65,7 @@ public class CasClient {
 
                 callback.onSuccess(null);
             } else {
-                callback.onError(null, "Username or password is incorrect.");
+                callback.onError(null, resources.getString(R.string.error_logging_in));
             }
         } catch (MalformedURLException e) {
             callback.onError(e, null);

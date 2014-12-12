@@ -150,8 +150,8 @@ public class LoginActivity extends BaseActivity {
     }
 
     protected void logIn() {
-        getActionBar().setDisplayHomeAsUpEnabled(false);
         showSpinner();
+
         casClient.authenticate(username, password, this, new UmobileRestCallback<String>() {
             @Override
             public void onSuccess(String response) {
@@ -161,9 +161,7 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onError(final Exception e, final String responseBody) {
                 dismissSpinner();
-                if (e != null && !e.getMessage().isEmpty()) {
-                    showLongToast(e.getMessage());
-                } else if (!responseBody.isEmpty()) {
+                if (!responseBody.isEmpty()) {
                     showLongToast(responseBody);
                 }
             }
