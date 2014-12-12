@@ -59,9 +59,9 @@ public class SplashActivity extends BaseActivity {
                     .password(accountManager.getPassword(account))
                     .start();
         } else {
+            CookieSyncManager.createInstance(this);
             CookieManager.getInstance().removeAllCookie();
             CookieManager.getInstance().removeSessionCookie();
-            CookieSyncManager.createInstance(this);
             CookieSyncManager.getInstance().sync();
 
             restApi.getMainFeed(this, new UmobileRestCallback<String>() {
