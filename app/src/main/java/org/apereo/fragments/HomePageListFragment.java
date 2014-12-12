@@ -92,7 +92,8 @@ public class HomePageListFragment extends ListFragment {
 
 
     }
-    public void update(int resourseId) {
+
+    public void update() {
         portlets = layoutManager.getLayout().getFolders().get(position).getPortlets();
         adapter.notifyDataSetChanged();
     }

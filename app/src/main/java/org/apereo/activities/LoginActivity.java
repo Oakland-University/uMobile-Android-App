@@ -9,11 +9,7 @@ import android.text.method.PasswordTransformationMethod;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -90,12 +86,6 @@ public class LoginActivity extends BaseActivity {
 
     @AfterViews
     void initialize() {
-        if (url.equalsIgnoreCase(getString(R.string.logout_url))) {
-            container.setVisibility(View.GONE);
-            openBackgroundLogoutWebView();
-            return;
-        }
-
         passwordView.setTypeface(Typeface.DEFAULT);
         passwordView.setTransformationMethod(new PasswordTransformationMethod());
 
@@ -180,64 +170,12 @@ public class LoginActivity extends BaseActivity {
         });
     }
 
-    protected void openBackgroundLogoutWebView() {
-        showSpinner();
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webView.setWebViewClient(new WebViewClient() {
-            private boolean receivedError = false;
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                if (receivedError) {
-                    showLongToast(getString(R.string.error_network_connection));
-                    super.onPageFinished(view, url);
-                    finish();
-
-                    dismissSpinner();
-                    return;
-                }
-
-                // logged out successfully
-                restApi.setCookie("");
-                removeAccount();
-                CookieManager.getInstance().removeSessionCookie();
-                CookieManager.getInstance().removeAllCookie();
-                CookieSyncManager.getInstance().sync();
-                App.setIsAuth(false);
-
-                getFeed();
-
-                super.onPageFinished(view, url);
-            }
-
-            @Override
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                receivedError = true;
-            }
-        });
-        webView.loadUrl(url);
-    }
-
-    private void removeAccount() {
-        if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
-            accountManager.removeAccount(
-                    accountManager.getAccountsByType(ACCOUNT_TYPE)[0], null, null);
-        }
-    }
-
     private void getFeed() {
         restApi.getMainFeed(this, new UmobileRestCallback<String>() {
 
             @Override
-            public void onBegin() {
-                super.onBegin();
-            }
-
-            @Override
             public void onError(Exception e, String responseBody) {
                 Logger.e(TAG, responseBody, e);
-
             }
 
             @Override
@@ -252,8 +190,6 @@ public class LoginActivity extends BaseActivity {
                 if (rememberMe.isChecked()) {
                     checkAccount(false);
                 }
-
-                dismissSpinner();
 
                 HomePage_
                         .intent(LoginActivity.this)
