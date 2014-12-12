@@ -65,6 +65,9 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
     @Extra
     int ePosition;
 
+    @Extra
+    boolean shouldLogOut;
+
     private ActionBarDrawerToggle mDrawerToggle;
 
     private CharSequence mTitle;
@@ -74,6 +77,11 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
         super.onCreate(savedInstanceState);
 
         mTitle = getTitle();
+
+        if (shouldLogOut) {
+            shouldLogOut = false;
+            logOut();
+        }
 
         // enable ActionBar app icon to behave as action to toggle nav drawer
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -137,26 +145,7 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
                 logIn(getResources().getString(R.string.login_url));
                 break;
             case R.id.logout_action_bar_button:
-                showSpinner();
-
-                casClient.logOut(new UmobileRestCallback<Integer>() {
-                    @Override
-                    public void onError(Exception e, Integer response) {
-                        Logger.e(TAG, "error logging out (received status code " + response + ")", e);
-                    }
-
-                    @Override
-                    public void onSuccess(Integer response) {
-                        getFeed();
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        super.onFinish();
-                        dismissSpinner();
-                    }
-                });
-
+                logOut();
                 break;
         }
 
@@ -177,6 +166,28 @@ public class HomePage extends BaseActivity implements IActionListener, AdapterVi
                 .intent(this)
                 .url(url)
                 .start();
+    }
+
+    private void logOut() {
+        showSpinner();
+
+        casClient.logOut(new UmobileRestCallback<Integer>() {
+            @Override
+            public void onError(Exception e, Integer response) {
+                Logger.e(TAG, "error logging out (received status code " + response + ")", e);
+            }
+
+            @Override
+            public void onSuccess(Integer response) {
+                getFeed();
+            }
+
+            @Override
+            public void onFinish() {
+                super.onFinish();
+                dismissSpinner();
+            }
+        });
     }
 
     @Override

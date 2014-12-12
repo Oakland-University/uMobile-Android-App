@@ -187,10 +187,10 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.login_action_bar_button:
-                login(getResources().getString(R.string.login_url));
+                logIn(getResources().getString(R.string.login_url));
                 break;
             case R.id.logout_action_bar_button:
-                login(getResources().getString(R.string.logout_url));
+                logOut();
                 break;
         }
 
@@ -198,10 +198,17 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     }
 
-    private void login(String url) {
+    private void logIn(String url) {
         LoginActivity_
                 .intent(this)
                 .url(url)
+                .start();
+    }
+
+    private void logOut() {
+        HomePage_
+                .intent(PortletWebViewActivity.this)
+                .shouldLogOut(true)
                 .start();
     }
 
