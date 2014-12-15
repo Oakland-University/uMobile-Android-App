@@ -37,7 +37,7 @@ import org.apereo.utils.Logger;
 /**
  * Created by schneis on 8/28/14.
  */
-@EActivity(R.layout.login_page)
+@EActivity(R.layout.activity_login_page)
 public class LoginActivity extends BaseActivity {
 
     private static final String TAG = LoginActivity.class.getName();
@@ -191,7 +191,7 @@ public class LoginActivity extends BaseActivity {
                     checkAccount(false);
                 }
 
-                HomePage_
+                HomePageActivity_
                         .intent(LoginActivity.this)
                         .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         .start();
