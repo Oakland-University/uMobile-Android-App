@@ -3,6 +3,6 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:state_activated="true"
-        android:drawable="@drawable/gradient_background">
+        android:drawable="@color/theme_accent" >
     </item>
 </selector>
