@@ -161,8 +161,10 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onError(final Exception e, final String responseBody) {
                 dismissSpinner();
-                if (!responseBody.isEmpty()) {
+                if (responseBody != null && !responseBody.isEmpty()) {
                     showLongToast(responseBody);
+                } else {
+                    showLongToast(getString(R.string.error_logging_in));
                 }
             }
         });
