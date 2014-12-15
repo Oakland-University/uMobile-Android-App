@@ -78,12 +78,11 @@ public class HomePageListFragment extends ListFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        int actionBarBg = R.drawable.ab_background;
 
         mArguments = getArguments();
 
         mFadingHelper = new FadingActionBarHelper()
-                .actionBarBackground(actionBarBg)
+                .actionBarBackground(R.color.theme_light)
                 .headerLayout(R.layout.header)
                 .contentLayout(R.layout.activity_listview);
         mFadingHelper.initActionBar(activity);

@@ -6,7 +6,6 @@
 
     <style name="MyActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
         <item name="android:background">#FFF</item>
-        <item name="android:titleTextStyle">@style/MyActionBar.Text</item>
     </style>
 
     <style name="AppTheme.TranslucentActionBar">
