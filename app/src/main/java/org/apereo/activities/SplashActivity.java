@@ -86,7 +86,7 @@ public class SplashActivity extends BaseActivity {
 
                     Layout layout = g.fromJson(response, Layout.class);
                     layoutManager.setLayout(layout);
-                    HomePage_
+                    HomePageActivity_
                             .intent(SplashActivity.this)
                             .start();
                     finish();

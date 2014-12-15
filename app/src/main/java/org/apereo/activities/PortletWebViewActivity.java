@@ -38,7 +38,7 @@ import java.util.List;
 /**
  * Created by schneis on 8/26/14.
  */
-@EActivity(R.layout.portlet_webview)
+@EActivity(R.layout.activity_portlet_webview)
 public class PortletWebViewActivity extends BaseActivity implements AdapterView.OnItemClickListener{
 
     private static final String TAG = PortletWebViewActivity.class.getName();
@@ -206,7 +206,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     }
 
     private void logOut() {
-        HomePage_
+        HomePageActivity_
                 .intent(PortletWebViewActivity.this)
                 .shouldLogOut(true)
                 .start();
@@ -234,7 +234,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     }
 
     private void selectItem(int position) {
-        HomePage_
+        HomePageActivity_
                 .intent(this)
                 .ePosition(position)
                 .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)

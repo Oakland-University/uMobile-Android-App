@@ -43,9 +43,9 @@ import org.apereo.utils.Logger;
 import java.util.List;
 
 @EActivity(R.layout.activity_home_page)
-public class HomePage extends BaseActivity implements IActionListener, AdapterView.OnItemClickListener {
+public class HomePageActivity extends BaseActivity implements IActionListener, AdapterView.OnItemClickListener {
 
-    private final String TAG = HomePage.class.getName();
+    private final String TAG = HomePageActivity.class.getName();
 
     @ViewById(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
