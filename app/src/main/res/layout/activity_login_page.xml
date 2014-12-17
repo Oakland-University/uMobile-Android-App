@@ -49,7 +49,8 @@
                 android:layout_below="@+id/image_view"
                 android:singleLine="true"
                 android:imeOptions="flagNoExtractUi"
-                android:padding="10dp" />
+                android:padding="10dp"
+                android:layout_marginTop="10dp" />
 
             <EditText
                 android:layout_width="match_parent"
@@ -64,7 +65,9 @@
                 android:textColor="#FFFFFF"
                 android:textColorHint="#C0CFE7"
                 android:singleLine="true"
-                android:padding="10dp" />
+                android:padding="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp" />
 
             <Button
                 android:layout_width="match_parent"
