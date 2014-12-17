@@ -2,9 +2,9 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/login_layout"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_background"
+    android:background="@color/theme_dark"
     android:padding="35dp"
     android:clickable="true" >
 
@@ -39,6 +39,7 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/custom_edit_text"
                 android:inputType="textWebEditText"
                 android:ems="10"
                 android:id="@+id/login_username"
@@ -47,13 +48,13 @@
                 android:textColorHint="#C0CFE7"
                 android:layout_below="@+id/image_view"
                 android:singleLine="true"
-                android:background="#00000000"
                 android:imeOptions="flagNoExtractUi"
                 android:padding="10dp" />
 
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/custom_edit_text"
                 android:inputType="textPassword"
                 android:password="true"
                 android:ems="10"
@@ -63,7 +64,6 @@
                 android:textColor="#FFFFFF"
                 android:textColorHint="#C0CFE7"
                 android:singleLine="true"
-                android:background="#00000000"
                 android:padding="10dp" />
 
             <Button
@@ -75,7 +75,8 @@
                 android:textColor="#FFFFFF"
                 android:clickable="true"
                 android:background="@drawable/custom_button"
-                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:layout_below="@+id/login_password"
                 android:layout_centerHorizontal="true" />
 
@@ -96,7 +97,7 @@
                 android:text="@string/forgot_password"
                 android:id="@+id/forgot_password"
                 android:textColor="#C0CFE7"
-                android:padding="10dp"
+                android:paddingTop="10dp"
                 android:layout_below="@+id/rememberMe"
                 android:layout_alignParentRight="true" />
 
