@@ -164,6 +164,7 @@ public class SplashActivity extends BaseActivity {
                         .create();
                 break;
             case AppConstants.UPGRADE_REQUIRED:
+                builder.setTitle(R.string.upgrade_required_title);
                 builder.setMessage(getString(R.string.upgrade_required));
                 dialog = builder.setCancelable(false)
                         .setPositiveButton(R.string.dialog_play_store, new DialogInterface.OnClickListener() {
@@ -184,6 +185,7 @@ public class SplashActivity extends BaseActivity {
                         .create();
                 break;
             case AppConstants.UPGRADE_RECOMMENDED:
+                builder.setTitle(R.string.upgrade_recommended_title);
                 builder.setMessage(getString(R.string.upgrade_recommended));
                 dialog = builder.setCancelable(false)
                         .setPositiveButton(R.string.dialog_play_store, new DialogInterface.OnClickListener() {

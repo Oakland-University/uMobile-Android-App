@@ -11,6 +11,8 @@
     <string name="login">Log In</string>
     <string name="logout">Log Out</string>
     <string name="error_title">Error</string>
+    <string name="upgrade_recommended_title">Upgrade recommended</string>
+    <string name="upgrade_required_title">Upgrade required</string>
     <string name="dialog_play_store">Play Store</string>
     <string name="dialog_close">Close app</string>
     <string name="dialog_later">Maybe later</string>
