@@ -46,7 +46,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 21
         versionCode 1
-        versionName "1.0"
+        versionName "2.0"
     }
     packagingOptions {
         exclude 'META-INF/notice.txt'
