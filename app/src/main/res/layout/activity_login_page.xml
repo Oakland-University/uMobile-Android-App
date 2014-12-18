@@ -30,7 +30,7 @@
                 android:layout_width="300dp"
                 android:layout_height="93dp"
                 android:id="@+id/image_view"
-                android:background="@drawable/umobile_header"
+                android:background="@drawable/umobile_header_light"
                 android:contentDescription="@string/umobile_header"
                 android:layout_centerHorizontal="true"
                 android:layout_marginBottom="50dp" />
