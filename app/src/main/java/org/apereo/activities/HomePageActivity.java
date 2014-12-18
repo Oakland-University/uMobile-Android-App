@@ -175,17 +175,13 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
             @Override
             public void onError(Exception e, Integer response) {
                 Logger.e(TAG, "error logging out (received status code " + response + ")", e);
+                dismissSpinner();
+                showLongToast(getString(R.string.error_logging_out));
             }
 
             @Override
             public void onSuccess(Integer response) {
                 getFeed();
-            }
-
-            @Override
-            public void onFinish() {
-                super.onFinish();
-                dismissSpinner();
             }
         });
     }
@@ -242,6 +238,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
             @Override
             public void onError(Exception e, String responseBody) {
                 Logger.e(TAG, responseBody, e);
+                dismissSpinner();
             }
 
             @Override
@@ -254,12 +251,6 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
                 layoutManager.setLayout(layout);
 
                 reconfigureViews();
-            }
-
-            @Override
-            public void onFinish() {
-                super.onFinish();
-                dismissSpinner();
             }
         });
     }
@@ -290,6 +281,8 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
 
         // Switch back to the first tab.
         selectItem(0);
+
+        dismissSpinner();
     }
 
     @UiThread
