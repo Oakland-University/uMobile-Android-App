@@ -20,4 +20,8 @@ public interface RestInterface extends RestClientRootUrl, RestClientSupport, Res
     @Accept(MediaType.APPLICATION_JSON)
     String getMainFeed();
 
+    @Get("/umobile-global-config/android/{version}/config")
+    @Accept(MediaType.APPLICATION_JSON)
+    String getGlobalConfig(String version);
+
 }

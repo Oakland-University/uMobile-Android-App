@@ -2,6 +2,7 @@ package org.apereo.services;
 
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.Background;
@@ -17,6 +18,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apereo.App;
 import org.apereo.R;
+import org.apereo.utils.Logger;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
@@ -85,6 +87,37 @@ public class RestApi {
             callbackHandler.onSuccess(callback, response);
         } catch (Exception e) {
             callbackHandler.onError(callback, e, "getMainFeed");
+        } finally {
+            callbackHandler.onFinish(callback);
+        }
+    }
+
+    @Background
+    public void getGlobalConfig(Context context, UmobileRestCallback<String> callback) {
+        callbackHandler.onBegin(callback);
+
+        HttpClient client = new DefaultHttpClient();
+        String configUrl = context.getResources().getString(R.string.global_config_url);
+
+        // build global config url
+        String appVersion = "0";
+        try {
+            appVersion = App.getInstance()
+                    .getPackageManager()
+                    .getPackageInfo(App.getInstance().getPackageName(), 0).versionName;
+            configUrl += appVersion + "/config";
+        } catch (PackageManager.NameNotFoundException e) {
+            Logger.d(TAG, e.getMessage());
+        }
+
+        HttpGet httpGet = new HttpGet(configUrl);
+
+        try {
+            powerClient.getGlobalConfig(appVersion);
+            String response = getResponse(client, httpGet);
+            callbackHandler.onSuccess(callback, response);
+        } catch (Exception e) {
+            callbackHandler.onError(callback, e, "getGlobalConfig");
         } finally {
             callbackHandler.onFinish(callback);
         }

@@ -12,4 +12,7 @@ public class AppConstants {
 
     // int constants
     public static final int ERROR_GETTING_FEED = 0x01;
+    public static final int ERROR_GETTING_CONFIG = 0x02;
+    public static final int UPGRADE_REQUIRED = 0x03;
+    public static final int UPGRADE_RECOMMENDED = 0x04;
 }
