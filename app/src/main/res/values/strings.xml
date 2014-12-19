@@ -11,6 +11,14 @@
     <string name="login">Log In</string>
     <string name="logout">Log Out</string>
     <string name="error_title">Error</string>
+    <string name="upgrade_recommended_title">Upgrade recommended</string>
+    <string name="upgrade_required_title">Upgrade required</string>
+    <string name="dialog_play_store">Play Store</string>
+    <string name="dialog_close">Close app</string>
+    <string name="dialog_later">Maybe later</string>
+    <string name="config_unavailable">Unfortunately, an error has occurred. Please check your internet connection and try again or visit the website for more information.</string>
+    <string name="upgrade_recommended">The current version of this app is out of date. We strongly recommend upgrading. Would you like to do this now?</string>
+    <string name="upgrade_required">Unfortunately, the current version of this app is out of date and must be updated. Please visit the Play Store to download the new version.</string>
     <string name="form_error">Please enter a username and password.</string>
     <string name="information_error">Please check your username and password.</string>
     <string name="error_logging_in">There was a problem logging in. Please try again.</string>
@@ -33,6 +41,7 @@
     <string name="forgot_password_url">https://netid.oakland.edu/profile/</string>
     <string name="base_url">https://mysail.oakland.edu</string>
     <string name="layout_json_url">https://mysail.oakland.edu/uPortal/layout.json</string>
+    <string name="global_config_url">https://mysail.oakland.edu/umobile-global-config/android/</string>
 
     <!-- Cookie domains -->
     <string name="uportal_domain">mysail.oakland.edu</string>
