@@ -1,12 +1,16 @@
 package org.apereo.models;
 
+import java.util.ArrayList;
+
 public class Config {
     private boolean upgradeRecommended;
     private boolean upgradeRequired;
+    private ArrayList<String> disabledPortlets;
 
     public static class Builder {
         private boolean upgradeRecommended;
         private boolean upgradeRequired;
+        private ArrayList<String> disabledPortlets;
 
         public Builder setUpgradeRecommended(boolean upgradeRecommended) {
             this.upgradeRecommended = upgradeRecommended;
@@ -18,6 +22,11 @@ public class Config {
             return this;
         }
 
+        public Builder setDisabledPortlets(ArrayList<String> disabledPortlets) {
+            this.disabledPortlets = disabledPortlets;
+            return this;
+        }
+
         public Config build() {
             return new Config(this);
         }
@@ -26,6 +35,7 @@ public class Config {
     private Config(Builder builder) {
         upgradeRecommended = builder.upgradeRecommended;
         upgradeRequired = builder.upgradeRequired;
+        disabledPortlets = builder.disabledPortlets;
     }
 
     public boolean isUpgradeRecommended() {
@@ -36,5 +46,8 @@ public class Config {
         return upgradeRequired;
     }
 
+    public ArrayList<String> getDisabledPortlets() {
+        return disabledPortlets;
+    }
 
 }

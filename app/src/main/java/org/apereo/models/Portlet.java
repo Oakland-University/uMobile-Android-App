@@ -9,6 +9,7 @@ public class Portlet {
 
 
     String name;
+    String fName;
     String description;
     String url;
     String iconUrl;
@@ -16,6 +17,7 @@ public class Portlet {
 
     public static class Builder {
         private String name;
+        private String fName;
         private String description;
         private String url;
         private String iconUrl;
@@ -23,6 +25,11 @@ public class Portlet {
 
         public Builder setName(String name) {
             this.name = name;
+            return this;
+        }
+
+        public Builder setFName(String fName) {
+            this.fName = fName;
             return this;
         }
 
@@ -52,6 +59,7 @@ public class Portlet {
 
     private Portlet(Builder builder) {
         name = builder.name;
+        fName = builder.fName;
         description = builder.description;
         url = builder.url;
         iconUrl = builder.iconUrl;
@@ -60,6 +68,10 @@ public class Portlet {
 
     public String getName() {
         return name;
+    }
+
+    public String getFName() {
+        return fName;
     }
 
     public String getDescription() {

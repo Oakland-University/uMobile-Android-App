@@ -27,10 +27,13 @@ import org.androidannotations.annotations.ViewById;
 import org.apereo.App;
 import org.apereo.R;
 import org.apereo.deserializers.LayoutDeserializer;
+import org.apereo.models.Folder;
 import org.apereo.models.Layout;
+import org.apereo.models.Portlet;
 import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
 import org.apereo.utils.CasClient;
+import org.apereo.utils.ConfigManager;
 import org.apereo.utils.LayoutManager;
 import org.apereo.utils.Logger;
 
@@ -74,6 +77,9 @@ public class LoginActivity extends BaseActivity {
 
     @Bean
     LayoutManager layoutManager;
+
+    @Bean
+    ConfigManager configManager;
 
     AccountManager accountManager =
             (AccountManager) App.getInstance().getSystemService(ACCOUNT_SERVICE);
@@ -185,6 +191,19 @@ public class LoginActivity extends BaseActivity {
                         .create();
 
                 Layout layout = g.fromJson(response, Layout.class);
+
+                if (getResources().getBoolean(R.bool.shouldUseGlobalConfig)) {
+                    for (Folder folder : layout.getFolders()) {
+                        for (Portlet p : folder.getPortlets()) {
+                            for (String portletName : configManager.getConfig().getDisabledPortlets()) {
+                                if (p.getFName().equalsIgnoreCase(portletName)) {
+                                    folder.getPortlets().remove(p);
+                                }
+                            }
+                        }
+                    }
+                }
+
                 layoutManager.setLayout(layout);
 
                 if (rememberMe.isChecked()) {

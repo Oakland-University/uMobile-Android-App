@@ -23,7 +23,9 @@ import org.apereo.constants.AppConstants;
 import org.apereo.deserializers.ConfigDeserializer;
 import org.apereo.deserializers.LayoutDeserializer;
 import org.apereo.models.Config;
+import org.apereo.models.Folder;
 import org.apereo.models.Layout;
+import org.apereo.models.Portlet;
 import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
 import org.apereo.utils.ConfigManager;
@@ -80,6 +82,8 @@ public class SplashActivity extends BaseActivity {
                     } else if (config.isUpgradeRecommended()) {
                         showErrorDialog(AppConstants.UPGRADE_RECOMMENDED);
                     }
+
+                    getAccountFeed();
                 }
             });
         } else {
@@ -124,6 +128,19 @@ public class SplashActivity extends BaseActivity {
                             .create();
 
                     Layout layout = g.fromJson(response, Layout.class);
+
+                    if (getResources().getBoolean(R.bool.shouldUseGlobalConfig)) {
+                        for (Folder folder : layout.getFolders()) {
+                            for (Portlet p : folder.getPortlets()) {
+                                for (String portletName : configManager.getConfig().getDisabledPortlets()) {
+                                    if (p.getFName().equalsIgnoreCase(portletName)) {
+                                        folder.getPortlets().remove(p);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     layoutManager.setLayout(layout);
                     HomePageActivity_
                             .intent(SplashActivity.this)

@@ -73,6 +73,7 @@ public class LayoutDeserializer implements JsonDeserializer<Layout> {
                     JsonObject portlet = portletArray.get(j).getAsJsonObject();
                     Portlet p = new Portlet.Builder()
                             .setName(portlet.get("title").getAsString())
+                            .setFName(portlet.get("fname").getAsString())
                             .setDescription(portlet.get("description").getAsString())
                             .setIconUrl(portlet.has("iconUrl") ? portlet.get("iconUrl").getAsString() :
                                 App.getInstance().getResources().getString(R.string.use_drawable))
