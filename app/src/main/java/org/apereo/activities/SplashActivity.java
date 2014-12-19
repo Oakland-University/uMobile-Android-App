@@ -4,6 +4,7 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -81,9 +82,9 @@ public class SplashActivity extends BaseActivity {
                         showErrorDialog(AppConstants.UPGRADE_REQUIRED);
                     } else if (config.isUpgradeRecommended()) {
                         showErrorDialog(AppConstants.UPGRADE_RECOMMENDED);
+                    } else {
+                        getAccountFeed();
                     }
-
-                    getAccountFeed();
                 }
             });
         } else {
@@ -187,10 +188,15 @@ public class SplashActivity extends BaseActivity {
                         .setPositiveButton(R.string.dialog_play_store, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Intent intent = new Intent(Intent.ACTION_VIEW);
-                                intent.setData(Uri.parse("market://details?id="
-                                        + getApplicationContext().getPackageName()));
-                                startActivity(intent);
+                                try {
+                                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                                    intent.setData(Uri.parse("market://details?id="
+                                            + getApplicationContext().getPackageName()));
+                                    startActivity(intent);
+                                } catch (ActivityNotFoundException e) {
+                                    Logger.d(TAG, e.getMessage());
+                                    finish();
+                                }
                             }
                         })
                         .setNegativeButton(R.string.dialog_close, new DialogInterface.OnClickListener() {
@@ -208,10 +214,15 @@ public class SplashActivity extends BaseActivity {
                         .setPositiveButton(R.string.dialog_play_store, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Intent intent = new Intent(Intent.ACTION_VIEW);
-                                intent.setData(Uri.parse("market://details?id="
-                                        + getApplicationContext().getPackageName()));
-                                startActivity(intent);
+                                try {
+                                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                                    intent.setData(Uri.parse("market://details?id="
+                                            + getApplicationContext().getPackageName()));
+                                    startActivity(intent);
+                                } catch (ActivityNotFoundException e) {
+                                    Logger.d(TAG, e.getMessage());
+                                    finish();
+                                }
                             }
                         })
                         .setNegativeButton(R.string.dialog_later, new DialogInterface.OnClickListener() {
