@@ -10,12 +10,15 @@ import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.UiThread;
 import org.apache.commons.lang.StringUtils;
 import org.apereo.R;
+import org.apereo.utils.Logger;
 
 /**
  * Created by schneis on 8/27/14.
  */
 @EActivity
 public class BaseActivity extends Activity {
+
+    private final String TAG = BaseActivity.class.getName();
 
     ProgressDialog dialog;
 
@@ -85,6 +88,11 @@ public class BaseActivity extends Activity {
 
     @UiThread
     public void dismissSpinner() {
-        if (dialog != null) dialog.dismiss();
+        if (dialog != null)
+            try {
+                dialog.dismiss();
+            } catch (Exception e) {
+                Logger.d(TAG, e.getMessage());
+            }
     }
 }
