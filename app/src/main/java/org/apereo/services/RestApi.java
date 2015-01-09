@@ -18,8 +18,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apereo.App;
 import org.apereo.R;
+import org.apereo.activities.LaunchActivity_;
 import org.apereo.utils.Logger;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
@@ -85,6 +87,8 @@ public class RestApi {
             powerClient.getMainFeed();
             String response = getResponse(client, httpGet);
             callbackHandler.onSuccess(callback, response);
+        } catch (ResourceAccessException rae) {
+            LaunchActivity_.intent(App.getInstance());
         } catch (Exception e) {
             callbackHandler.onError(callback, e, "getMainFeed");
         } finally {

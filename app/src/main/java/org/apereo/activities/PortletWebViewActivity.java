@@ -32,6 +32,7 @@ import org.apereo.R;
 import org.apereo.adapters.FolderListAdapter;
 import org.apereo.models.Folder;
 import org.apereo.utils.LayoutManager;
+import org.apereo.utils.Logger;
 
 import java.util.List;
 
@@ -108,8 +109,17 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     void initialize() {
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+
+        List<Folder> folders = null;
+        // workaround for layoutManager being possibly garbage collected
+        try {
+            folders = layoutManager.getLayout().getFolders();
+        } catch (NullPointerException e) {
+            Logger.d(TAG, e.getMessage());
+            LaunchActivity_.intent(this);
+        }
+
         // set up the drawer's list view with items and click listener
-        List<Folder> folders = layoutManager.getLayout().getFolders();
         mDrawerList.setAdapter(new FolderListAdapter(this,
                 R.layout.drawer_list_item, folders, folderPosition));
         mDrawerList.setOnItemClickListener(this);
