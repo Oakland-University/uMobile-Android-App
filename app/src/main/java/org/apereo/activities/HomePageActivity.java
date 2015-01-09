@@ -1,8 +1,6 @@
 package org.apereo.activities;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -93,9 +91,14 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // set up the drawer's list view with items and click listener
-        List<Folder> folders = layoutManager.getLayout().getFolders();
-        mDrawerList.setAdapter(new FolderListAdapter(this,
-                R.layout.drawer_list_item, folders, ePosition));
+        try {
+            List<Folder> folders = layoutManager.getLayout().getFolders();
+            mDrawerList.setAdapter(new FolderListAdapter(this,
+                    R.layout.drawer_list_item, folders, ePosition));
+        } catch (NullPointerException e) {
+            Logger.d(TAG, e.getMessage());
+            LaunchActivity_.intent(this);
+        }
         mDrawerList.setOnItemClickListener(this);
 
         // ActionBarDrawerToggle ties together the the proper interactions
@@ -217,12 +220,21 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         Fragment fragment = HomePageListFragment.getFragment(this);
         fragment.setArguments(args);
 
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.content_frame, fragment)
+                .commit();
 
         // update selected item and title, then close the drawer
         mDrawerList.setItemChecked(position, true);
-        setTitle(layoutManager.getLayout().getFolders().get(position).getName());
+
+        // Workaround for layoutManager being possibly garbage collected
+        try {
+            setTitle(layoutManager.getLayout().getFolders().get(position).getName());
+        } catch (NullPointerException e) {
+            Logger.d(TAG, e.getMessage());
+            LaunchActivity_.intent(this);
+        }
 
         mDrawerLayout.closeDrawer(mDrawerList);
     }
@@ -265,19 +277,25 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         Fragment fragment = HomePageListFragment.getFragment(this);
         fragment.setArguments(args);
 
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        ft.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
-        ft.replace(R.id.content_frame, fragment);
-        ft.commit();
+        getFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
+                .replace(R.id.content_frame, fragment)
+                .commit();
 
         // Update the login/logout button.
         invalidateOptionsMenu();
 
-        // Update the side drawer contents.
-        List<Folder> folders = layoutManager.getLayout().getFolders();
-        mDrawerList.setAdapter(new FolderListAdapter(this,
-                R.layout.drawer_list_item, folders, ePosition));
+        // Workaround for layoutManager being possibly garbage collected
+        try {
+            // Update the side drawer contents.
+            List<Folder> folders = layoutManager.getLayout().getFolders();
+            mDrawerList.setAdapter(new FolderListAdapter(this,
+                    R.layout.drawer_list_item, folders, ePosition));
+        } catch (NullPointerException e) {
+            Logger.d(TAG, e.getMessage());
+            LaunchActivity_.intent(this);
+        }
 
         // Switch back to the first tab.
         selectItem(0);
