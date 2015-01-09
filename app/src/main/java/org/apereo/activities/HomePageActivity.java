@@ -1,8 +1,6 @@
 package org.apereo.activities;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -222,8 +220,10 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         Fragment fragment = HomePageListFragment.getFragment(this);
         fragment.setArguments(args);
 
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.content_frame, fragment)
+                .commit();
 
         // update selected item and title, then close the drawer
         mDrawerList.setItemChecked(position, true);
@@ -277,11 +277,11 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         Fragment fragment = HomePageListFragment.getFragment(this);
         fragment.setArguments(args);
 
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        ft.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
-        ft.replace(R.id.content_frame, fragment);
-        ft.commit();
+        getFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
+                .replace(R.id.content_frame, fragment)
+                .commit();
 
         // Update the login/logout button.
         invalidateOptionsMenu();
