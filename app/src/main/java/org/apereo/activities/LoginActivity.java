@@ -173,23 +173,25 @@ public class LoginActivity extends BaseActivity {
                     showLongToast(getString(R.string.error_logging_in));
                 }
 
-                if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
-                    casClient.logOut(new UmobileRestCallback<Integer>() {
-                        @Override
-                        public void onError(Exception e, Integer response) {
-                            Logger.e(TAG, "error logging out (received status code " + response + ")", e);
-                            dismissSpinner();
-                            showLongToast(getString(R.string.error_logging_out));
-                        }
-
-                        @Override
-                        public void onSuccess(Integer response) { }
-                    });
-                }
-
+                deleteAccount();
                 restartActivity();
             }
         });
+    }
+
+    private void deleteAccount() {
+        if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
+            casClient.logOut(new UmobileRestCallback<Integer>() {
+                @Override
+                public void onError(Exception e, Integer response) {
+                    Logger.e(TAG, "error logging out (received status code " + response + ")", e);
+                    dismissSpinner();
+                    showLongToast(getString(R.string.error_logging_out));
+                }
+                @Override
+                public void onSuccess(Integer response) { }
+            });
+        }
     }
 
     private void restartActivity() {
