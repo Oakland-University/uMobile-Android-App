@@ -13,6 +13,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.apereo.App;
 import org.apereo.R;
+import org.apereo.activities.LoginActivity;
 import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
 
@@ -67,10 +68,8 @@ public class CasClient {
             } else {
                 callback.onError(null, resources.getString(R.string.error_logging_in));
             }
-        } catch (MalformedURLException e) {
-            callback.onError(e, null);
-        } catch (IOException e) {
-            callback.onError(e, null);
+        } catch (Exception e) {
+            callback.onError(e, resources.getString(R.string.error_logging_in));
         } finally {
             if (postConnection != null) { postConnection.disconnect(); }
             if (postConnection2 != null) { postConnection2.disconnect(); }
