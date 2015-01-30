@@ -9,8 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 
-import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
-
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EFragment;
@@ -27,7 +25,6 @@ import java.util.List;
 
 @EFragment(R.layout.activity_listview)
 public class HomePageListFragment extends ListFragment {
-    private FadingActionBarHelper mFadingHelper;
     private Bundle mArguments;
     private View view;
     private PortletListAdapter adapter;
@@ -43,13 +40,11 @@ public class HomePageListFragment extends ListFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = mFadingHelper.createView(inflater);
-
         if (mArguments != null){
             position = mArguments.getInt(AppConstants.POSITION);
         }
 
-        return view;
+        return getView();
     }
 
     @AfterViews
@@ -66,13 +61,12 @@ public class HomePageListFragment extends ListFragment {
                     Portlet p = (Portlet) o;
 
                     // TODO have a flag in portlet to decide this
-                    boolean concat  = !StringUtils.equalsIgnoreCase(p.getIconUrl(), getResources().getString(R.string.use_drawable));
+                    boolean concat = !StringUtils.equalsIgnoreCase(p.getIconUrl(), getResources().getString(R.string.use_drawable));
 
                     actionListener.launchWebView(p.getName(), concat ? App.getRootUrl().concat(p.getUrl()) : p.getUrl());
                 }
             }
         });
-
     }
 
     @Override
@@ -81,15 +75,7 @@ public class HomePageListFragment extends ListFragment {
 
         mArguments = getArguments();
 
-        mFadingHelper = new FadingActionBarHelper()
-                .actionBarBackground(R.color.theme_light)
-                .headerLayout(R.layout.header)
-                .contentLayout(R.layout.activity_listview);
-        mFadingHelper.initActionBar(activity);
-
         this.activity = activity;
-
-
     }
 
     public void update() {

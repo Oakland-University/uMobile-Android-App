@@ -84,12 +84,6 @@ public class LoginActivity extends BaseActivity {
     AccountManager accountManager =
             (AccountManager) App.getInstance().getSystemService(ACCOUNT_SERVICE);
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-    }
-
     @AfterViews
     void initialize() {
         passwordView.setTypeface(Typeface.DEFAULT);
@@ -156,7 +150,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     protected void logIn() {
-        showSpinner();
+        showSpinner("Logging in...");
 
         casClient.authenticate(username, password, this, new UmobileRestCallback<String>() {
             @Override

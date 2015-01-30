@@ -4,9 +4,9 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,6 +23,7 @@ import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
+import org.apache.commons.lang.ObjectUtils;
 import org.apereo.App;
 import org.apereo.R;
 import org.apereo.adapters.FolderListAdapter;
@@ -45,11 +46,17 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
 
     private final String TAG = HomePageActivity.class.getName();
 
+    @ViewById(R.id.toolbar)
+    Toolbar toolbar;
+
     @ViewById(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
 
     @ViewById(R.id.left_drawer)
     ListView mDrawerList;
+
+    @ViewById(R.id.image_header)
+    View headerImage;
 
     @Bean
     RestApi restApi;
@@ -74,29 +81,28 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mTitle = getTitle();
-
         if (shouldLogOut) {
             shouldLogOut = false;
             logOut();
         }
-
-        // enable ActionBar app icon to behave as action to toggle nav drawer
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
     }
 
     @AfterViews
     void init() {
-        // set a custom shadow that overlays the main content when the drawer opens
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+        setUpNavigationDrawer();
+    }
+
+    private void setUpNavigationDrawer() {
+
+        setSupportActionBar(toolbar);
+        mTitle = toolbar.getTitle();
+
         // set up the drawer's list view with items and click listener
         try {
             List<Folder> folders = layoutManager.getLayout().getFolders();
             mDrawerList.setAdapter(new FolderListAdapter(this,
                     R.layout.drawer_list_item, folders, ePosition));
         } catch (NullPointerException e) {
-            Logger.d(TAG, e.getMessage());
             LaunchActivity_.intent(this);
         }
         mDrawerList.setOnItemClickListener(this);
@@ -106,18 +112,10 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
-                R.drawable.ic_drawer,  /* nav drawer image to replace 'Up' caret */
+                toolbar,               /* pass in toolbar reference */
                 R.string.drawer_open,  /* "open drawer" description for accessibility */
                 R.string.drawer_close  /* "close drawer" description for accessibility */
-        ) {
-            public void onDrawerClosed(View view) {
-                getActionBar().setIcon(R.drawable.ic_launcher);
-                getActionBar().setTitle(mTitle);
-            }
-
-            public void onDrawerOpened(View drawerView) {
-            }
-        };
+        );
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
@@ -133,7 +131,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if(App.getIsAuth()) {
+        if (App.getIsAuth()) {
             menu.findItem(R.id.login_action_bar_button).setVisible(false);
         } else {
             menu.findItem(R.id.logout_action_bar_button).setVisible(false);
@@ -210,7 +208,12 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
 
     private void selectItem(int position) {
 
-        ((FolderListAdapter) mDrawerList.getAdapter()).setSelectedIndex(position);
+        try {
+            ((FolderListAdapter) mDrawerList.getAdapter()).setSelectedIndex(position);
+        } catch (NullPointerException e) {
+            LaunchActivity_.intent(this);
+        }
+
         ePosition = position;
 
         // update the main content by replacing fragments
@@ -232,7 +235,6 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         try {
             setTitle(layoutManager.getLayout().getFolders().get(position).getName());
         } catch (NullPointerException e) {
-            Logger.d(TAG, e.getMessage());
             LaunchActivity_.intent(this);
         }
 
@@ -242,7 +244,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
     @Override
     public void setTitle(CharSequence title) {
         mTitle = title;
-        getActionBar().setTitle(mTitle);
+        getSupportActionBar().setTitle(mTitle);
     }
 
     private void getFeed() {
@@ -314,4 +316,5 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
                 .flags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .start();
     }
+
 }
