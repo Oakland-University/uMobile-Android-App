@@ -15,6 +15,7 @@ import org.androidannotations.annotations.EFragment;
 import org.apache.commons.lang.StringUtils;
 import org.apereo.App;
 import org.apereo.R;
+import org.apereo.activities.LaunchActivity_;
 import org.apereo.adapters.PortletListAdapter;
 import org.apereo.constants.AppConstants;
 import org.apereo.interfaces.IActionListener;
@@ -49,7 +50,11 @@ public class HomePageListFragment extends ListFragment {
 
     @AfterViews
     void initialize() {
-        portlets = layoutManager.getLayout().getFolders().get(position).getPortlets();
+        try {
+            portlets = layoutManager.getLayout().getFolders().get(position).getPortlets();
+        } catch (NullPointerException e) {
+            LaunchActivity_.intent(getActivity());
+        }
         adapter = new PortletListAdapter(activity, R.layout.portlet_row, portlets);
         setListAdapter(adapter);
 
