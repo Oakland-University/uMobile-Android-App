@@ -101,8 +101,6 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
                 observer.removeGlobalOnLayoutListener(this);
             }
         });
-
-        CookieSyncManager.createInstance(this);
     }
 
     @AfterViews
