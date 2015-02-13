@@ -12,21 +12,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
-        <LinearLayout
-            android:orientation="vertical"
+        <!-- As the main content view, the view below consumes the entire
+         space available using match_parent in both dimensions. -->
+        <FrameLayout
+            android:id="@+id/content_frame"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
-
-            <include layout="@layout/header" />
-
-            <!-- As the main content view, the view below consumes the entire
-             space available using match_parent in both dimensions. -->
-            <FrameLayout
-                android:id="@+id/content_frame"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-        </LinearLayout>
+            android:layout_height="match_parent" />
 
         <!-- and:layout_gty="start" tells DrawerLayout to treat
              this as a sliding draon the left side for left-to-right

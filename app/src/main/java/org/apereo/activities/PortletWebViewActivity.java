@@ -27,7 +27,6 @@ import org.apereo.R;
 import org.apereo.adapters.FolderListAdapter;
 import org.apereo.models.Folder;
 import org.apereo.utils.LayoutManager;
-import org.apereo.utils.Logger;
 
 import java.util.List;
 
@@ -64,13 +63,11 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     @Extra
     int folderPosition;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
     @AfterViews
     void initialize() {
+        if (url.equals(getResources().getString(R.string.login_url))) {
+            LaunchActivity_.intent(this);
+        }
 
         setUpNavigationDrawer();
 
@@ -89,6 +86,14 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
         dismissSpinner();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (url.equals(getResources().getString(R.string.login_url))) {
+            LaunchActivity_.intent(this);
+        }
+    }
+
     private void setUpNavigationDrawer() {
 
         setSupportActionBar(toolbar);
@@ -98,7 +103,6 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
         try {
             folders = layoutManager.getLayout().getFolders();
         } catch (NullPointerException e) {
-            Logger.d(TAG, e.getMessage());
             LaunchActivity_.intent(this);
         }
 

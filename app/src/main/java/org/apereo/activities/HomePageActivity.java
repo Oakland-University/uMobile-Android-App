@@ -23,7 +23,6 @@ import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
-import org.apache.commons.lang.ObjectUtils;
 import org.apereo.App;
 import org.apereo.R;
 import org.apereo.adapters.FolderListAdapter;
@@ -55,9 +54,6 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
     @ViewById(R.id.left_drawer)
     ListView mDrawerList;
 
-    @ViewById(R.id.image_header)
-    View headerImage;
-
     @Bean
     RestApi restApi;
 
@@ -80,7 +76,6 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (shouldLogOut) {
             shouldLogOut = false;
             logOut();
@@ -316,5 +311,4 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
                 .flags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .start();
     }
-
 }
