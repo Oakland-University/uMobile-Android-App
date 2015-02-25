@@ -27,6 +27,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpCookie;
 
 
 /**
@@ -44,13 +45,9 @@ public class RestApi {
     @Bean
     RestCallbackHandler callbackHandler;
 
-    // Since CookieSyncManager synchronizes cookies asynchronously, this field
-    // is necessary in order to retrieve the JSESSIONID cookie immediately.
-    private String cookie = "";
-
     @AfterInject
     void initialize() {
-        String rootUrl = "https://mysail.oakland.edu";
+        String rootUrl = "https://mysaildev.oakland.edu";
         powerClient.setRootUrl(rootUrl);
 
         RestTemplate template = powerClient.getRestTemplate();
@@ -60,7 +57,6 @@ public class RestApi {
         requestFactory.setReadTimeout(30 * 1000); // 30 seconds
         requestFactory.setConnectTimeout(5 * 1000); // 5 seconds
         template.setRequestFactory(requestFactory);
-
     }
 
     public void setRootUrl(String rootUrl) {
@@ -78,9 +74,10 @@ public class RestApi {
         HttpClient client = new DefaultHttpClient();
         HttpGet httpGet = new HttpGet(context.getResources().getString(R.string.layout_json_url));
 
-        if (!cookie.isEmpty()) {
+        if (!App.getCookieManager().getCookieStore().getCookies().isEmpty()) {
             App.setIsAuth(true);
-            httpGet.setHeader("Cookie", cookie);
+            HttpCookie cookie = App.getCookieManager().getCookieStore().getCookies().get(0);
+            httpGet.setHeader("Cookie", "JSESSIONID=" + cookie.getValue() + "; Path=/; HttpOnly");
         }
 
         try {
@@ -145,9 +142,5 @@ public class RestApi {
         }
 
         return builder.toString();
-    }
-
-    public void setCookie(String cookie) {
-        this.cookie = cookie;
     }
 }

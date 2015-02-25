@@ -80,10 +80,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
         //TODO find better way to do this
         url = url.replaceAll("/f/welcome","");
 
-        CookieSyncManager.createInstance(this);
         webView.loadUrl(url);
-
-        dismissSpinner();
     }
 
     @Override

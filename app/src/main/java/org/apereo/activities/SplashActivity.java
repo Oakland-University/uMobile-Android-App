@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
 import com.google.gson.Gson;
@@ -33,6 +32,9 @@ import org.apereo.utils.ConfigManager;
 import org.apereo.utils.LayoutManager;
 import org.apereo.utils.Logger;
 
+import java.net.CookieHandler;
+import java.net.CookieManager;
+
 /**
  * Created by schneis on 8/27/14.
  */
@@ -55,6 +57,8 @@ public class SplashActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        App.setCookieManager(new CookieManager());
+        CookieHandler.setDefault(App.getCookieManager());
         getGlobalConfig();
     }
 
@@ -102,10 +106,7 @@ public class SplashActivity extends BaseActivity {
                     .password(accountManager.getPassword(account))
                     .start();
         } else {
-            CookieSyncManager.createInstance(this);
-            CookieManager.getInstance().removeAllCookie();
-            CookieManager.getInstance().removeSessionCookie();
-            CookieSyncManager.getInstance().sync();
+            clearCookies();
 
             restApi.getMainFeed(this, new UmobileRestCallback<String>() {
 
@@ -149,6 +150,10 @@ public class SplashActivity extends BaseActivity {
                 }
             });
         }
+    }
+
+    private void clearCookies() {
+        App.getCookieManager().getCookieStore().removeAll();
     }
 
     @UiThread

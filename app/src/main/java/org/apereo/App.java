@@ -5,14 +5,21 @@ import android.content.pm.ApplicationInfo;
 
 import org.androidannotations.annotations.EApplication;
 
+import java.net.CookieManager;
+
 /**
  * Created by schneis on 8/26/14.
  */
 @EApplication
 public class App extends Application {
     private static App instance;
+    private static CookieManager cookieManager;
 
     private static boolean isAuth;
+
+    public static CookieManager getCookieManager() {
+        return cookieManager;
+    }
 
     @Override
     public void onCreate() {
@@ -33,6 +40,11 @@ public class App extends Application {
 
     public static void setIsAuth(boolean isAuth) {
         App.isAuth = isAuth;
+    }
+
+
+    public static void setCookieManager(CookieManager cookieManager) {
+        App.cookieManager = cookieManager;
     }
 
     public static String getRootUrl() {
