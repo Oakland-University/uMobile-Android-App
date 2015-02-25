@@ -6,16 +6,22 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.webkit.CookieSyncManager;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
@@ -27,6 +33,7 @@ import org.apereo.R;
 import org.apereo.adapters.FolderListAdapter;
 import org.apereo.models.Folder;
 import org.apereo.utils.LayoutManager;
+import org.apereo.utils.Logger;
 
 import java.util.List;
 
@@ -51,6 +58,9 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     @ViewById(R.id.left_drawer)
     ListView mDrawerList;
 
+    @ViewById(R.id.progress_bar)
+    ProgressBar progressBar;
+
     @Bean
     LayoutManager layoutManager;
 
@@ -71,11 +81,23 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
         setUpNavigationDrawer();
 
-        showSpinner();
+        progressBar.setY(mDrawerLayout.getTop());
 
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient());
+        webView.setWebChromeClient(new WebChromeClient() {
+            public void onProgressChanged(WebView view, int progress) {
+                if (progress < 100 && progressBar.getVisibility() == ProgressBar.GONE) {
+                    progressBar.setVisibility(ProgressBar.VISIBLE);
+                }
+                progressBar.setProgress(progress);
+                if (progress == 100) {
+                    progressBar.setVisibility(ProgressBar.GONE);
+                }
+            }
+
+        });
 
         //TODO find better way to do this
         url = url.replaceAll("/f/welcome","");
@@ -121,7 +143,6 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         getSupportActionBar().setTitle(portletName);
-
     }
 
     @Override
