@@ -1,12 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".HomePage" >
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".HomePage">
+
     <item
         android:id="@+id/login_action_bar_button"
         android:title="@string/login"
-        android:showAsAction="always" />
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/logout_action_bar_button"
         android:title="@string/logout"
-        android:showAsAction="always" />
+        app:showAsAction="ifRoom" />
+
 </menu>
