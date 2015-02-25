@@ -3,9 +3,10 @@ package org.apereo.activities;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.view.GravityCompat;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.widget.Toolbar;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -45,21 +46,19 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     private static final String TAG = PortletWebViewActivity.class.getName();
     private ActionBarDrawerToggle mDrawerToggle;
 
-    private CharSequence mDrawerTitle;
-    private CharSequence mTitle;
-
-    private static final int MENU_LOGIN = Menu.FIRST;
-    private static final int MENU_LOGOUT = Menu.FIRST + 1;
-
     @ViewById(R.id.webView)
     WebView webView;
 
     @ViewById(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
 
+    @ViewById(R.id.toolbar)
+    Toolbar toolbar;
+
     @ViewById(R.id.left_drawer)
     ListView mDrawerList;
 
+    @ViewById(R.id.progress_bar)
     ProgressBar progressBar;
 
     @Bean
@@ -74,48 +73,55 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     @Extra
     int folderPosition;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mTitle = mDrawerTitle = getTitle();
-
-        // enable ActionBar app icon to behave as action to toggle nav drawer
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
-
-        // create new ProgressBar and style it
-        progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-        progressBar.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 24));
-
-        final FrameLayout decorView = (FrameLayout) getWindow().getDecorView();
-        decorView.addView(progressBar);
-
-        ViewTreeObserver observer = progressBar.getViewTreeObserver();
-        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                View contentView = decorView.findViewById(android.R.id.content);
-                progressBar.setY(contentView.getY() - 10);
-
-                ViewTreeObserver observer = progressBar.getViewTreeObserver();
-                observer.removeGlobalOnLayoutListener(this);
-            }
-        });
-
-        CookieSyncManager.createInstance(this);
-    }
-
     @AfterViews
     void initialize() {
-        // set a custom shadow that overlays the main content when the drawer opens
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+        if (url.equals(getResources().getString(R.string.login_url))) {
+            LaunchActivity_.intent(this);
+        }
+
+        setUpNavigationDrawer();
+
+        progressBar.setY(mDrawerLayout.getTop());
+
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webView.setWebViewClient(new WebViewClient());
+        webView.setWebChromeClient(new WebChromeClient() {
+            public void onProgressChanged(WebView view, int progress) {
+                if (progress < 100 && progressBar.getVisibility() == ProgressBar.GONE) {
+                    progressBar.setVisibility(ProgressBar.VISIBLE);
+                }
+                progressBar.setProgress(progress);
+                if (progress == 100) {
+                    progressBar.setVisibility(ProgressBar.GONE);
+                }
+            }
+
+        });
+
+        //TODO find better way to do this
+        url = url.replaceAll("/f/welcome","");
+
+        webView.loadUrl(url);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (url.equals(getResources().getString(R.string.login_url))) {
+            LaunchActivity_.intent(this);
+        }
+    }
+
+    private void setUpNavigationDrawer() {
+
+        setSupportActionBar(toolbar);
 
         List<Folder> folders = null;
         // workaround for layoutManager being possibly garbage collected
         try {
             folders = layoutManager.getLayout().getFolders();
         } catch (NullPointerException e) {
-            Logger.d(TAG, e.getMessage());
             LaunchActivity_.intent(this);
         }
 
@@ -130,39 +136,13 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
-                R.drawable.ic_drawer,  /* nav drawer image to replace 'Up' caret */
+                toolbar,               /* pass in toolbar reference */
                 R.string.drawer_open,  /* "open drawer" description for accessibility */
                 R.string.drawer_close  /* "close drawer" description for accessibility */
-        ) {
-            public void onDrawerClosed(View view) {
-                getActionBar().setIcon(R.drawable.ic_launcher);
-                getActionBar().setTitle(portletName);
-            }
-
-            public void onDrawerOpened(View drawerView) {
-            }
-
-        };
+        );
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-        getActionBar().setTitle(portletName);
-
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webView.setWebViewClient(new WebViewClient());
-        webView.setWebChromeClient(new WebChromeClient() {
-            public void onProgressChanged(WebView view, int progress) {
-                if (progress != 100) {
-                    progressBar.setProgress(progress);
-                } else {
-                    progressBar.setVisibility(ProgressBar.GONE);
-                }
-            }
-        });
-        //TODO find better way to do this
-        url = url.replaceAll("/f/welcome","");
-
-        webView.loadUrl(url);
+        getSupportActionBar().setTitle(portletName);
     }
 
     @Override

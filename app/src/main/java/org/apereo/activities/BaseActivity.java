@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.widget.Toast;
 
 import org.androidannotations.annotations.EActivity;
@@ -16,7 +17,7 @@ import org.apereo.utils.Logger;
  * Created by schneis on 8/27/14.
  */
 @EActivity
-public class BaseActivity extends Activity {
+public class BaseActivity extends ActionBarActivity {
 
     private final String TAG = BaseActivity.class.getName();
 

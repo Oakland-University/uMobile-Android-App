@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/wrapper_view"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/image_wrapper_view"
+    android:background="@drawable/image_shadow"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    >
-<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/image_header"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:adjustViewBounds="true"
-    android:src="@drawable/umobile_header"
-    android:layout_alignParentTop="true"
-    android:layout_centerHorizontal="true"
-    android:paddingTop="20dp"
-    android:paddingBottom="20dp" />
+    android:layout_height="wrap_content" >
+
+    <ImageView
+        android:id="@+id/image_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:src="@drawable/umobile_header"
+        android:layout_centerHorizontal="true"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp" />
+
 </RelativeLayout>

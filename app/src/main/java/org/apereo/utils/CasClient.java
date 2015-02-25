@@ -3,7 +3,6 @@ package org.apereo.utils;
 import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.res.Resources;
-import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
 import org.androidannotations.annotations.Background;
@@ -13,7 +12,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.apereo.App;
 import org.apereo.R;
-import org.apereo.activities.LoginActivity;
 import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
 
@@ -26,7 +24,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -43,8 +40,8 @@ public class CasClient {
 
     private static final String TAG = CasClient.class.getName();
 
-    private String cookie, tgt;
-    private HttpURLConnection postConnection, postConnection2; // to be closed outside their methods
+    private String tgt;
+    private HttpURLConnection serviceTicketLocationConnection, serviceTicketConnection; // to be closed outside their methods
 
     private final Resources resources = App.getInstance().getResources();
     private final String ACCOUNT_TYPE = resources.getString(R.string.account_type);
@@ -54,16 +51,13 @@ public class CasClient {
     @Background
     public void authenticate(String username, String password, Context context,
                              UmobileRestCallback<String> callback) {
-
         try {
             // Perform the CAS authentication dance.
-            List<NameValuePair> postData = getAndParsePostData(username, password);
-            String stLocation = sendPostForServiceTicketLocation(postData);
+            List<NameValuePair> postData = generatePostData(username, password);
+            String stLocation = postForServiceTicketLocation(postData);
             if (stLocation != null) {
-                String st = sendPostForServiceTicket(stLocation);
+                String st = postForServiceTicket();
                 validateServiceTicket(st);
-                syncCookies();
-
                 callback.onSuccess(null);
             } else {
                 callback.onError(null, resources.getString(R.string.error_logging_in));
@@ -71,8 +65,8 @@ public class CasClient {
         } catch (Exception e) {
             callback.onError(e, resources.getString(R.string.error_logging_in));
         } finally {
-            if (postConnection != null) { postConnection.disconnect(); }
-            if (postConnection2 != null) { postConnection2.disconnect(); }
+            if (serviceTicketLocationConnection != null) { serviceTicketLocationConnection.disconnect(); }
+            if (serviceTicketConnection != null) { serviceTicketConnection.disconnect(); }
             callback.onFinish();
         }
     }
@@ -81,11 +75,9 @@ public class CasClient {
     public void logOut(UmobileRestCallback<Integer> callback) {
         Integer responseCode = sendLogOutRequest();
         if (responseCode == 200) {
-            restApi.setCookie("");
-            removeAccount();
             clearCookies();
+            removeAccount();
             App.setIsAuth(false);
-
             callback.onSuccess(responseCode);
         } else {
             callback.onError(null, responseCode);
@@ -94,8 +86,8 @@ public class CasClient {
     }
 
     private void clearCookies() {
-        CookieManager.getInstance().removeSessionCookie();
-        CookieManager.getInstance().removeAllCookie();
+        App.getCookieManager().getCookieStore().removeAll();
+        android.webkit.CookieManager.getInstance().removeAllCookie();
         CookieSyncManager.getInstance().sync();
     }
 
@@ -105,7 +97,6 @@ public class CasClient {
             accountManager =
                     (AccountManager) App.getInstance().getSystemService(Context.ACCOUNT_SERVICE);
         }
-
         // Remove the account.
         if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
             accountManager.removeAccount(
@@ -118,7 +109,6 @@ public class CasClient {
         try {
             URL url = new URL(App.getInstance().getResources().getString(R.string.logout_url));
             HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
-            getConnection.setRequestProperty("Cookie", cookie);
             getConnection.connect();
             return getConnection.getResponseCode();
         } catch (IOException e) {
@@ -127,59 +117,36 @@ public class CasClient {
         }
     }
 
-    private List<NameValuePair> getAndParsePostData(String username, String password)
+    private List<NameValuePair> generatePostData(String username, String password)
             throws IOException {
-        String lt = null;
-        String execution = null;
 
-        URL url = new URL(resources.getString(R.string.login_url));
-        HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(getConnection.getInputStream()));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (line.contains("<input type=\"hidden\" name=\"lt\" value=")) {
-                lt = line.substring(41, line.lastIndexOf("\""));
-            }
-            if (line.contains("<input type=\"hidden\" name=\"execution\" value=\"")) {
-                execution = line.substring(48, line.lastIndexOf("\""));
-            }
-        }
-        List<NameValuePair> postData = new ArrayList<NameValuePair>(6);
+        List<NameValuePair> postData = new ArrayList<NameValuePair>(2);
         postData.add(new BasicNameValuePair("username", username));
         postData.add(new BasicNameValuePair("password", password));
-        postData.add(new BasicNameValuePair("lt", lt));
-        postData.add(new BasicNameValuePair("execution", execution));
-        postData.add(new BasicNameValuePair("_eventId", "submit"));
-        postData.add(new BasicNameValuePair("submit", "Sign In"));
-
-        cookie = getConnection.getHeaderField("Set-Cookie");
-        restApi.setCookie(cookie);
 
         return postData;
     }
 
-    private String sendPostForServiceTicketLocation(List<NameValuePair> postData)
+    private String postForServiceTicketLocation(List<NameValuePair> postData)
             throws IOException {
 
         String postPath = resources.getString(R.string.ticket_url);
         URL postUrl = new URL(postPath);
-        postConnection = (HttpURLConnection) postUrl.openConnection();
-        postConnection.setInstanceFollowRedirects(true);
-        postConnection.setRequestProperty("Cookie", cookie);
-        HttpURLConnection.setFollowRedirects(true);
-        postConnection.setDoOutput(true);
-        postConnection.setChunkedStreamingMode(0);
-        OutputStream os = new BufferedOutputStream(postConnection.getOutputStream());
+        serviceTicketLocationConnection = (HttpURLConnection) postUrl.openConnection();
+        serviceTicketLocationConnection.setDoOutput(true);
+        serviceTicketLocationConnection.addRequestProperty("Content-Type", "text/html");
+
+        OutputStream os = new BufferedOutputStream(serviceTicketLocationConnection.getOutputStream());
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+
         writer.write(getQuery(postData));
         writer.flush();
         writer.close();
         os.close();
-        postConnection.connect();
+        serviceTicketLocationConnection.connect();
 
-        // Service ticket created.
-        String serviceTicketLocation = postConnection.getHeaderField("Location");
-
+        // Service ticket created
+        String serviceTicketLocation = serviceTicketLocationConnection.getHeaderField("Location");
         if (serviceTicketLocation != null) {
             serviceTicketLocation = serviceTicketLocation.replace("http", "https");
             tgt = serviceTicketLocation.split("tickets/")[1];
@@ -188,47 +155,43 @@ public class CasClient {
         return serviceTicketLocation;
     }
 
-    private String sendPostForServiceTicket(String location) throws IOException {
-        URL postST = new URL(location);
-        postConnection2 = (HttpURLConnection) postST.openConnection();
-        postConnection2.setInstanceFollowRedirects(true);
-        postConnection2.setRequestProperty("Cookie", cookie);
-        List<NameValuePair> postData = new ArrayList<NameValuePair>(6);
+    private String postForServiceTicket() throws IOException {
+        String postPath = resources.getString(R.string.ticket_url) + "/" + tgt;
+        URL postST = new URL(postPath);
+        serviceTicketConnection = (HttpURLConnection) postST.openConnection();
+        serviceTicketConnection.setDoOutput(true);
+        serviceTicketConnection.addRequestProperty("Content-Type", "text/html");
+
+        List<NameValuePair> postData = new ArrayList<NameValuePair>(1);
         postData.add(new BasicNameValuePair("service",
                 resources.getString(R.string.login_service)));
-        postConnection2.setDoOutput(true);
-        postConnection2.setChunkedStreamingMode(0);
-        OutputStream os2 = new BufferedOutputStream(postConnection2.getOutputStream());
+        OutputStream os2 = new BufferedOutputStream(serviceTicketConnection.getOutputStream());
         BufferedWriter writer2 = new BufferedWriter(new OutputStreamWriter(os2, "UTF-8"));
         writer2.write(getQuery(postData));
         writer2.flush();
         writer2.close();
         os2.close();
-        postConnection2.connect();
+        serviceTicketConnection.connect();
         BufferedReader in = new BufferedReader(
-                new InputStreamReader(postConnection2.getInputStream()));
-        String serviceTicket;
-        serviceTicket = in.readLine();
+                new InputStreamReader(serviceTicketConnection.getInputStream()));
 
-        return serviceTicket;
+        // Return service ticket
+        return in.readLine();
     }
 
     private void validateServiceTicket(String serviceTicket) throws IOException {
         URL url = new URL(resources.getString(R.string.login_service) + "?ticket=" + serviceTicket);
         HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
-        getConnection.setRequestProperty("Cookie", cookie);
         getConnection.connect();
-        getConnection.getContent();
+        // Necessary
+        getConnection.getHeaderField("Set-Cookie");
+        getConnection.disconnect();
+        setCasCookie();
     }
 
-    private void syncCookies() {
-        CookieManager.getInstance().removeSessionCookie();
-
-        String uportalDomain = resources.getString(R.string.uportal_domain);
+    private void setCasCookie() {
         String casDomain = resources.getString(R.string.cas_domain);
-        CookieManager.getInstance().setCookie(uportalDomain, cookie);
-        CookieManager.getInstance().setCookie(casDomain, "CASTGC=" + tgt);
-
+        android.webkit.CookieManager.getInstance().setCookie(casDomain, "CASTGC=" + tgt);
         CookieSyncManager.getInstance().sync();
     }
 

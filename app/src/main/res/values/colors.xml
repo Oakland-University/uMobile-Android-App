@@ -2,6 +2,7 @@
 <resources>
 
     <item name="theme_accent" type="color">#F1751B</item>
+    <item name="theme_accent_light" type="color">#F59e5f</item>
 
     <item name="theme_light" type="color">#6288C4</item>
 
