@@ -131,6 +131,12 @@ public class HomePageListFragment extends ListFragment {
                     if (Build.VERSION.SDK_INT >= 21) {
                         updateStatusBarColor(ratio);
                     }
+                } else {
+                    ((ActionBarActivity) getActivity()).getSupportActionBar()
+                            .setBackgroundDrawable(new ColorDrawable(themeAccent));
+                    if (Build.VERSION.SDK_INT >= 21) {
+                        getActivity().getWindow().setStatusBarColor(themeAccentDark);
+                    }
                 }
             } catch (NullPointerException e) { }
         }
