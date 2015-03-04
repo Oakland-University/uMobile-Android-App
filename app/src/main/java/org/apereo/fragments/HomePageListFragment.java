@@ -1,5 +1,6 @@
 package org.apereo.fragments;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.ListFragment;
@@ -127,7 +128,9 @@ public class HomePageListFragment extends ListFragment {
                     }
 
                     updateToolbarColor(ratio);
-                    updateStatusBarColor(ratio);
+                    if (Build.VERSION.SDK_INT >= 21) {
+                        updateStatusBarColor(ratio);
+                    }
                 }
             } catch (NullPointerException e) { }
         }
@@ -154,6 +157,7 @@ public class HomePageListFragment extends ListFragment {
 
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void updateStatusBarColor(float ratio) {
 
         int mainRed = Color.red(themeDark);
@@ -170,9 +174,7 @@ public class HomePageListFragment extends ListFragment {
 
         int newColor = Color.rgb(newRed, newGreen, newBlue);
 
-        if (Build.VERSION.SDK_INT >= 21) {
-            getActivity().getWindow().setStatusBarColor(newColor);
-        }
+        getActivity().getWindow().setStatusBarColor(newColor);
     }
 
     private void parallaxHeader(int childTop, int headerHeight) {
