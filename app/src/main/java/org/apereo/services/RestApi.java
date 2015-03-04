@@ -47,7 +47,7 @@ public class RestApi {
 
     @AfterInject
     void initialize() {
-        String rootUrl = "https://mysaildev.oakland.edu";
+        String rootUrl = App.getInstance().getResources().getString(R.string.base_url);
         powerClient.setRootUrl(rootUrl);
 
         RestTemplate template = powerClient.getRestTemplate();
