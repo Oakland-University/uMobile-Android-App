@@ -5,5 +5,5 @@
         android:drawable="@color/theme_accent" >
     </item>
     <item
-        android:drawable="@color/theme_accent_tint" />
+        android:drawable="@color/theme_accent_light" />
 </selector>

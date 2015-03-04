@@ -2,13 +2,13 @@
 <resources>
 
     <item name="theme_accent" type="color">#F1751B</item>
+    <item name="theme_accent_dark" type="color">#C05D15</item>
     <item name="theme_accent_light" type="color">#F59e5f</item>
 
     <item name="theme_light" type="color">#6288C4</item>
+    <item name="theme_dark" type="color">#4E6C9C</item>
 
     <!-- for not-quite-white styling -->
     <item name="theme_light_tint" type="color">#EFF3F9</item>
-
-    <item name="theme_dark" type="color">#4E6C9C</item>
 
 </resources>
