@@ -75,17 +75,21 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     @AfterViews
     void initialize() {
-        if (url.equals(getResources().getString(R.string.login_url))) {
-            LaunchActivity_.intent(this);
-        }
-
         setUpNavigationDrawer();
-
-        progressBar.setY(mDrawerLayout.getTop());
 
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        webView.setWebViewClient(new WebViewClient());
+        webView.setWebViewClient(new WebViewClient() {
+            public void onPageFinished(WebView view, String url) {
+                if (url.startsWith(getResources().getString(R.string.login_url))) {
+                    showLongToast("It's been a while. Logging you back in...");
+                    LaunchActivity_
+                            .intent(getApplicationContext())
+                            .flags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            .start();
+                }
+            }
+        });
         webView.setWebChromeClient(new WebChromeClient() {
             public void onProgressChanged(WebView view, int progress) {
                 if (progress < 100 && progressBar.getVisibility() == ProgressBar.GONE) {
@@ -96,21 +100,13 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
                     progressBar.setVisibility(ProgressBar.GONE);
                 }
             }
-
         });
+        progressBar.setY(mDrawerLayout.getTop());
 
         //TODO find better way to do this
         url = url.replaceAll("/f/welcome","");
 
         webView.loadUrl(url);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (url.equals(getResources().getString(R.string.login_url))) {
-            LaunchActivity_.intent(this);
-        }
     }
 
     private void setUpNavigationDrawer() {

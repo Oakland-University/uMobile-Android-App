@@ -78,6 +78,8 @@ public class RestApi {
             App.setIsAuth(true);
             HttpCookie cookie = App.getCookieManager().getCookieStore().getCookies().get(0);
             httpGet.setHeader("Cookie", "JSESSIONID=" + cookie.getValue() + "; Path=/; HttpOnly");
+        } else {
+            App.setIsAuth(false);
         }
 
         try {

@@ -101,12 +101,6 @@ public class HomePageListFragment extends ListFragment {
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        update();
-    }
-
     private AbsListView.OnScrollListener onScrollListener = new AbsListView.OnScrollListener() {
 
         @Override
