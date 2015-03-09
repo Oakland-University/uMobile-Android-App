@@ -1,25 +1,23 @@
 package org.apereo.activities;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.webkit.CookieSyncManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
-import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
@@ -32,8 +30,9 @@ import org.apereo.App;
 import org.apereo.R;
 import org.apereo.adapters.FolderListAdapter;
 import org.apereo.models.Folder;
+import org.apereo.services.UmobileRestCallback;
+import org.apereo.utils.CasClient;
 import org.apereo.utils.LayoutManager;
-import org.apereo.utils.Logger;
 
 import java.util.List;
 
@@ -45,6 +44,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     private static final String TAG = PortletWebViewActivity.class.getName();
     private ActionBarDrawerToggle mDrawerToggle;
+    private final String ACCOUNT_TYPE = App.getInstance().getResources().getString(R.string.account_type);
 
     @ViewById(R.id.webView)
     WebView webView;
@@ -64,6 +64,9 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     @Bean
     LayoutManager layoutManager;
 
+    @Bean
+    CasClient casClient;
+
     @Extra
     String url;
 
@@ -77,16 +80,37 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     void initialize() {
         setUpNavigationDrawer();
 
+        final Activity activity = this;
+
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
-            public void onPageFinished(WebView view, String url) {
+            public void onPageFinished(WebView view, final String url) {
                 if (url.startsWith(getResources().getString(R.string.login_url))) {
                     showLongToast("It's been a while. Logging you back in...");
-                    LaunchActivity_
-                            .intent(getApplicationContext())
-                            .flags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            .start();
+                    AccountManager accountManager = AccountManager.get(App.getInstance());
+                    if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
+                        Account account = accountManager.getAccountsByType(ACCOUNT_TYPE)[0];
+                        casClient.authenticate(account.name, accountManager.getPassword(account), activity, new UmobileRestCallback<String>() {
+
+                            @Override
+                            public void onError(Exception e, String response) { }
+
+                            @Override
+                            public void onSuccess(String response) {
+                                PortletWebViewActivity_.intent(activity)
+                                        .flags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                        .url(url)
+                                        .portletName(portletName)
+                                        .start();
+                            }
+                        });
+                    } else {
+                        LaunchActivity_
+                                .intent(getApplicationContext())
+                                .flags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                .start();
+                    }
                 }
             }
         });
