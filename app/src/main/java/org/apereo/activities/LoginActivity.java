@@ -3,17 +3,21 @@ package org.apereo.activities;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Typeface;
-import android.os.Bundle;
+import android.support.annotation.DrawableRes;
+import android.support.v7.widget.Toolbar;
 import android.text.method.PasswordTransformationMethod;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.WebView;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -49,10 +53,6 @@ public class LoginActivity extends BaseActivity {
 
     @ViewById(R.id.login_container)
     RelativeLayout container;
-
-    @ViewById(R.id.web_view)
-    WebView webView;
-
     @ViewById(R.id.login_username)
     EditText userNameView;
     @ViewById(R.id.login_password)
@@ -61,6 +61,8 @@ public class LoginActivity extends BaseActivity {
     CheckBox rememberMe;
     @ViewById(R.id.forgot_password)
     TextView forgotPassword;
+    @ViewById(R.id.toolbar)
+    Toolbar toolbar;
 
     @Extra
     String username;
@@ -86,9 +88,11 @@ public class LoginActivity extends BaseActivity {
 
     @AfterViews
     void initialize() {
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         passwordView.setTypeface(Typeface.DEFAULT);
         passwordView.setTransformationMethod(new PasswordTransformationMethod());
-
         passwordView.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
