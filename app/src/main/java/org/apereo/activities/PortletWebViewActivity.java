@@ -3,8 +3,11 @@ package org.apereo.activities;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
@@ -13,6 +16,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.CookieManager;
+import android.webkit.DownloadListener;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -26,6 +31,7 @@ import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.ViewById;
+import org.apache.commons.lang.StringUtils;
 import org.apereo.App;
 import org.apereo.R;
 import org.apereo.adapters.FolderListAdapter;
@@ -66,6 +72,8 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     @Bean
     CasClient casClient;
+
+    DownloadManager downloadManager;
 
     @Extra
     String url;
@@ -126,6 +134,22 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
             }
         });
         progressBar.setY(mDrawerLayout.getTop());
+
+        downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        webView.setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent,
+                    String contentDisposition, String mimetype,
+                    long contentLength) {
+                // This is a general solution that is only confirmed working for Moodle.
+                String domain = url.substring(0, StringUtils.ordinalIndexOf(url, "/", 3));
+                String cookie = CookieManager.getInstance().getCookie(domain);
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url))
+                        .addRequestHeader("Cookie", cookie)
+                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                downloadManager.enqueue(request);
+            }
+        });
 
         //TODO find better way to do this
         url = url.replaceAll("/f/welcome","");
