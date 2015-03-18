@@ -21,6 +21,8 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.nispok.snackbar.Snackbar;
+import com.nispok.snackbar.listeners.ActionClickListener;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
@@ -140,7 +142,7 @@ public class LoginActivity extends BaseActivity {
 
             logIn();
         } else {
-            showShortToast(getResources().getString(R.string.form_error));
+            showSnackBar(getResources().getString(R.string.form_error));
         }
     }
 
@@ -165,14 +167,14 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onError(final Exception e, final String responseBody) {
                 dismissSpinner();
-                if (responseBody != null && !responseBody.isEmpty()) {
-                    showLongToast(responseBody);
-                } else {
-                    showLongToast(getString(R.string.error_logging_in));
-                }
-
+                ActionClickListener listener = new ActionClickListener() {
+                    @Override
+                    public void onActionClicked(Snackbar snackbar) {
+                        loginClick();
+                    }
+                };
+                showSnackBarWithAction(responseBody, listener);
                 deleteAccount();
-                restartActivity();
             }
         });
     }
@@ -184,7 +186,13 @@ public class LoginActivity extends BaseActivity {
                 public void onError(Exception e, Integer response) {
                     Logger.e(TAG, "error logging out (received status code " + response + ")", e);
                     dismissSpinner();
-                    showLongToast(getString(R.string.error_logging_out));
+                    ActionClickListener listener = new ActionClickListener() {
+                        @Override
+                        public void onActionClicked(Snackbar snackbar) {
+                            deleteAccount();
+                        }
+                    };
+                    showSnackBarWithAction(getString(R.string.error), listener);
                 }
                 @Override
                 public void onSuccess(Integer response) { }

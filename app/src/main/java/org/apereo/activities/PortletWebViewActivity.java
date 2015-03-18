@@ -95,7 +95,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
         webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, final String url) {
                 if (url.startsWith(getResources().getString(R.string.login_url))) {
-                    showLongToast("It's been a while. Logging you back in...");
+                    showSnackBar("It's been a while. Logging you back in...");
                     AccountManager accountManager = AccountManager.get(App.getInstance());
                     if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
                         Account account = accountManager.getAccountsByType(ACCOUNT_TYPE)[0];
