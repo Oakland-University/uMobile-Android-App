@@ -60,10 +60,10 @@ public class CasClient {
                 validateServiceTicket(st);
                 callback.onSuccess(null);
             } else {
-                callback.onError(null, resources.getString(R.string.error_logging_in));
+                callback.onError(null, resources.getString(R.string.error));
             }
         } catch (Exception e) {
-            callback.onError(e, resources.getString(R.string.error_logging_in));
+            callback.onError(e, resources.getString(R.string.error));
         } finally {
             if (serviceTicketLocationConnection != null) { serviceTicketLocationConnection.disconnect(); }
             if (serviceTicketConnection != null) { serviceTicketConnection.disconnect(); }

@@ -33,6 +33,7 @@
             android:choiceMode="singleChoice"
             android:background="@color/theme_light_tint"
             android:divider="@android:color/transparent"
+            android:drawSelectorOnTop="true"
             android:dividerHeight="0dp" />
 
     </android.support.v4.widget.DrawerLayout>

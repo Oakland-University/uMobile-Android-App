@@ -1,9 +1,14 @@
 package org.apereo.fragments;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.ListFragment;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +40,19 @@ public class HomePageListFragment extends ListFragment {
     private final String TAG = HomePageListFragment.class.getName();
     private Activity activity;
     private int position;
-    float parallaxRate = 1.9f;
+    private float parallaxRate = 1.9f;
+
+    @org.androidannotations.annotations.res.ColorRes(R.color.theme_accent)
+    int themeAccent;
+
+    @org.androidannotations.annotations.res.ColorRes(R.color.theme_accent_dark)
+    int themeAccentDark;
+
+    @org.androidannotations.annotations.res.ColorRes(R.color.theme_light)
+    int themeLight;
+
+    @org.androidannotations.annotations.res.ColorRes(R.color.theme_dark)
+    int themeDark;
 
     ListView list;
     View header;
@@ -84,13 +101,8 @@ public class HomePageListFragment extends ListFragment {
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        update();
-    }
-
     private AbsListView.OnScrollListener onScrollListener = new AbsListView.OnScrollListener() {
+
         @Override
         public void onScrollStateChanged(AbsListView view, int scrollState) { }
 
@@ -101,13 +113,68 @@ public class HomePageListFragment extends ListFragment {
                     int childTop = list.getChildAt(1).getTop();
                     int headerHeight = header.getHeight();
                     parallaxHeader(childTop, headerHeight);
-                    updateToolbarTransparency();
+
+                    float ratio = (float) childTop / headerHeight;
+                    if (ratio > 1) {
+                        ratio = 1;
+                    } else if (ratio < 0) {
+                        ratio = 0;
+                    }
+
+                    updateToolbarColor(ratio);
+                    if (Build.VERSION.SDK_INT >= 21) {
+                        updateStatusBarColor(ratio);
+                    }
+                } else {
+                    ((ActionBarActivity) getActivity()).getSupportActionBar()
+                            .setBackgroundDrawable(new ColorDrawable(themeAccent));
+                    if (Build.VERSION.SDK_INT >= 21) {
+                        getActivity().getWindow().setStatusBarColor(themeAccentDark);
+                    }
                 }
             } catch (NullPointerException e) { }
         }
     };
 
-    private void updateToolbarTransparency() {
+    private void updateToolbarColor(float ratio) {
+
+        int mainRed = Color.red(themeLight);
+        int mainBlue = Color.blue(themeLight);
+        int mainGreen = Color.green(themeLight);
+
+        int accentRed = Color.red(themeAccent);
+        int accentGreen = Color.green(themeAccent);
+        int accentBlue = Color.blue(themeAccent);
+
+        int newRed =  (int) ((mainRed * ratio) + (accentRed * (1 - ratio)));
+        int newGreen = (int) ((mainGreen * ratio) + (accentGreen * (1 - ratio)));
+        int newBlue = (int) ((mainBlue * ratio) + (accentBlue * (1 - ratio)));
+
+        int newColor = Color.rgb(newRed, newGreen, newBlue);
+
+        ((ActionBarActivity) getActivity()).getSupportActionBar()
+                .setBackgroundDrawable(new ColorDrawable(newColor));
+
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void updateStatusBarColor(float ratio) {
+
+        int mainRed = Color.red(themeDark);
+        int mainGreen = Color.green(themeDark);
+        int mainBlue = Color.blue(themeDark);
+
+        int accentRed = Color.red(themeAccentDark);
+        int accentGreen = Color.green(themeAccentDark);
+        int accentBlue = Color.blue(themeAccentDark);
+
+        int newRed =  (int) ((mainRed * ratio) + (accentRed * (1 - ratio)));
+        int newGreen = (int) ((mainGreen * ratio) + (accentGreen * (1 - ratio)));
+        int newBlue = (int) ((mainBlue * ratio) + (accentBlue * (1 - ratio)));
+
+        int newColor = Color.rgb(newRed, newGreen, newBlue);
+
+        getActivity().getWindow().setStatusBarColor(newColor);
     }
 
     private void parallaxHeader(int childTop, int headerHeight) {
