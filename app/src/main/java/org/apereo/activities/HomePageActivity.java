@@ -92,7 +92,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         setSupportActionBar(toolbar);
         mTitle = toolbar.getTitle();
 
-        // set up the drawer's list view with items and click listener
+        // workaround for layoutManager/mDrawerList being possibly garbage collected
         try {
             List<Folder> folders = layoutManager.getLayout().getFolders();
             mDrawerList.setAdapter(new FolderListAdapter(this,
@@ -100,6 +100,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         } catch (NullPointerException e) {
             LaunchActivity_.intent(this);
         }
+
         mDrawerList.setOnItemClickListener(this);
 
         // ActionBarDrawerToggle ties together the the proper interactions

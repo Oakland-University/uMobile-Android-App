@@ -161,17 +161,15 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
         setSupportActionBar(toolbar);
 
-        List<Folder> folders = null;
-        // workaround for layoutManager being possibly garbage collected
+        // workaround for layoutManager/mDrawerList being possibly garbage collected
         try {
-            folders = layoutManager.getLayout().getFolders();
+            List<Folder> folders = layoutManager.getLayout().getFolders();
+            mDrawerList.setAdapter(new FolderListAdapter(this,
+                    R.layout.drawer_list_item, folders, folderPosition));
         } catch (NullPointerException e) {
             LaunchActivity_.intent(this);
         }
 
-        // set up the drawer's list view with items and click listener
-        mDrawerList.setAdapter(new FolderListAdapter(this,
-                R.layout.drawer_list_item, folders, folderPosition));
         mDrawerList.setOnItemClickListener(this);
         mDrawerList.setItemChecked(folderPosition, true);
 
