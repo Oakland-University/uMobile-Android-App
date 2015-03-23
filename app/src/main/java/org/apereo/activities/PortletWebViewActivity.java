@@ -107,7 +107,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
                             @Override
                             public void onSuccess(String response) {
                                 PortletWebViewActivity_.intent(activity)
-                                        .flags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                        .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                                         .url(url)
                                         .portletName(portletName)
                                         .start();
