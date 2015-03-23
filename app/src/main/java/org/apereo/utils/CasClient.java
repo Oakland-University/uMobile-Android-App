@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -186,13 +187,21 @@ public class CasClient {
         // Necessary
         getConnection.getHeaderField("Set-Cookie");
         getConnection.disconnect();
+
         setCasCookie();
+        setJSession();
+        CookieSyncManager.getInstance().sync();
+    }
+
+    private void setJSession() {
+        String uPortalDomain = resources.getString(R.string.uportal_domain);
+        HttpCookie cookie = App.getCookieManager().getCookieStore().getCookies().get(0);
+        android.webkit.CookieManager.getInstance().setCookie(uPortalDomain, "JSESSIONID=" + cookie.getValue() + "; Path=/; HttpOnly");
     }
 
     private void setCasCookie() {
         String casDomain = resources.getString(R.string.cas_domain);
         android.webkit.CookieManager.getInstance().setCookie(casDomain, "CASTGC=" + tgt);
-        CookieSyncManager.getInstance().sync();
     }
 
     // URL encoding helper method. (http://stackoverflow.com/a/13486223/2546659)
