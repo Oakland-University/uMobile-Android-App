@@ -47,7 +47,7 @@ public class RestApi {
 
     @AfterInject
     void initialize() {
-        String rootUrl = "https://mysaildev.oakland.edu";
+        String rootUrl = App.getInstance().getResources().getString(R.string.base_url);
         powerClient.setRootUrl(rootUrl);
 
         RestTemplate template = powerClient.getRestTemplate();
@@ -78,6 +78,8 @@ public class RestApi {
             App.setIsAuth(true);
             HttpCookie cookie = App.getCookieManager().getCookieStore().getCookies().get(0);
             httpGet.setHeader("Cookie", "JSESSIONID=" + cookie.getValue() + "; Path=/; HttpOnly");
+        } else {
+            App.setIsAuth(false);
         }
 
         try {

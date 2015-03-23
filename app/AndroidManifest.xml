@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".App_"
@@ -36,7 +37,11 @@
         </activity>
         <activity
             android:name=".activities.LoginActivity_"
-            android:launchMode="singleTop" >
+            android:parentActivityName=".activities.HomePageActivity_" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.HomePageActivity_" />
         </activity>
         <service
             android:name=".services.AuthenticatorService" >

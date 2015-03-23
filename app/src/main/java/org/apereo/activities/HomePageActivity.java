@@ -170,9 +170,8 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         casClient.logOut(new UmobileRestCallback<Integer>() {
             @Override
             public void onError(Exception e, Integer response) {
-                Logger.e(TAG, "error logging out (received status code " + response + ")", e);
                 dismissSpinner();
-                showLongToast(getString(R.string.error_logging_out));
+                showSnackBar(getString(R.string.error));
             }
 
             @Override

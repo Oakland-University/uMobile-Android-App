@@ -30,9 +30,11 @@
             android:layout_width="240dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:background="@color/theme_light_tint"
             android:choiceMode="singleChoice"
-            android:divider="@android:color/transparent" />
+            android:background="@color/theme_light_tint"
+            android:divider="@android:color/transparent"
+            android:drawSelectorOnTop="true"
+            android:dividerHeight="0dp" />
 
     </android.support.v4.widget.DrawerLayout>
 

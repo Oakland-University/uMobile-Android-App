@@ -3,12 +3,20 @@ package org.apereo.activities;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.widget.Toast;
 
+import com.nispok.snackbar.Snackbar;
+import com.nispok.snackbar.SnackbarManager;
+import com.nispok.snackbar.enums.SnackbarType;
+import com.nispok.snackbar.listeners.ActionClickListener;
+
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.UiThread;
+import org.androidannotations.annotations.res.ColorRes;
 import org.apache.commons.lang.StringUtils;
 import org.apereo.R;
 import org.apereo.utils.Logger;
@@ -20,6 +28,9 @@ import org.apereo.utils.Logger;
 public class BaseActivity extends ActionBarActivity {
 
     private final String TAG = BaseActivity.class.getName();
+
+    @ColorRes(R.color.theme_accent)
+    int themeAccent;
 
     ProgressDialog dialog;
 
@@ -44,13 +55,28 @@ public class BaseActivity extends ActionBarActivity {
     }
 
     @UiThread
-    public void showShortToast(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    public void showSnackBar(String msg) {
+        SnackbarManager.show(
+                Snackbar.with(this)
+                        .text(msg + " 10 incorrect attempts will lock your account.")
+                        .type(SnackbarType.MULTI_LINE)
+                        .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
+        );
     }
 
     @UiThread
-    public void showLongToast(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    public void showSnackBarWithAction(String msg, ActionClickListener listener) {
+        SnackbarManager.show(
+                Snackbar.with(this)
+                        .text(msg + " 10 incorrect attempts will lock your account.")
+                        .type(SnackbarType.MULTI_LINE)
+                        .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
+                        .dismissOnActionClicked(true)
+                        .actionColor(themeAccent)
+                        .actionLabel("Retry")
+                        .actionListener(listener),
+                this
+        );
     }
 
     @Override

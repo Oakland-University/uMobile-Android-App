@@ -1,25 +1,28 @@
 package org.apereo.activities;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.webkit.CookieSyncManager;
+import android.webkit.CookieManager;
+import android.webkit.DownloadListener;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
-import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
@@ -28,12 +31,14 @@ import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.ViewById;
+import org.apache.commons.lang.StringUtils;
 import org.apereo.App;
 import org.apereo.R;
 import org.apereo.adapters.FolderListAdapter;
 import org.apereo.models.Folder;
+import org.apereo.services.UmobileRestCallback;
+import org.apereo.utils.CasClient;
 import org.apereo.utils.LayoutManager;
-import org.apereo.utils.Logger;
 
 import java.util.List;
 
@@ -45,6 +50,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     private static final String TAG = PortletWebViewActivity.class.getName();
     private ActionBarDrawerToggle mDrawerToggle;
+    private final String ACCOUNT_TYPE = App.getInstance().getResources().getString(R.string.account_type);
 
     @ViewById(R.id.webView)
     WebView webView;
@@ -64,6 +70,11 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     @Bean
     LayoutManager layoutManager;
 
+    @Bean
+    CasClient casClient;
+
+    DownloadManager downloadManager;
+
     @Extra
     String url;
 
@@ -75,17 +86,42 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     @AfterViews
     void initialize() {
-        if (url.equals(getResources().getString(R.string.login_url))) {
-            LaunchActivity_.intent(this);
-        }
-
         setUpNavigationDrawer();
 
-        progressBar.setY(mDrawerLayout.getTop());
+        final Activity activity = this;
 
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        webView.setWebViewClient(new WebViewClient());
+        webView.setWebViewClient(new WebViewClient() {
+            public void onPageFinished(WebView view, final String url) {
+                if (url.startsWith(getResources().getString(R.string.login_url))) {
+                    showSnackBar("It's been a while. Logging you back in...");
+                    AccountManager accountManager = AccountManager.get(App.getInstance());
+                    if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
+                        Account account = accountManager.getAccountsByType(ACCOUNT_TYPE)[0];
+                        casClient.authenticate(account.name, accountManager.getPassword(account), activity, new UmobileRestCallback<String>() {
+
+                            @Override
+                            public void onError(Exception e, String response) { }
+
+                            @Override
+                            public void onSuccess(String response) {
+                                PortletWebViewActivity_.intent(activity)
+                                        .flags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                        .url(url)
+                                        .portletName(portletName)
+                                        .start();
+                            }
+                        });
+                    } else {
+                        LaunchActivity_
+                                .intent(getApplicationContext())
+                                .flags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                .start();
+                    }
+                }
+            }
+        });
         webView.setWebChromeClient(new WebChromeClient() {
             public void onProgressChanged(WebView view, int progress) {
                 if (progress < 100 && progressBar.getVisibility() == ProgressBar.GONE) {
@@ -96,21 +132,29 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
                     progressBar.setVisibility(ProgressBar.GONE);
                 }
             }
+        });
+        progressBar.setY(mDrawerLayout.getTop());
 
+        downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        webView.setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent,
+                    String contentDisposition, String mimetype,
+                    long contentLength) {
+                // This is a general solution that is only confirmed working for Moodle.
+                String domain = url.substring(0, StringUtils.ordinalIndexOf(url, "/", 3));
+                String cookie = CookieManager.getInstance().getCookie(domain);
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url))
+                        .addRequestHeader("Cookie", cookie)
+                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                downloadManager.enqueue(request);
+            }
         });
 
         //TODO find better way to do this
         url = url.replaceAll("/f/welcome","");
 
         webView.loadUrl(url);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (url.equals(getResources().getString(R.string.login_url))) {
-            LaunchActivity_.intent(this);
-        }
     }
 
     private void setUpNavigationDrawer() {
