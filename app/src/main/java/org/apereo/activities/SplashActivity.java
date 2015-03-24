@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.webkit.CookieSyncManager;
 
 import com.google.gson.Gson;
@@ -34,6 +35,8 @@ import org.apereo.utils.Logger;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
+
+import me.drakeet.materialdialog.MaterialDialog;
 
 /**
  * Created by schneis on 8/27/14.
@@ -68,7 +71,7 @@ public class SplashActivity extends BaseActivity {
 
                 @Override
                 public void onError(Exception e, String responseBody) {
-                    Logger.e(TAG, e.getMessage(), e);
+                    showErrorDialog(AppConstants.ERROR_GETTING_CONFIG);
                 }
 
                 @Override
@@ -117,7 +120,6 @@ public class SplashActivity extends BaseActivity {
 
                 @Override
                 public void onError(Exception e, String responseBody) {
-                    Logger.e(TAG, e.getMessage(), e);
                     showErrorDialog(AppConstants.ERROR_GETTING_FEED);
                 }
 
@@ -158,40 +160,34 @@ public class SplashActivity extends BaseActivity {
 
     @UiThread
     protected void showErrorDialog(int msgId) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setIcon(R.drawable.ic_launcher);
-        Dialog dialog = builder.setTitle(getString(R.string.error_title)).create();
+        MaterialDialog dialog = new MaterialDialog(this)
+                .setTitle(getString(R.string.error_title));
 
         switch (msgId) {
             case AppConstants.ERROR_GETTING_FEED:
-                builder.setMessage(getString(R.string.error_network_connection));
-                dialog = builder.setCancelable(false)
-                        .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+                dialog.setMessage(getString(R.string.error_network_connection))
+                        .setPositiveButton(R.string.dialog_ok, new View.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                            public void onClick(View v) {
                                 finish();
                             }
-                        })
-                        .create();
+                        });
                 break;
             case AppConstants.ERROR_GETTING_CONFIG:
-                builder.setMessage(getString(R.string.config_unavailable));
-                dialog = builder.setCancelable(false)
-                        .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+                dialog.setMessage(getString(R.string.config_unavailable))
+                        .setPositiveButton(R.string.dialog_ok, new View.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                            public void onClick(View v) {
                                 finish();
                             }
-                        })
-                        .create();
+                        });
                 break;
             case AppConstants.UPGRADE_REQUIRED:
-                builder.setTitle(R.string.upgrade_required_title);
-                builder.setMessage(getString(R.string.upgrade_required));
-                dialog = builder.setCancelable(false)
-                        .setPositiveButton(R.string.dialog_play_store, new DialogInterface.OnClickListener() {
+                dialog.setTitle(R.string.upgrade_required_title)
+                        .setMessage(getString(R.string.upgrade_required))
+                        .setPositiveButton(R.string.dialog_play_store, new View.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                            public void onClick(View v) {
                                 try {
                                     Intent intent = new Intent(Intent.ACTION_VIEW);
                                     intent.setData(Uri.parse("market://details?id="
@@ -203,21 +199,19 @@ public class SplashActivity extends BaseActivity {
                                 }
                             }
                         })
-                        .setNegativeButton(R.string.dialog_close, new DialogInterface.OnClickListener() {
+                        .setNegativeButton(R.string.dialog_close, new View.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                            public void onClick(View v) {
                                 finish();
                             }
-                        })
-                        .create();
+                        });
                 break;
             case AppConstants.UPGRADE_RECOMMENDED:
-                builder.setTitle(R.string.upgrade_recommended_title);
-                builder.setMessage(getString(R.string.upgrade_recommended));
-                dialog = builder.setCancelable(false)
-                        .setPositiveButton(R.string.dialog_play_store, new DialogInterface.OnClickListener() {
+                dialog.setTitle(R.string.upgrade_recommended_title)
+                        .setMessage(getString(R.string.upgrade_recommended))
+                        .setPositiveButton(R.string.dialog_play_store, new View.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                            public void onClick(View v) {
                                 try {
                                     Intent intent = new Intent(Intent.ACTION_VIEW);
                                     intent.setData(Uri.parse("market://details?id="
@@ -229,13 +223,12 @@ public class SplashActivity extends BaseActivity {
                                 }
                             }
                         })
-                        .setNegativeButton(R.string.dialog_later, new DialogInterface.OnClickListener() {
+                        .setNegativeButton(R.string.dialog_later, new View.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                            public void onClick(View v) {
                                 getAccountFeed();
                             }
-                        })
-                        .create();
+                        });
                 break;
             default:
                 break;

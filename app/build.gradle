@@ -24,8 +24,9 @@ dependencies {
     compile group: 'org.springframework.android', name: 'spring-android-rest-template', version: '1.0.1.RELEASE'
     compile 'com.google.code.gson:gson:2.3.1'
     compile 'com.squareup.picasso:picasso:2.4.0'
-    compile "com.android.support:appcompat-v7:21.0.3"
+    compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.nispok:snackbar:2.10.5'
+    compile 'me.drakeet.materialdialog:library:1.2.2'
     compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 }
 
