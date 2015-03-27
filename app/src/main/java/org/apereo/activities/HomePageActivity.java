@@ -247,7 +247,6 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
             @Override
             public void onError(Exception e, String responseBody) {
                 Logger.e(TAG, responseBody, e);
-                dismissSpinner();
             }
 
             @Override
@@ -258,8 +257,12 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
 
                 Layout layout = g.fromJson(response, Layout.class);
                 layoutManager.setLayout(layout);
+            }
 
+            @Override
+            public void onFinish() {
                 reconfigureViews();
+                dismissSpinner();
             }
         });
     }
