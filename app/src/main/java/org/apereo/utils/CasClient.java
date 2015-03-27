@@ -87,7 +87,9 @@ public class CasClient {
     }
 
     private void clearCookies() {
-        App.getCookieManager().getCookieStore().removeAll();
+        try {
+            App.getCookieManager().getCookieStore().removeAll();
+        } catch (NullPointerException e) {  }
         android.webkit.CookieManager.getInstance().removeAllCookie();
         CookieSyncManager.getInstance().sync();
     }
