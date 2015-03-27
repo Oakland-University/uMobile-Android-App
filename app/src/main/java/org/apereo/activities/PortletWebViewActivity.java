@@ -167,7 +167,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
             mDrawerList.setAdapter(new FolderListAdapter(this,
                     R.layout.drawer_list_item, folders, folderPosition));
         } catch (NullPointerException e) {
-            LaunchActivity_.intent(this);
+            LaunchActivity_.intent(this).start();
         }
 
         mDrawerList.setOnItemClickListener(this);

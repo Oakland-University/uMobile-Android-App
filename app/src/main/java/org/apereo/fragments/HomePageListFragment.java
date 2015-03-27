@@ -97,7 +97,7 @@ public class HomePageListFragment extends ListFragment {
             adapter = new PortletListAdapter(activity, R.layout.portlet_row, portlets);
             setListAdapter(adapter);
         } catch (NullPointerException e) {
-            LaunchActivity_.intent(App.getInstance());
+            LaunchActivity_.intent(App.getInstance()).start();
         }
     }
 

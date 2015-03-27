@@ -98,7 +98,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
             mDrawerList.setAdapter(new FolderListAdapter(this,
                     R.layout.drawer_list_item, folders, ePosition));
         } catch (NullPointerException e) {
-            LaunchActivity_.intent(this);
+            LaunchActivity_.intent(this).start();
         }
 
         mDrawerList.setOnItemClickListener(this);
@@ -206,7 +206,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         try {
             ((FolderListAdapter) mDrawerList.getAdapter()).setSelectedIndex(position);
         } catch (NullPointerException e) {
-            LaunchActivity_.intent(this);
+            LaunchActivity_.intent(this).start();
         }
 
         ePosition = position;
@@ -230,7 +230,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         try {
             setTitle(layoutManager.getLayout().getFolders().get(position).getName());
         } catch (NullPointerException e) {
-            LaunchActivity_.intent(this);
+            LaunchActivity_.intent(this).start();
         }
 
         mDrawerLayout.closeDrawer(mDrawerList);
@@ -294,7 +294,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
                     R.layout.drawer_list_item, folders, ePosition));
         } catch (NullPointerException e) {
             Logger.d(TAG, e.getMessage());
-            LaunchActivity_.intent(this);
+            LaunchActivity_.intent(this).start();
         }
 
         // Switch back to the first tab.
