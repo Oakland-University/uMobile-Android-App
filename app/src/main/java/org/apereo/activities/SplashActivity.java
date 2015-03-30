@@ -2,15 +2,11 @@ package org.apereo.activities;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.webkit.CookieSyncManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -31,7 +27,6 @@ import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
 import org.apereo.utils.ConfigManager;
 import org.apereo.utils.LayoutManager;
-import org.apereo.utils.Logger;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -45,24 +40,26 @@ import me.drakeet.materialdialog.MaterialDialog;
 public class SplashActivity extends BaseActivity {
 
     private final String TAG = SplashActivity.class.getName();
-
     private final String ACCOUNT_TYPE = App.getInstance().getResources().getString(R.string.account_type);
 
     @Bean
     RestApi restApi;
-
     @Bean
     LayoutManager layoutManager;
-
     @Bean
     ConfigManager configManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        manageCookies();
+        getGlobalConfig();
+        getAccountFeed();
+    }
+
+    private void manageCookies() {
         App.setCookieManager(new CookieManager());
         CookieHandler.setDefault(App.getCookieManager());
-        getGlobalConfig();
     }
 
     private void getGlobalConfig() {
@@ -88,13 +85,9 @@ public class SplashActivity extends BaseActivity {
                         showErrorDialog(AppConstants.UPGRADE_REQUIRED);
                     } else if (config.isUpgradeRecommended()) {
                         showErrorDialog(AppConstants.UPGRADE_RECOMMENDED);
-                    } else {
-                        getAccountFeed();
                     }
                 }
             });
-        } else {
-            getAccountFeed();
         }
     }
 
@@ -162,79 +155,100 @@ public class SplashActivity extends BaseActivity {
     protected void showErrorDialog(int msgId) {
         MaterialDialog dialog = new MaterialDialog(this)
                 .setTitle(getString(R.string.error_title));
-
+        View.OnClickListener positiveAction = null;
+        View.OnClickListener negativeAction = null;
         switch (msgId) {
             case AppConstants.ERROR_GETTING_FEED:
-                dialog.setMessage(getString(R.string.error_network_connection))
-                        .setPositiveButton(R.string.dialog_ok, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                finish();
-                            }
-                        });
+                positiveAction = new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) { finish(); }
+                };
+                dialog = setUpDialog(dialog,
+                        null, getString(R.string.error_network_connection),
+                        getString(R.string.dialog_ok), positiveAction, null, null);
                 break;
             case AppConstants.ERROR_GETTING_CONFIG:
-                dialog.setMessage(getString(R.string.config_unavailable))
-                        .setPositiveButton(R.string.dialog_ok, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                finish();
-                            }
-                        });
+                positiveAction = new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) { finish(); }
+                };
+                dialog = setUpDialog(dialog,
+                        null, getString(R.string.config_unavailable),
+                        getString(R.string.dialog_ok), positiveAction, null, null);
                 break;
             case AppConstants.UPGRADE_REQUIRED:
-                dialog.setTitle(R.string.upgrade_required_title)
-                        .setMessage(getString(R.string.upgrade_required))
-                        .setPositiveButton(R.string.dialog_play_store, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                try {
-                                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                                    intent.setData(Uri.parse("market://details?id="
-                                            + getApplicationContext().getPackageName()));
-                                    startActivity(intent);
-                                } catch (ActivityNotFoundException e) {
-                                    Logger.d(TAG, e.getMessage());
-                                    finish();
-                                }
-                            }
-                        })
-                        .setNegativeButton(R.string.dialog_close, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                finish();
-                            }
-                        });
+                positiveAction = new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            openPlayStore();
+                        } catch (ActivityNotFoundException e) {
+                            finish();
+                        }
+                    }
+                };
+                negativeAction = new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) { finish(); }
+                };
+                dialog = setUpDialog(dialog,
+                        getString(R.string.upgrade_required_title), getString(R.string.upgrade_required),
+                        getString(R.string.dialog_play_store), positiveAction,
+                        getString(R.string.dialog_close), negativeAction);
                 break;
             case AppConstants.UPGRADE_RECOMMENDED:
-                dialog.setTitle(R.string.upgrade_recommended_title)
-                        .setMessage(getString(R.string.upgrade_recommended))
-                        .setPositiveButton(R.string.dialog_play_store, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                try {
-                                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                                    intent.setData(Uri.parse("market://details?id="
-                                            + getApplicationContext().getPackageName()));
-                                    startActivity(intent);
-                                } catch (ActivityNotFoundException e) {
-                                    Logger.d(TAG, e.getMessage());
-                                    finish();
-                                }
-                            }
-                        })
-                        .setNegativeButton(R.string.dialog_later, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                getAccountFeed();
-                            }
-                        });
+                positiveAction = new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            openPlayStore();
+                        } catch (ActivityNotFoundException e) {
+                            finish();
+                        }
+                    }
+                };
+                negativeAction = new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        getAccountFeed();
+                    }
+                };
+                dialog = setUpDialog(dialog,
+                        getString(R.string.upgrade_recommended_title), getString(R.string.upgrade_recommended),
+                        getString(R.string.dialog_play_store), positiveAction,
+                        getString(R.string.dialog_later), negativeAction);
                 break;
             default:
                 break;
         }
 
         dialog.show();
+    }
+
+    private void openPlayStore() {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse("market://details?id="
+                + getApplicationContext().getPackageName()));
+        startActivity(intent);
+    }
+
+    private MaterialDialog setUpDialog(MaterialDialog dialog,
+                                       String title, String message,
+                                       String positiveTitle, View.OnClickListener positiveAction,
+                                       String negativeTitle, View.OnClickListener negativeAction) {
+        if (title != null) {
+            dialog.setTitle(title);
+        }
+        if (message != null) {
+            dialog.setMessage(message);
+        }
+        if (positiveTitle != null && positiveAction != null) {
+            dialog.setPositiveButton(positiveTitle, positiveAction);
+        }
+        if (negativeTitle != null && negativeAction != null) {
+            dialog.setNegativeButton(negativeTitle, negativeAction);
+        }
+        return dialog;
     }
 
     @Override

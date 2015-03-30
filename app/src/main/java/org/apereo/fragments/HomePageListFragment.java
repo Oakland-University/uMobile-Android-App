@@ -33,34 +33,28 @@ import java.util.List;
 
 @EFragment(R.layout.activity_listview)
 public class HomePageListFragment extends ListFragment {
+    private final String TAG = HomePageListFragment.class.getName();
     private Bundle mArguments;
-    private View view;
+    private Activity activity;
     private PortletListAdapter adapter;
     private List<Portlet> portlets = null;
-    private final String TAG = HomePageListFragment.class.getName();
-    private Activity activity;
+    private ListView list;
+    private View header;
+    private IActionListener actionListener;
     private int position;
     private float parallaxRate = 1.9f;
 
     @org.androidannotations.annotations.res.ColorRes(R.color.theme_accent)
     int themeAccent;
-
     @org.androidannotations.annotations.res.ColorRes(R.color.theme_accent_dark)
     int themeAccentDark;
-
     @org.androidannotations.annotations.res.ColorRes(R.color.theme_light)
     int themeLight;
-
     @org.androidannotations.annotations.res.ColorRes(R.color.theme_dark)
     int themeDark;
 
-    ListView list;
-    View header;
-
     @Bean
     LayoutManager layoutManager;
-
-    private IActionListener actionListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,9 +66,12 @@ public class HomePageListFragment extends ListFragment {
 
     @AfterViews
     void initialize() {
+        setUpListView();
+    }
+
+    private void setUpListView() {
         list = getListView();
-        header = getActivity().getLayoutInflater().inflate(R.layout.header, null);
-        list.addHeaderView(header, null, false);
+        setUpListViewHeader();
         fetchLayout();
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -89,6 +86,11 @@ public class HomePageListFragment extends ListFragment {
             }
         });
         list.setOnScrollListener(onScrollListener);
+    }
+
+    private void setUpListViewHeader() {
+        header = getActivity().getLayoutInflater().inflate(R.layout.header, null);
+        list.addHeaderView(header, null, false);
     }
 
     private void fetchLayout() {
@@ -188,13 +190,6 @@ public class HomePageListFragment extends ListFragment {
         super.onAttach(activity);
         mArguments = getArguments();
         this.activity = activity;
-    }
-
-    public void update() {
-        try {
-            portlets = layoutManager.getLayout().getFolders().get(position).getPortlets();
-            adapter.notifyDataSetChanged();
-        } catch (NullPointerException e) { }
     }
 
     public static Fragment getFragment(IActionListener actionListener) {

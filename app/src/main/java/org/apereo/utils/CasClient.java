@@ -12,6 +12,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.apereo.App;
 import org.apereo.R;
+import org.apereo.constants.AppConstants;
 import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
 
@@ -36,16 +37,15 @@ import java.util.List;
 @EBean
 public class CasClient {
 
-    @Bean
-    RestApi restApi;
-
     private static final String TAG = CasClient.class.getName();
+    private final Resources resources = App.getInstance().getResources();
+    private final String ACCOUNT_TYPE = resources.getString(R.string.account_type);
 
     private String tgt;
     private HttpURLConnection serviceTicketLocationConnection, serviceTicketConnection; // to be closed outside their methods
 
-    private final Resources resources = App.getInstance().getResources();
-    private final String ACCOUNT_TYPE = resources.getString(R.string.account_type);
+    @Bean
+    RestApi restApi;
 
     AccountManager accountManager;
 
@@ -130,23 +130,14 @@ public class CasClient {
         return postData;
     }
 
-    private String postForServiceTicketLocation(List<NameValuePair> postData)
-            throws IOException {
+    private String postForServiceTicketLocation(List<NameValuePair> postData) throws IOException {
 
         String postPath = resources.getString(R.string.ticket_url);
         URL postUrl = new URL(postPath);
+
         serviceTicketLocationConnection = (HttpURLConnection) postUrl.openConnection();
-        serviceTicketLocationConnection.setDoOutput(true);
-        serviceTicketLocationConnection.addRequestProperty("Content-Type", "text/html");
-
-        OutputStream os = new BufferedOutputStream(serviceTicketLocationConnection.getOutputStream());
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-
-        writer.write(getQuery(postData));
-        writer.flush();
-        writer.close();
-        os.close();
-        serviceTicketLocationConnection.connect();
+        serviceTicketLocationConnection = configureHttpURLConnection(serviceTicketLocationConnection);
+        serviceTicketLocationConnection = configurePost(serviceTicketLocationConnection, postData);
 
         // Service ticket created
         String serviceTicketLocation = serviceTicketLocationConnection.getHeaderField("Location");
@@ -158,23 +149,37 @@ public class CasClient {
         return serviceTicketLocation;
     }
 
+    private HttpURLConnection configurePost(HttpURLConnection connection, List<NameValuePair> postData) throws IOException {
+        OutputStream os = new BufferedOutputStream(connection.getOutputStream());
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+
+        writer.write(getQuery(postData));
+        writer.flush();
+        writer.close();
+        os.close();
+        connection.connect();
+
+        return connection;
+    }
+
+    private HttpURLConnection configureHttpURLConnection(HttpURLConnection connection) {
+        connection.setDoOutput(true);
+        connection.addRequestProperty("Content-Type", "text/html");
+        return connection;
+    }
+
     private String postForServiceTicket() throws IOException {
         String postPath = resources.getString(R.string.ticket_url) + "/" + tgt;
         URL postST = new URL(postPath);
         serviceTicketConnection = (HttpURLConnection) postST.openConnection();
-        serviceTicketConnection.setDoOutput(true);
-        serviceTicketConnection.addRequestProperty("Content-Type", "text/html");
+        serviceTicketConnection = configureHttpURLConnection(serviceTicketConnection);
 
         List<NameValuePair> postData = new ArrayList<NameValuePair>(1);
         postData.add(new BasicNameValuePair("service",
                 resources.getString(R.string.login_service)));
-        OutputStream os2 = new BufferedOutputStream(serviceTicketConnection.getOutputStream());
-        BufferedWriter writer2 = new BufferedWriter(new OutputStreamWriter(os2, "UTF-8"));
-        writer2.write(getQuery(postData));
-        writer2.flush();
-        writer2.close();
-        os2.close();
-        serviceTicketConnection.connect();
+
+        serviceTicketConnection = configurePost(serviceTicketConnection, postData);
+
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(serviceTicketConnection.getInputStream()));
 
@@ -198,7 +203,8 @@ public class CasClient {
     private void setJSession() {
         String uPortalDomain = resources.getString(R.string.uportal_domain);
         HttpCookie cookie = App.getCookieManager().getCookieStore().getCookies().get(0);
-        android.webkit.CookieManager.getInstance().setCookie(uPortalDomain, "JSESSIONID=" + cookie.getValue() + "; Path=/; HttpOnly");
+        android.webkit.CookieManager.getInstance().setCookie(uPortalDomain,
+                AppConstants.JSESSIONID + "=" + cookie.getValue() + "; Path=/; HttpOnly");
     }
 
     private void setCasCookie() {

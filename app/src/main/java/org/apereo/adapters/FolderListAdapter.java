@@ -1,19 +1,14 @@
 package org.apereo.adapters;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Typeface;
-import android.graphics.drawable.RippleDrawable;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import org.androidannotations.annotations.ViewById;
 import org.apereo.App;
 import org.apereo.R;
 import org.apereo.models.Folder;
@@ -42,7 +37,6 @@ public class FolderListAdapter extends ArrayAdapter<Folder> {
         this.selectedIndex = selectedIndex;
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
@@ -61,15 +55,8 @@ public class FolderListAdapter extends ArrayAdapter<Folder> {
 
         holder.txtName = (TextView) row.findViewById(R.id.name);
 
-        if (position == selectedIndex) {
-            holder.txtName.setTypeface(Typeface.DEFAULT_BOLD);
-            holder.txtName.setTextColor(colorThemeLightTint);
-            holder.txtName.setBackgroundColor(colorThemeAccent);
-        } else {
-            holder.txtName.setTypeface(Typeface.DEFAULT);
-            holder.txtName.setTextColor(colorBlack);
-            holder.txtName.setBackgroundColor(colorThemeLightTint);
-        }
+        int color = (position == selectedIndex) ? colorThemeAccent : colorBlack;
+        holder.setFolderStyles(color, colorThemeLightTint, Typeface.DEFAULT);
 
         Folder folder = data.get(position);
         holder.txtName.setText(folder.getName());
@@ -83,5 +70,13 @@ public class FolderListAdapter extends ArrayAdapter<Folder> {
 
     static class FolderHolder {
         TextView txtName;
+
+        private FolderHolder setFolderStyles(int backgroundColor, int textColor, Typeface typeface) {
+            this.txtName.setBackgroundColor(backgroundColor);
+            this.txtName.setTextColor(textColor);
+            this.txtName.setTypeface(typeface);
+            return this;
+        }
+
     }
 }

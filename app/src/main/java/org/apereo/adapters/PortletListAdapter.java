@@ -25,7 +25,6 @@ public class PortletListAdapter extends ArrayAdapter<Portlet> {
     Context context;
     int layoutResourceId;
     List<Portlet> data = null;
-    int size;
 
     public PortletListAdapter(Context context, int layoutResourceId, List<Portlet> data) {
         super(context, layoutResourceId, data);
@@ -59,8 +58,7 @@ public class PortletListAdapter extends ArrayAdapter<Portlet> {
 
         if (StringUtils.equalsIgnoreCase(App.getInstance().getResources().getString(R.string.use_drawable), portlet.getIconUrl())) {
             ImageManager.setImageFromDrawable(holder.portletIcon, portlet.getResID());
-        }
-        else {
+        } else {
             ImageManager.setImageFromUrl(holder.portletIcon, portlet.getIconUrl());
         }
 

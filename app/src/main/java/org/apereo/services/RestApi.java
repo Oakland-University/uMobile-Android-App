@@ -19,6 +19,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apereo.App;
 import org.apereo.R;
 import org.apereo.activities.LaunchActivity_;
+import org.apereo.constants.AppConstants;
 import org.apereo.utils.Logger;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.ResourceAccessException;
@@ -59,28 +60,13 @@ public class RestApi {
         template.setRequestFactory(requestFactory);
     }
 
-    public void setRootUrl(String rootUrl) {
-        powerClient.setRootUrl(rootUrl);
-    }
-
-    public RestInterface getRestInterface() {
-        return powerClient;
-    }
-
     @Background
     public void getMainFeed(Context context, UmobileRestCallback<String> callback) {
         callbackHandler.onBegin(callback);
 
         HttpClient client = new DefaultHttpClient();
         HttpGet httpGet = new HttpGet(context.getResources().getString(R.string.layout_json_url));
-
-        if (!App.getCookieManager().getCookieStore().getCookies().isEmpty()) {
-            App.setIsAuth(true);
-            HttpCookie cookie = App.getCookieManager().getCookieStore().getCookies().get(0);
-            httpGet.setHeader("Cookie", "JSESSIONID=" + cookie.getValue() + "; Path=/; HttpOnly");
-        } else {
-            App.setIsAuth(false);
-        }
+        httpGet = setUpMainFeedCookies(httpGet);
 
         try {
             powerClient.getMainFeed();
@@ -93,6 +79,17 @@ public class RestApi {
         } finally {
             callbackHandler.onFinish(callback);
         }
+    }
+
+    private HttpGet setUpMainFeedCookies(HttpGet httpGet) {
+        if (!App.getCookieManager().getCookieStore().getCookies().isEmpty()) {
+            App.setIsAuth(true);
+            HttpCookie cookie = App.getCookieManager().getCookieStore().getCookies().get(0);
+            httpGet.setHeader("Cookie", AppConstants.JSESSIONID + "=" + cookie.getValue() + "; Path=/; HttpOnly");
+        } else {
+            App.setIsAuth(false);
+        }
+        return httpGet;
     }
 
     @Background

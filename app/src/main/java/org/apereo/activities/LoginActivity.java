@@ -50,7 +50,6 @@ import org.apereo.utils.Logger;
 public class LoginActivity extends BaseActivity {
 
     private static final String TAG = LoginActivity.class.getName();
-
     private final String ACCOUNT_TYPE = App.getInstance().getResources().getString(R.string.account_type);
 
     @ViewById(R.id.login_container)
@@ -75,13 +74,10 @@ public class LoginActivity extends BaseActivity {
 
     @Bean
     RestApi restApi;
-
     @Bean
     CasClient casClient;
-
     @Bean
     LayoutManager layoutManager;
-
     @Bean
     ConfigManager configManager;
 
@@ -90,9 +86,14 @@ public class LoginActivity extends BaseActivity {
 
     @AfterViews
     void initialize() {
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        setUpToolbar();
+        setUpPasswordView();
+
+        checkAccount(true);
+    }
+
+    private void setUpPasswordView() {
         passwordView.setTypeface(Typeface.DEFAULT);
         passwordView.setTransformationMethod(new PasswordTransformationMethod());
         passwordView.setOnKeyListener(new View.OnKeyListener() {
@@ -105,8 +106,11 @@ public class LoginActivity extends BaseActivity {
                 return false;
             }
         });
+    }
 
-        checkAccount(true);
+    private void setUpToolbar() {
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -122,9 +126,7 @@ public class LoginActivity extends BaseActivity {
     private void checkAccount(boolean initialCheck) {
         if (username != null) {
             Account newAccount = new Account(username, ACCOUNT_TYPE);
-
             accountManager.addAccountExplicitly(newAccount, password, null);
-
             if (initialCheck) {
                 container.setVisibility(View.GONE);
                 logIn();
@@ -139,7 +141,6 @@ public class LoginActivity extends BaseActivity {
                 !passwordView.getText().toString().isEmpty()) {
             username = userNameView.getText().toString();
             password = passwordView.getText().toString();
-
             logIn();
         } else {
             showSnackBar(getResources().getString(R.string.form_error));
@@ -198,11 +199,6 @@ public class LoginActivity extends BaseActivity {
                 public void onSuccess(Integer response) { }
             });
         }
-    }
-
-    private void restartActivity() {
-        finish();
-        LoginActivity_.intent(this).start();
     }
 
     private void getFeed() {

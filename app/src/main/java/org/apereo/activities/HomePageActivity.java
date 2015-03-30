@@ -47,30 +47,24 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
 
     @ViewById(R.id.toolbar)
     Toolbar toolbar;
-
     @ViewById(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
-
     @ViewById(R.id.left_drawer)
     ListView mDrawerList;
 
     @Bean
     RestApi restApi;
-
     @Bean
     CasClient casClient;
-
     @Bean
     LayoutManager layoutManager;
 
     @Extra
     int ePosition;
-
     @Extra
     boolean shouldLogOut;
 
     private ActionBarDrawerToggle mDrawerToggle;
-
     private CharSequence mTitle;
 
     @Override
@@ -84,13 +78,16 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
 
     @AfterViews
     void init() {
+        setUpToolbar();
         setUpNavigationDrawer();
     }
 
-    private void setUpNavigationDrawer() {
-
+    private void setUpToolbar() {
         setSupportActionBar(toolbar);
         mTitle = toolbar.getTitle();
+    }
+
+    private void setUpNavigationDrawer() {
 
         // workaround for layoutManager/mDrawerList being possibly garbage collected
         try {
@@ -98,7 +95,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
             mDrawerList.setAdapter(new FolderListAdapter(this,
                     R.layout.drawer_list_item, folders, ePosition));
         } catch (NullPointerException e) {
-            LaunchActivity_.intent(this).start();
+            restartApp();
         }
 
         mDrawerList.setOnItemClickListener(this);
@@ -206,7 +203,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         try {
             ((FolderListAdapter) mDrawerList.getAdapter()).setSelectedIndex(position);
         } catch (NullPointerException e) {
-            LaunchActivity_.intent(this).start();
+            restartApp();
         }
 
         ePosition = position;
@@ -214,14 +211,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         // update the main content by replacing fragments
         Bundle args = new Bundle();
         args.putInt(AppConstants.POSITION, position);
-
-        Fragment fragment = HomePageListFragment.getFragment(this);
-        fragment.setArguments(args);
-
-        getFragmentManager()
-                .beginTransaction()
-                .replace(R.id.content_frame, fragment)
-                .commit();
+        replaceFragment(args);
 
         // update selected item and title, then close the drawer
         mDrawerList.setItemChecked(position, true);
@@ -230,10 +220,27 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         try {
             setTitle(layoutManager.getLayout().getFolders().get(position).getName());
         } catch (NullPointerException e) {
-            LaunchActivity_.intent(this).start();
+            restartApp();
         }
 
         mDrawerLayout.closeDrawer(mDrawerList);
+    }
+
+    private void replaceFragment(Bundle args) {
+        Fragment fragment = HomePageListFragment.getFragment(this);
+        fragment.setArguments(args);
+
+        getFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
+                .replace(R.id.content_frame, fragment)
+                .commit();
+    }
+
+    private void restartApp() {
+        LaunchActivity_
+                .intent(this)
+                .start();
     }
 
     @Override
@@ -274,14 +281,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         Bundle args = new Bundle();
         args.putInt(AppConstants.POSITION, 0);
 
-        Fragment fragment = HomePageListFragment.getFragment(this);
-        fragment.setArguments(args);
-
-        getFragmentManager()
-                .beginTransaction()
-                .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
-                .replace(R.id.content_frame, fragment)
-                .commit();
+        replaceFragment(args);
 
         // Update the login/logout button.
         invalidateOptionsMenu();
@@ -293,8 +293,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
             mDrawerList.setAdapter(new FolderListAdapter(this,
                     R.layout.drawer_list_item, folders, ePosition));
         } catch (NullPointerException e) {
-            Logger.d(TAG, e.getMessage());
-            LaunchActivity_.intent(this).start();
+            restartApp();
         }
 
         // Switch back to the first tab.

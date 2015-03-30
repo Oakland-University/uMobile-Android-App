@@ -29,6 +29,7 @@
     <string name="password">Password</string>
     <string name="forgot_password">Forgot password?</string>
     <string name="account_type">apereo.org.umobile</string>
+    <string name="reauthenticating">It\'s been a while. Logging you back in...</string>
 
     <!-- URL constants -->
     <string name="home_page">https://mysail.oakland.edu/uPortal/normal/render.uP</string>

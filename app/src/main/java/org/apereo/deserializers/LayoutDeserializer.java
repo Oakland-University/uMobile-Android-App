@@ -47,7 +47,7 @@ public class LayoutDeserializer implements JsonDeserializer<Layout> {
             JsonObject otherObject = (JsonObject)jsonParser.parse(otherPortlets);
             JsonArray otherFolderArray = otherObject.getAsJsonArray("folders");
             fillFolders(otherFolderArray);
-        }catch (IOException ioe) {
+        } catch (IOException ioe) {
             Logger.e(TAG, ioe.getMessage(), ioe);
         }
 
