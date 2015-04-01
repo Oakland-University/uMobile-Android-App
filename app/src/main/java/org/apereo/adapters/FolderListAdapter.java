@@ -55,8 +55,18 @@ public class FolderListAdapter extends ArrayAdapter<Folder> {
 
         holder.txtName = (TextView) row.findViewById(R.id.name);
 
-        int color = (position == selectedIndex) ? colorThemeAccent : colorBlack;
-        holder.setFolderStyles(color, colorThemeLightTint, Typeface.DEFAULT);
+        Typeface tf = null;
+        int backgroundColor, textColor = 0;
+        if (position == selectedIndex) {
+            backgroundColor = colorThemeAccent;
+            textColor = colorThemeLightTint;
+            tf = Typeface.DEFAULT_BOLD;
+        } else {
+            backgroundColor = colorThemeLightTint;
+            textColor = colorBlack;
+            tf = Typeface.DEFAULT;
+        }
+        holder.setFolderStyles(backgroundColor, textColor, tf);
 
         Folder folder = data.get(position);
         holder.txtName.setText(folder.getName());
