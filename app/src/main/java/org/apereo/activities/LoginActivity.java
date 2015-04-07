@@ -2,6 +2,7 @@ package org.apereo.activities;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
@@ -32,6 +33,7 @@ import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.ViewById;
 import org.apereo.App;
 import org.apereo.R;
+import org.apereo.constants.AppConstants;
 import org.apereo.deserializers.LayoutDeserializer;
 import org.apereo.models.Folder;
 import org.apereo.models.Layout;
@@ -43,6 +45,9 @@ import org.apereo.utils.ConfigManager;
 import org.apereo.utils.LayoutManager;
 import org.apereo.utils.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by schneis on 8/28/14.
  */
@@ -51,6 +56,7 @@ public class LoginActivity extends BaseActivity {
 
     private static final String TAG = LoginActivity.class.getName();
     private final String ACCOUNT_TYPE = App.getInstance().getResources().getString(R.string.account_type);
+    private boolean usingConfig = false;
 
     @ViewById(R.id.login_container)
     RelativeLayout container;
@@ -86,9 +92,10 @@ public class LoginActivity extends BaseActivity {
 
     @AfterViews
     void initialize() {
-
         setUpToolbar();
         setUpPasswordView();
+
+        usingConfig = getResources().getBoolean(R.bool.shouldUseGlobalConfig);
 
         checkAccount(true);
     }
@@ -129,11 +136,10 @@ public class LoginActivity extends BaseActivity {
             accountManager.addAccountExplicitly(newAccount, password, null);
             if (initialCheck) {
                 container.setVisibility(View.GONE);
-                logIn();
+                logInWithConfig();
             }
         }
     }
-
 
     @Click(R.id.login_button)
     protected void loginClick() {
@@ -141,12 +147,11 @@ public class LoginActivity extends BaseActivity {
                 !passwordView.getText().toString().isEmpty()) {
             username = userNameView.getText().toString();
             password = passwordView.getText().toString();
-            logIn();
+            logInWithConfig();
         } else {
             showSnackBar(getResources().getString(R.string.form_error));
         }
     }
-
 
     @Click(R.id.forgot_password)
     protected void forgotPasswordClick() {
@@ -156,14 +161,28 @@ public class LoginActivity extends BaseActivity {
                 .start();
     }
 
-    protected void logIn() {
+    protected void logInWithConfig() {
         showSpinner("Logging in...");
 
+        if (usingConfig) {
+            restApi.getGlobalConfig(this, new UmobileRestCallback<String>() {
+                @Override
+                public void onError(Exception e, String response) { }
+
+                @Override
+                public void onSuccess(String response) {
+                    logInToCas();
+                }
+            });
+        } else {
+            logInToCas();
+        }
+    }
+
+    private void logInToCas() {
         casClient.authenticate(username, password, this, new UmobileRestCallback<String>() {
             @Override
-            public void onSuccess(String response) {
-                getFeed();
-            }
+            public void onSuccess(String response) { getFeed(); }
 
             @Override
             public void onError(final Exception e, final String responseBody) {
@@ -217,15 +236,22 @@ public class LoginActivity extends BaseActivity {
 
                 Layout layout = g.fromJson(response, Layout.class);
 
-                if (getResources().getBoolean(R.bool.shouldUseGlobalConfig)) {
-                    for (Folder folder : layout.getFolders()) {
-                        for (Portlet p : folder.getPortlets()) {
-                            for (String portletName : configManager.getConfig().getDisabledPortlets()) {
-                                if (p.getFName().equalsIgnoreCase(portletName)) {
-                                    folder.getPortlets().remove(p);
-                                }
+                List<String> disabledPortlets = configManager.getConfig().getDisabledPortlets();
+                List<Portlet> portletReferences = new ArrayList<Portlet>();
+                boolean usingGlobalConfig = getResources().getBoolean(R.bool.shouldUseGlobalConfig);
+                if (usingGlobalConfig) {
+                    for (Folder f : layout.getFolders()) {
+                        for (Portlet p : f.getPortlets()) {
+                            if (disabledPortlets.contains(p.getFName())) {
+                                portletReferences.add(p);
                             }
                         }
+                    }
+                }
+
+                for (Folder f : layout.getFolders()) {
+                    for (Portlet p : portletReferences) {
+                        f.getPortlets().remove(p);
                     }
                 }
 

@@ -27,9 +27,12 @@ import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
 import org.apereo.utils.ConfigManager;
 import org.apereo.utils.LayoutManager;
+import org.apereo.utils.Logger;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.util.ArrayList;
+import java.util.List;
 
 import me.drakeet.materialdialog.MaterialDialog;
 
@@ -54,7 +57,6 @@ public class SplashActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         manageCookies();
         getGlobalConfig();
-        getAccountFeed();
     }
 
     private void manageCookies() {
@@ -81,6 +83,8 @@ public class SplashActivity extends BaseActivity {
                     Config config = g.fromJson(response, Config.class);
                     configManager.setConfig(config);
 
+                    getAccountFeed();
+
                     if (config.isUpgradeRequired()) {
                         showErrorDialog(AppConstants.UPGRADE_REQUIRED);
                     } else if (config.isUpgradeRecommended()) {
@@ -88,6 +92,8 @@ public class SplashActivity extends BaseActivity {
                     }
                 }
             });
+        } else {
+            getAccountFeed();
         }
     }
 
@@ -107,11 +113,6 @@ public class SplashActivity extends BaseActivity {
             restApi.getMainFeed(this, new UmobileRestCallback<String>() {
 
                 @Override
-                public void onBegin() {
-                    super.onBegin();
-                }
-
-                @Override
                 public void onError(Exception e, String responseBody) {
                     showErrorDialog(AppConstants.ERROR_GETTING_FEED);
                 }
@@ -125,19 +126,27 @@ public class SplashActivity extends BaseActivity {
 
                     Layout layout = g.fromJson(response, Layout.class);
 
-                    if (getResources().getBoolean(R.bool.shouldUseGlobalConfig)) {
-                        for (Folder folder : layout.getFolders()) {
-                            for (Portlet p : folder.getPortlets()) {
-                                for (String portletName : configManager.getConfig().getDisabledPortlets()) {
-                                    if (p.getFName().equalsIgnoreCase(portletName)) {
-                                        folder.getPortlets().remove(p);
-                                    }
+                    List<String> disabledPortlets = configManager.getConfig().getDisabledPortlets();
+                    List<Portlet> portletReferences = new ArrayList<Portlet>();
+                    boolean usingGlobalConfig = getResources().getBoolean(R.bool.shouldUseGlobalConfig);
+                    if (usingGlobalConfig) {
+                        for (Folder f : layout.getFolders()) {
+                            for (Portlet p : f.getPortlets()) {
+                                if (disabledPortlets.contains(p.getFName())) {
+                                    portletReferences.add(p);
                                 }
                             }
                         }
                     }
 
+                    for (Folder f : layout.getFolders()) {
+                        for (Portlet p : portletReferences) {
+                            f.getPortlets().remove(p);
+                        }
+                    }
+
                     layoutManager.setLayout(layout);
+
                     HomePageActivity_
                             .intent(SplashActivity.this)
                             .start();
