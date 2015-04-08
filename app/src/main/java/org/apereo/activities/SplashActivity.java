@@ -126,10 +126,10 @@ public class SplashActivity extends BaseActivity {
 
                     Layout layout = g.fromJson(response, Layout.class);
 
-                    List<String> disabledPortlets = configManager.getConfig().getDisabledPortlets();
                     List<Portlet> portletReferences = new ArrayList<Portlet>();
                     boolean usingGlobalConfig = getResources().getBoolean(R.bool.shouldUseGlobalConfig);
                     if (usingGlobalConfig) {
+                        List<String> disabledPortlets = configManager.getConfig().getDisabledPortlets();
                         for (Folder f : layout.getFolders()) {
                             for (Portlet p : f.getPortlets()) {
                                 if (disabledPortlets.contains(p.getFName())) {
