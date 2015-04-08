@@ -170,7 +170,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     private void setUpToolbar() {
         setSupportActionBar(toolbar);
-        toolbar.setTitle(portletName);
+        getSupportActionBar().setTitle(portletName);
     }
 
     private void setUpNavigationDrawer() {
