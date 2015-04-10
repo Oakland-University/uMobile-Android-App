@@ -26,6 +26,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import com.nispok.snackbar.Snackbar;
+import com.nispok.snackbar.listeners.ActionClickListener;
+
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
@@ -141,27 +144,37 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
         webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, final String url) {
                 if (url.startsWith(getResources().getString(R.string.login_url))) {
-                    showSnackBar(getString(R.string.reauthenticating));
-                    AccountManager accountManager = AccountManager.get(App.getInstance());
-                    if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
-                        Account account = accountManager.getAccountsByType(ACCOUNT_TYPE)[0];
-                        casClient.authenticate(account.name, accountManager.getPassword(account), activity, new UmobileRestCallback<String>() {
-                            @Override
-                            public void onError(Exception e, String response) {
-                                showSnackBar(getString(R.string.error));
-                            }
-                            @Override
-                            public void onSuccess(String response) {
-                                PortletWebViewActivity_.intent(activity)
+                    ActionClickListener listener = new ActionClickListener() {
+                        @Override
+                        public void onActionClicked(Snackbar snackbar) {
+                            AccountManager accountManager = AccountManager.get(App.getInstance());
+                            if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
+                                Account account = accountManager.getAccountsByType(ACCOUNT_TYPE)[0];
+                                casClient.authenticate(account.name, accountManager.getPassword(account), activity, new UmobileRestCallback<String>() {
+                                    @Override
+                                    public void onError(Exception e, String response) {
+                                        showSnackBar(getString(R.string.error) + " " + getString(R.string.lockout_reminder));
+                                    }
+                                    @Override
+                                    public void onSuccess(String response) {
+                                        PortletWebViewActivity_.intent(activity)
+                                                .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                                .url(url)
+                                                .portletName(portletName)
+                                                .start();
+                                    }
+                                });
+                            } else {
+                                LoginActivity_
+                                        .intent(activity)
                                         .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                                         .url(url)
                                         .portletName(portletName)
                                         .start();
                             }
-                        });
-                    } else {
-                        restartApp();
-                    }
+                        }
+                    };
+                    showSnackBarWithAction(getString(R.string.reauthenticating), listener, getString(R.string.login));
                 }
             }
         });
@@ -203,6 +216,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     private void restartApp() {
         LaunchActivity_
                 .intent(this)
+                .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 .start();
     }
 

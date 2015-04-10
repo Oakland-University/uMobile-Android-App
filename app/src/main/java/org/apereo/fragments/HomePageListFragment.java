@@ -28,6 +28,7 @@ import org.apereo.constants.AppConstants;
 import org.apereo.interfaces.IActionListener;
 import org.apereo.models.Portlet;
 import org.apereo.utils.LayoutManager;
+import org.apereo.utils.Logger;
 
 import java.util.List;
 
@@ -99,7 +100,9 @@ public class HomePageListFragment extends ListFragment {
             adapter = new PortletListAdapter(activity, R.layout.portlet_row, portlets);
             setListAdapter(adapter);
         } catch (NullPointerException e) {
-            LaunchActivity_.intent(App.getInstance()).start();
+            LaunchActivity_
+                    .intent(getActivity())
+                    .start();
         }
     }
 

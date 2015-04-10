@@ -2,11 +2,8 @@ package org.apereo.activities;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.app.Activity;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Typeface;
-import android.support.annotation.DrawableRes;
 import android.support.v7.widget.Toolbar;
 import android.text.method.PasswordTransformationMethod;
 import android.view.KeyEvent;
@@ -14,11 +11,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -31,9 +25,9 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.ViewById;
+import org.apache.commons.lang.StringUtils;
 import org.apereo.App;
 import org.apereo.R;
-import org.apereo.constants.AppConstants;
 import org.apereo.deserializers.LayoutDeserializer;
 import org.apereo.models.Folder;
 import org.apereo.models.Layout;
@@ -77,6 +71,8 @@ public class LoginActivity extends BaseActivity {
     String password;
     @Extra
     String url;
+    @Extra
+    String portletName;
 
     @Bean
     RestApi restApi;
@@ -193,7 +189,7 @@ public class LoginActivity extends BaseActivity {
                         loginClick();
                     }
                 };
-                showSnackBarWithAction(responseBody, listener);
+                showSnackBarWithAction(responseBody + " " + getString(R.string.lockout_reminder), listener, getString(R.string.retry));
                 deleteAccount();
             }
         });
@@ -204,7 +200,6 @@ public class LoginActivity extends BaseActivity {
             casClient.logOut(new UmobileRestCallback<Integer>() {
                 @Override
                 public void onError(Exception e, Integer response) {
-                    Logger.e(TAG, "error logging out (received status code " + response + ")", e);
                     dismissSpinner();
                     ActionClickListener listener = new ActionClickListener() {
                         @Override
@@ -212,7 +207,7 @@ public class LoginActivity extends BaseActivity {
                             deleteAccount();
                         }
                     };
-                    showSnackBarWithAction(getString(R.string.error), listener);
+                    showSnackBarWithAction(getString(R.string.error), listener, getString(R.string.retry));
                 }
                 @Override
                 public void onSuccess(Integer response) { }
@@ -224,9 +219,7 @@ public class LoginActivity extends BaseActivity {
         restApi.getMainFeed(this, new UmobileRestCallback<String>() {
 
             @Override
-            public void onError(Exception e, String responseBody) {
-                Logger.e(TAG, responseBody, e);
-            }
+            public void onError(Exception e, String responseBody) { }
 
             @Override
             public void onSuccess(String response) {
@@ -261,10 +254,21 @@ public class LoginActivity extends BaseActivity {
                     checkAccount(false);
                 }
 
-                HomePageActivity_
-                        .intent(LoginActivity.this)
-                        .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        .start();
+                if (StringUtils.isNotEmpty(url) &&
+                        StringUtils.isNotEmpty(portletName)) {
+                    PortletWebViewActivity_
+                            .intent(LoginActivity.this)
+                            .url(url)
+                            .portletName(portletName)
+                            .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            .start();
+                } else {
+                    HomePageActivity_
+                            .intent(LoginActivity.this)
+                            .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            .start();
+                }
+
                 finish();
             }
 

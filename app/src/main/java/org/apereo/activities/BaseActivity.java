@@ -58,22 +58,22 @@ public class BaseActivity extends ActionBarActivity {
     public void showSnackBar(String msg) {
         SnackbarManager.show(
                 Snackbar.with(this)
-                        .text(msg + " 10 incorrect attempts will lock your account.")
+                        .text(msg)
                         .type(SnackbarType.MULTI_LINE)
                         .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
         );
     }
 
     @UiThread
-    public void showSnackBarWithAction(String msg, ActionClickListener listener) {
+    public void showSnackBarWithAction(String msg, ActionClickListener listener, String actionLabel) {
         SnackbarManager.show(
                 Snackbar.with(this)
-                        .text(msg + " 10 incorrect attempts will lock your account.")
+                        .text(msg)
                         .type(SnackbarType.MULTI_LINE)
                         .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
                         .dismissOnActionClicked(true)
                         .actionColor(themeAccent)
-                        .actionLabel("Retry")
+                        .actionLabel(actionLabel)
                         .actionListener(listener),
                 this
         );

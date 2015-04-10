@@ -76,6 +76,15 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Bundle args = new Bundle();
+        args.putInt(AppConstants.POSITION, ePosition);
+        replaceFragment(args);
+        invalidateOptionsMenu();
+    }
+
     @AfterViews
     void init() {
         setUpToolbar();
@@ -163,7 +172,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
     }
 
     private void logOut() {
-        showSpinner();
+        showSpinner("Logging out...");
 
         casClient.logOut(new UmobileRestCallback<Integer>() {
             @Override

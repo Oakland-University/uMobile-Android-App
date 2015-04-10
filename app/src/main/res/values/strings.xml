@@ -11,6 +11,7 @@
     <string name="login">Log In</string>
     <string name="logout">Log Out</string>
     <string name="error_title">Error</string>
+    <string name="retry">Retry</string>
     <string name="upgrade_recommended_title">Upgrade recommended</string>
     <string name="upgrade_required_title">Upgrade required</string>
     <string name="dialog_play_store">Play Store</string>
@@ -29,7 +30,8 @@
     <string name="password">Password</string>
     <string name="forgot_password">Forgot password?</string>
     <string name="account_type">apereo.org.umobile</string>
-    <string name="reauthenticating">It\'s been a while. Logging you back in...</string>
+    <string name="reauthenticating">It\'s been a while. Log back in?</string>
+    <string name="lockout_reminder">10 incorrect attempts will lock your account.</string>
 
     <!-- URL constants -->
     <string name="home_page">https://mysail.oakland.edu/uPortal/normal/render.uP</string>
