@@ -117,7 +117,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     private void setUpWebView() {
         WebSettings webSettings = webView.getSettings();
-        webSettings.setUserAgentString("android.uMobile");
+        webSettings.setUserAgentString("Android.uMobile");
         webSettings.setJavaScriptEnabled(true);
         setUpAutomaticReauthentication(this);
     }
