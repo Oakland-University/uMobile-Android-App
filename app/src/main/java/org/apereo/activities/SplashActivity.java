@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -27,14 +28,11 @@ import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
 import org.apereo.utils.ConfigManager;
 import org.apereo.utils.LayoutManager;
-import org.apereo.utils.Logger;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.util.ArrayList;
 import java.util.List;
-
-import me.drakeet.materialdialog.MaterialDialog;
 
 /**
  * Created by schneis on 8/27/14.
@@ -162,33 +160,33 @@ public class SplashActivity extends BaseActivity {
 
     @UiThread
     protected void showErrorDialog(int msgId) {
-        MaterialDialog dialog = new MaterialDialog(this)
-                .setTitle(getString(R.string.error_title));
-        View.OnClickListener positiveAction = null;
-        View.OnClickListener negativeAction = null;
+        MaterialDialog.Builder dialog = new MaterialDialog.Builder(this)
+                .title(getString(R.string.error_title));
+        MaterialDialog.ButtonCallback positiveAction = null;
+        MaterialDialog.ButtonCallback negativeAction = null;
         switch (msgId) {
             case AppConstants.ERROR_GETTING_FEED:
-                positiveAction = new View.OnClickListener() {
+                positiveAction = new MaterialDialog.ButtonCallback() {
                     @Override
-                    public void onClick(View v) { finish(); }
+                    public void onPositive(MaterialDialog dialog) { finish(); }
                 };
-                dialog = setUpDialog(dialog,
+                dialog = buildDialog(dialog,
                         null, getString(R.string.error_network_connection),
                         getString(R.string.dialog_ok), positiveAction, null, null);
                 break;
             case AppConstants.ERROR_GETTING_CONFIG:
-                positiveAction = new View.OnClickListener() {
+                positiveAction = new MaterialDialog.ButtonCallback() {
                     @Override
-                    public void onClick(View v) { finish(); }
+                    public void onPositive(MaterialDialog dialog) { finish(); }
                 };
-                dialog = setUpDialog(dialog,
+                dialog = buildDialog(dialog,
                         null, getString(R.string.config_unavailable),
                         getString(R.string.dialog_ok), positiveAction, null, null);
                 break;
             case AppConstants.UPGRADE_REQUIRED:
-                positiveAction = new View.OnClickListener() {
+                positiveAction = new MaterialDialog.ButtonCallback() {
                     @Override
-                    public void onClick(View v) {
+                    public void onPositive(MaterialDialog dialog) {
                         try {
                             openPlayStore();
                         } catch (ActivityNotFoundException e) {
@@ -196,19 +194,19 @@ public class SplashActivity extends BaseActivity {
                         }
                     }
                 };
-                negativeAction = new View.OnClickListener() {
+                negativeAction = new MaterialDialog.ButtonCallback() {
                     @Override
-                    public void onClick(View v) { finish(); }
+                    public void onNegative(MaterialDialog dialog) { finish(); }
                 };
-                dialog = setUpDialog(dialog,
+                dialog = buildDialog(dialog,
                         getString(R.string.upgrade_required_title), getString(R.string.upgrade_required),
                         getString(R.string.dialog_play_store), positiveAction,
                         getString(R.string.dialog_close), negativeAction);
                 break;
             case AppConstants.UPGRADE_RECOMMENDED:
-                positiveAction = new View.OnClickListener() {
+                positiveAction = new MaterialDialog.ButtonCallback() {
                     @Override
-                    public void onClick(View v) {
+                    public void onPositive(MaterialDialog dialog) {
                         try {
                             openPlayStore();
                         } catch (ActivityNotFoundException e) {
@@ -216,13 +214,13 @@ public class SplashActivity extends BaseActivity {
                         }
                     }
                 };
-                negativeAction = new View.OnClickListener() {
+                negativeAction = new MaterialDialog.ButtonCallback() {
                     @Override
-                    public void onClick(View v) {
+                    public void onNegative(MaterialDialog dialog) {
                         getAccountFeed();
                     }
                 };
-                dialog = setUpDialog(dialog,
+                dialog = buildDialog(dialog,
                         getString(R.string.upgrade_recommended_title), getString(R.string.upgrade_recommended),
                         getString(R.string.dialog_play_store), positiveAction,
                         getString(R.string.dialog_later), negativeAction);
@@ -231,7 +229,8 @@ public class SplashActivity extends BaseActivity {
                 break;
         }
 
-        dialog.show();
+        dialog.build()
+                .show();
     }
 
     private void openPlayStore() {
@@ -241,21 +240,23 @@ public class SplashActivity extends BaseActivity {
         startActivity(intent);
     }
 
-    private MaterialDialog setUpDialog(MaterialDialog dialog,
+    private MaterialDialog.Builder buildDialog(MaterialDialog.Builder dialog,
                                        String title, String message,
-                                       String positiveTitle, View.OnClickListener positiveAction,
-                                       String negativeTitle, View.OnClickListener negativeAction) {
+                                       String positiveTitle, MaterialDialog.ButtonCallback positiveAction,
+                                       String negativeTitle, MaterialDialog.ButtonCallback negativeAction) {
         if (title != null) {
-            dialog.setTitle(title);
+            dialog.title(title);
         }
         if (message != null) {
-            dialog.setMessage(message);
+            dialog.content(message);
         }
         if (positiveTitle != null && positiveAction != null) {
-            dialog.setPositiveButton(positiveTitle, positiveAction);
+            dialog.positiveText(positiveTitle)
+                    .callback(positiveAction);
         }
         if (negativeTitle != null && negativeAction != null) {
-            dialog.setNegativeButton(negativeTitle, negativeAction);
+            dialog.negativeText(negativeTitle)
+                    .callback(negativeAction);
         }
         return dialog;
     }

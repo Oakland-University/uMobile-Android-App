@@ -1,14 +1,10 @@
 package org.apereo.activities;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Color;
-import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.SnackbarManager;
 import com.nispok.snackbar.enums.SnackbarType;
@@ -19,7 +15,6 @@ import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.res.ColorRes;
 import org.apache.commons.lang.StringUtils;
 import org.apereo.R;
-import org.apereo.utils.Logger;
 
 /**
  * Created by schneis on 8/27/14.
@@ -32,7 +27,7 @@ public class BaseActivity extends ActionBarActivity {
     @ColorRes(R.color.theme_accent)
     int themeAccent;
 
-    ProgressDialog dialog;
+    MaterialDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,28 +93,19 @@ public class BaseActivity extends ActionBarActivity {
     @UiThread
     public void showSpinner(String msg) {
 
-        if (dialog == null) {
-            dialog = new ProgressDialog(this);
-            dialog.setCancelable(false);
-        }
+        dialog = new MaterialDialog.Builder(this)
+                .content((!StringUtils.isEmpty(msg)) ? msg : null)
+                .progress(true, 0)
+                .autoDismiss(true)
+                .build();
         dialog.show();
-        if (StringUtils.isEmpty(msg)) {
-            dialog.setContentView(R.layout.spinner);
-        }
-        else {
-            dialog.setMessage(msg);
-        }
-
 
     }
 
-    @UiThread
     public void dismissSpinner() {
-        if (dialog != null)
-            try {
-                dialog.dismiss();
-            } catch (Exception e) {
-                Logger.d(TAG, e.getMessage());
-            }
+        try {
+            dialog.dismiss();
+        } catch (Exception e) { }
     }
+
 }
