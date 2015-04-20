@@ -102,6 +102,7 @@ public class BaseActivity extends ActionBarActivity {
 
     }
 
+    @UiThread
     public void dismissSpinner() {
         try {
             dialog.dismiss();
