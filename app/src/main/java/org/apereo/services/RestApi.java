@@ -15,6 +15,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.params.ClientPNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apereo.App;
 import org.apereo.R;
@@ -72,6 +73,7 @@ public class RestApi {
         callbackHandler.onBegin(callback);
 
         HttpClient client = new DefaultHttpClient();
+        client.getParams().setParameter(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, true);
         HttpGet httpGet = new HttpGet(context.getResources().getString(R.string.layout_json_url));
 
         if (!App.getCookieManager().getCookieStore().getCookies().isEmpty()) {
