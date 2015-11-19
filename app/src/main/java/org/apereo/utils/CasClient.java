@@ -1,6 +1,7 @@
 package org.apereo.utils;
 
 import android.accounts.AccountManager;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.webkit.CookieSyncManager;
@@ -8,8 +9,6 @@ import android.webkit.CookieSyncManager;
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.apereo.App;
 import org.apereo.R;
 import org.apereo.constants.AppConstants;
@@ -28,8 +27,7 @@ import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ajclisso on 12/4/14.
@@ -54,7 +52,7 @@ public class CasClient {
                              UmobileRestCallback<String> callback) {
         try {
             // Perform the CAS authentication dance.
-            List<NameValuePair> postData = generatePostData(username, password);
+            ContentValues postData = generatePostData(username, password);
             String stLocation = postForServiceTicketLocation(postData);
             if (stLocation != null) {
                 String st = postForServiceTicket();
@@ -120,17 +118,15 @@ public class CasClient {
         }
     }
 
-    private List<NameValuePair> generatePostData(String username, String password)
+    private ContentValues generatePostData(String username, String password)
             throws IOException {
-
-        List<NameValuePair> postData = new ArrayList<NameValuePair>(2);
-        postData.add(new BasicNameValuePair("username", username));
-        postData.add(new BasicNameValuePair("password", password));
-
+        ContentValues postData = new ContentValues();
+        postData.put("username", username);
+        postData.put("password", password);
         return postData;
     }
 
-    private String postForServiceTicketLocation(List<NameValuePair> postData) throws IOException {
+    private String postForServiceTicketLocation(ContentValues postData) throws IOException {
 
         String postPath = resources.getString(R.string.ticket_url);
         URL postUrl = new URL(postPath);
@@ -149,7 +145,8 @@ public class CasClient {
         return serviceTicketLocation;
     }
 
-    private HttpURLConnection configurePost(HttpURLConnection connection, List<NameValuePair> postData) throws IOException {
+    private HttpURLConnection configurePost(HttpURLConnection connection, ContentValues postData)
+            throws IOException {
         OutputStream os = new BufferedOutputStream(connection.getOutputStream());
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
 
@@ -174,10 +171,8 @@ public class CasClient {
         serviceTicketConnection = (HttpURLConnection) postST.openConnection();
         serviceTicketConnection = configureHttpURLConnection(serviceTicketConnection);
 
-        List<NameValuePair> postData = new ArrayList<NameValuePair>(1);
-        postData.add(new BasicNameValuePair("service",
-                resources.getString(R.string.login_service)));
-
+        ContentValues postData = new ContentValues(1);
+        postData.put("service", resources.getString(R.string.login_service));
         serviceTicketConnection = configurePost(serviceTicketConnection, postData);
 
         BufferedReader in = new BufferedReader(
@@ -213,20 +208,20 @@ public class CasClient {
     }
 
     // URL encoding helper method. (http://stackoverflow.com/a/13486223/2546659)
-    private String getQuery(List<NameValuePair> params) throws UnsupportedEncodingException {
+    private String getQuery(ContentValues params) throws UnsupportedEncodingException {
         StringBuilder result = new StringBuilder();
 
         boolean first = true;
-        for (NameValuePair pair : params) {
+        for (Map.Entry<String, Object> pair : params.valueSet()) {
             if (first) {
                 first = false;
             } else {
                 result.append("&");
             }
 
-            result.append(URLEncoder.encode(pair.getName(), "UTF-8"));
+            result.append(URLEncoder.encode(pair.getKey(), "UTF-8"));
             result.append("=");
-            result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
+            result.append(URLEncoder.encode((String) pair.getValue(), "UTF-8"));
         }
 
         return result.toString();
