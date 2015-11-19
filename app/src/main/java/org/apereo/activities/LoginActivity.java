@@ -175,7 +175,9 @@ public class LoginActivity extends BaseActivity {
     private void logInToCas() {
         casClient.authenticate(username, password, this, new UmobileRestCallback<String>() {
             @Override
-            public void onSuccess(String response) { getFeed(); }
+            public void onSuccess(String response) {
+                getFeed();
+            }
 
             @Override
             public void onError(final Exception e, final String responseBody) {

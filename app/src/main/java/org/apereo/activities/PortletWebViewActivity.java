@@ -150,11 +150,12 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
                                 casClient.authenticate(account.name, accountManager.getPassword(account), activity, new UmobileRestCallback<String>() {
                                     @Override
                                     public void onError(Exception e, String response) {
-                                        showSnackBar(getParent(), App.getInstance().getString(R.string.error) + " " + App.getInstance().getString(R.string.lockout_reminder));
+                                        showSnackBar(PortletWebViewActivity.this, App.getInstance().getString(R.string.error) + " " + App.getInstance().getString(R.string.lockout_reminder));
                                     }
                                     @Override
                                     public void onSuccess(String response) {
-                                        PortletWebViewActivity_.intent(activity)
+                                        PortletWebViewActivity_
+                                                .intent(activity)
                                                 .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                                                 .url(url)
                                                 .portletName(portletName)
@@ -171,7 +172,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
                             }
                         }
                     };
-                    showSnackBarWithAction(getParent(), getString(R.string.reauthenticating), listener, getString(R.string.login));
+                    showSnackBarWithAction(PortletWebViewActivity.this, getString(R.string.reauthenticating), listener, getString(R.string.login));
                 }
             }
         });
