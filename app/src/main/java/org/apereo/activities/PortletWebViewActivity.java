@@ -146,14 +146,14 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
                 if (url.startsWith(getResources().getString(R.string.login_url))) {
                     ActionClickListener listener = new ActionClickListener() {
                         @Override
-                        public void onActionClicked(Snackbar snackbar) {
+                        public void onClick(View view) {
                             AccountManager accountManager = AccountManager.get(App.getInstance());
                             if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
                                 Account account = accountManager.getAccountsByType(ACCOUNT_TYPE)[0];
                                 casClient.authenticate(account.name, accountManager.getPassword(account), activity, new UmobileRestCallback<String>() {
                                     @Override
                                     public void onError(Exception e, String response) {
-                                        showSnackBar(getString(R.string.error) + " " + getString(R.string.lockout_reminder));
+                                        showSnackBar(getParent(), App.getInstance().getString(R.string.error) + " " + App.getInstance().getString(R.string.lockout_reminder));
                                     }
                                     @Override
                                     public void onSuccess(String response) {
@@ -174,7 +174,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
                             }
                         }
                     };
-                    showSnackBarWithAction(getString(R.string.reauthenticating), listener, getString(R.string.login));
+                    showSnackBarWithAction(getParent(), getString(R.string.reauthenticating), listener, getString(R.string.login));
                 }
             }
         });

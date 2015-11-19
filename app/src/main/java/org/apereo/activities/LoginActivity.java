@@ -16,8 +16,6 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.nispok.snackbar.Snackbar;
-import com.nispok.snackbar.listeners.ActionClickListener;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
@@ -145,7 +143,7 @@ public class LoginActivity extends BaseActivity {
             password = passwordView.getText().toString();
             logInWithConfig();
         } else {
-            showSnackBar(getResources().getString(R.string.form_error));
+            showSnackBar(this, getResources().getString(R.string.form_error));
         }
     }
 
@@ -183,13 +181,13 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onError(final Exception e, final String responseBody) {
                 dismissSpinner();
-                ActionClickListener listener = new ActionClickListener() {
+                View.OnClickListener listener = new View.OnClickListener() {
                     @Override
-                    public void onActionClicked(Snackbar snackbar) {
+                    public void onClick(View v) {
                         loginClick();
                     }
                 };
-                showSnackBarWithAction(responseBody + " " + getString(R.string.lockout_reminder), listener, getString(R.string.retry));
+                showSnackBarWithAction(LoginActivity.this, responseBody + " " + getString(R.string.lockout_reminder), listener, getString(R.string.retry));
                 deleteAccount();
             }
         });
@@ -201,13 +199,13 @@ public class LoginActivity extends BaseActivity {
                 @Override
                 public void onError(Exception e, Integer response) {
                     dismissSpinner();
-                    ActionClickListener listener = new ActionClickListener() {
+                    View.OnClickListener listener = new View.OnClickListener() {
                         @Override
-                        public void onActionClicked(Snackbar snackbar) {
+                        public void onClick(View v) {
                             deleteAccount();
                         }
                     };
-                    showSnackBarWithAction(getString(R.string.error), listener, getString(R.string.retry));
+                    showSnackBarWithAction(LoginActivity.this, getString(R.string.error), listener, getString(R.string.retry));
                 }
                 @Override
                 public void onSuccess(Integer response) { }

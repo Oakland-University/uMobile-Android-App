@@ -178,7 +178,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
             @Override
             public void onError(Exception e, Integer response) {
                 dismissSpinner();
-                showSnackBar(getString(R.string.error));
+                showSnackBar(HomePageActivity.this, getString(R.string.error));
             }
 
             @Override

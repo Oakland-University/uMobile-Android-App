@@ -2,16 +2,16 @@ package org.apereo.activities;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
-import android.view.View;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.UiThread;
@@ -160,33 +160,38 @@ public class SplashActivity extends BaseActivity {
 
     @UiThread
     protected void showErrorDialog(int msgId) {
-        MaterialDialog.Builder dialog = new MaterialDialog.Builder(this)
-                .title(getString(R.string.error_title));
-        MaterialDialog.ButtonCallback positiveAction = null;
-        MaterialDialog.ButtonCallback negativeAction = null;
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+        DialogInterface.OnClickListener positiveAction = null;
+        DialogInterface.OnClickListener negativeAction = null;
         switch (msgId) {
             case AppConstants.ERROR_GETTING_FEED:
-                positiveAction = new MaterialDialog.ButtonCallback() {
+                positiveAction = new DialogInterface.OnClickListener() {
                     @Override
-                    public void onPositive(MaterialDialog dialog) { finish(); }
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
                 };
                 dialog = buildDialog(dialog,
                         null, getString(R.string.error_network_connection),
                         getString(R.string.dialog_ok), positiveAction, null, null);
                 break;
             case AppConstants.ERROR_GETTING_CONFIG:
-                positiveAction = new MaterialDialog.ButtonCallback() {
+
+                positiveAction = new DialogInterface.OnClickListener() {
                     @Override
-                    public void onPositive(MaterialDialog dialog) { finish(); }
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
                 };
+
                 dialog = buildDialog(dialog,
                         null, getString(R.string.config_unavailable),
                         getString(R.string.dialog_ok), positiveAction, null, null);
                 break;
             case AppConstants.UPGRADE_REQUIRED:
-                positiveAction = new MaterialDialog.ButtonCallback() {
+                positiveAction = new DialogInterface.OnClickListener() {
                     @Override
-                    public void onPositive(MaterialDialog dialog) {
+                    public void onClick(DialogInterface dialog, int which) {
                         try {
                             openPlayStore();
                         } catch (ActivityNotFoundException e) {
@@ -194,19 +199,23 @@ public class SplashActivity extends BaseActivity {
                         }
                     }
                 };
-                negativeAction = new MaterialDialog.ButtonCallback() {
+
+                negativeAction = new DialogInterface.OnClickListener() {
                     @Override
-                    public void onNegative(MaterialDialog dialog) { finish(); }
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
                 };
+
                 dialog = buildDialog(dialog,
                         getString(R.string.upgrade_required_title), getString(R.string.upgrade_required),
                         getString(R.string.dialog_play_store), positiveAction,
                         getString(R.string.dialog_close), negativeAction);
                 break;
             case AppConstants.UPGRADE_RECOMMENDED:
-                positiveAction = new MaterialDialog.ButtonCallback() {
+                positiveAction = new DialogInterface.OnClickListener() {
                     @Override
-                    public void onPositive(MaterialDialog dialog) {
+                    public void onClick(DialogInterface dialog, int which) {
                         try {
                             openPlayStore();
                         } catch (ActivityNotFoundException e) {
@@ -214,12 +223,14 @@ public class SplashActivity extends BaseActivity {
                         }
                     }
                 };
-                negativeAction = new MaterialDialog.ButtonCallback() {
+
+                negativeAction = new DialogInterface.OnClickListener() {
                     @Override
-                    public void onNegative(MaterialDialog dialog) {
+                    public void onClick(DialogInterface dialog, int which) {
                         getAccountFeed();
                     }
                 };
+
                 dialog = buildDialog(dialog,
                         getString(R.string.upgrade_recommended_title), getString(R.string.upgrade_recommended),
                         getString(R.string.dialog_play_store), positiveAction,
@@ -229,8 +240,7 @@ public class SplashActivity extends BaseActivity {
                 break;
         }
 
-        dialog.build()
-                .show();
+        dialog.show();
     }
 
     private void openPlayStore() {
@@ -240,23 +250,22 @@ public class SplashActivity extends BaseActivity {
         startActivity(intent);
     }
 
-    private MaterialDialog.Builder buildDialog(MaterialDialog.Builder dialog,
-                                       String title, String message,
-                                       String positiveTitle, MaterialDialog.ButtonCallback positiveAction,
-                                       String negativeTitle, MaterialDialog.ButtonCallback negativeAction) {
+    private AlertDialog.Builder buildDialog(AlertDialog.Builder dialog,
+                                               String title, String message,
+                                               String positiveTitle, DialogInterface.OnClickListener positiveAction,
+                                               String negativeTitle, DialogInterface.OnClickListener negativeAction) {
+
         if (title != null) {
-            dialog.title(title);
+            dialog.setTitle(title);
         }
         if (message != null) {
-            dialog.content(message);
+            dialog.setMessage(message);
         }
         if (positiveTitle != null && positiveAction != null) {
-            dialog.positiveText(positiveTitle)
-                    .callback(positiveAction);
+            dialog.setPositiveButton(positiveTitle, positiveAction);
         }
         if (negativeTitle != null && negativeAction != null) {
-            dialog.negativeText(negativeTitle)
-                    .callback(negativeAction);
+            dialog.setNegativeButton(negativeTitle, negativeAction);
         }
         return dialog;
     }
