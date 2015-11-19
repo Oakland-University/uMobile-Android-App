@@ -4,7 +4,6 @@ import android.accounts.AccountManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
-import android.webkit.CookieSyncManager;
 
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Bean;
@@ -88,8 +87,6 @@ public class CasClient {
         try {
             App.getCookieManager().getCookieStore().removeAll();
         } catch (NullPointerException e) {  }
-        android.webkit.CookieManager.getInstance().removeAllCookie();
-        CookieSyncManager.getInstance().sync();
     }
 
     private void removeAccount() {
@@ -138,7 +135,6 @@ public class CasClient {
         // Service ticket created
         String serviceTicketLocation = serviceTicketLocationConnection.getHeaderField("Location");
         if (serviceTicketLocation != null) {
-            serviceTicketLocation = serviceTicketLocation.replace("http", "https");
             tgt = serviceTicketLocation.split("tickets/")[1];
         }
 
@@ -185,14 +181,15 @@ public class CasClient {
     private void validateServiceTicket(String serviceTicket) throws IOException {
         URL url = new URL(resources.getString(R.string.login_service) + "?ticket=" + serviceTicket);
         HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
-        getConnection.connect();
+
         // Necessary
         getConnection.getHeaderField("Set-Cookie");
+
+        getConnection.connect();
         getConnection.disconnect();
 
-        setCasCookie();
         setJSession();
-        CookieSyncManager.getInstance().sync();
+        setCasCookie();
     }
 
     private void setJSession() {
