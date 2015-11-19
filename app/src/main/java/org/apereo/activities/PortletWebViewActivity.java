@@ -7,10 +7,9 @@ import android.app.DownloadManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,13 +25,11 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
-import com.nispok.snackbar.Snackbar;
-import com.nispok.snackbar.listeners.ActionClickListener;
-
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
+import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.ViewById;
 import org.apache.commons.lang.StringUtils;
 import org.apereo.App;
@@ -76,6 +73,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     @Bean
     CasClient casClient;
 
+    @SystemService
     DownloadManager downloadManager;
 
     @Extra
@@ -101,7 +99,6 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     }
 
     private void setUpDownloadManager() {
-        downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         webView.setDownloadListener(new DownloadListener() {
             @Override
             public void onDownloadStart(String url, String userAgent,
@@ -143,8 +140,8 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     private void setUpAutomaticReauthentication(final Activity activity) {
         webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, final String url) {
-                if (url.startsWith(getResources().getString(R.string.login_url))) {
-                    ActionClickListener listener = new ActionClickListener() {
+                if (url.startsWith(App.getInstance().getResources().getString(R.string.login_url))) {
+                    View.OnClickListener listener = new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             AccountManager accountManager = AccountManager.get(App.getInstance());
@@ -273,6 +270,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     private void logOut() {
         HomePageActivity_
                 .intent(PortletWebViewActivity.this)
+                .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK)
                 .shouldLogOut(true)
                 .start();
     }

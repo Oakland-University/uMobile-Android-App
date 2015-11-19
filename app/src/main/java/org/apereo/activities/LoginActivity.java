@@ -35,7 +35,6 @@ import org.apereo.services.UmobileRestCallback;
 import org.apereo.utils.CasClient;
 import org.apereo.utils.ConfigManager;
 import org.apereo.utils.LayoutManager;
-import org.apereo.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -139,7 +138,7 @@ public class LoginActivity extends BaseActivity {
     protected void loginClick() {
         if (!userNameView.getText().toString().isEmpty() &&
                 !passwordView.getText().toString().isEmpty()) {
-            username = userNameView.getText().toString();
+            username = userNameView.getText().toString().toLowerCase();
             password = passwordView.getText().toString();
             logInWithConfig();
         } else {
@@ -252,8 +251,9 @@ public class LoginActivity extends BaseActivity {
                     checkAccount(false);
                 }
 
-                if (StringUtils.isNotEmpty(url) &&
-                        StringUtils.isNotEmpty(portletName)) {
+                App.setIsAuth(true);
+
+                if (StringUtils.isNotEmpty(url) && StringUtils.isNotEmpty(portletName)) {
                     PortletWebViewActivity_
                             .intent(LoginActivity.this)
                             .url(url)

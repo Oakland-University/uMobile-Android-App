@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -36,7 +37,6 @@ import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
 import org.apereo.utils.CasClient;
 import org.apereo.utils.LayoutManager;
-import org.apereo.utils.Logger;
 
 import java.util.List;
 
@@ -262,7 +262,6 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         restApi.getMainFeed(this, new UmobileRestCallback<String>() {
             @Override
             public void onError(Exception e, String responseBody) {
-                Logger.e(TAG, responseBody, e);
             }
 
             @Override
@@ -286,6 +285,8 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
     // Resets the activity's UI based on the current JSON layout, for example after logging out.
     @UiThread
     protected void reconfigureViews() {
+        clearBackStack();
+
         // Update the portlet list.
         Bundle args = new Bundle();
         args.putInt(AppConstants.POSITION, 0);
@@ -309,6 +310,14 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         selectItem(0);
 
         dismissSpinner();
+    }
+
+    private void clearBackStack() {
+        FragmentManager manager = getSupportFragmentManager();
+        if (manager.getBackStackEntryCount() > 0) {
+            FragmentManager.BackStackEntry first = manager.getBackStackEntryAt(0);
+            manager.popBackStack(first.getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
     }
 
     @UiThread

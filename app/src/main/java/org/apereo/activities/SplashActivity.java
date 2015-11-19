@@ -50,9 +50,8 @@ public class SplashActivity extends BaseActivity {
     @Bean
     ConfigManager configManager;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    @AfterViews
+    void init() {
         manageCookies();
         getGlobalConfig();
     }

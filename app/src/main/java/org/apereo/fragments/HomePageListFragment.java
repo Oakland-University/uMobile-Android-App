@@ -9,6 +9,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +29,6 @@ import org.apereo.constants.AppConstants;
 import org.apereo.interfaces.IActionListener;
 import org.apereo.models.Portlet;
 import org.apereo.utils.LayoutManager;
-import org.apereo.utils.Logger;
 
 import java.util.List;
 
@@ -131,7 +131,7 @@ public class HomePageListFragment extends ListFragment {
                         updateStatusBarColor(ratio);
                     }
                 } else {
-                    ((ActionBarActivity) getActivity()).getSupportActionBar()
+                    ((AppCompatActivity) getActivity()).getSupportActionBar()
                             .setBackgroundDrawable(new ColorDrawable(themeAccent));
                     if (Build.VERSION.SDK_INT >= 21) {
                         getActivity().getWindow().setStatusBarColor(themeAccentDark);
@@ -157,7 +157,7 @@ public class HomePageListFragment extends ListFragment {
 
         int newColor = Color.rgb(newRed, newGreen, newBlue);
 
-        ((ActionBarActivity) getActivity()).getSupportActionBar()
+        ((AppCompatActivity) getActivity()).getSupportActionBar()
                 .setBackgroundDrawable(new ColorDrawable(newColor));
 
     }
