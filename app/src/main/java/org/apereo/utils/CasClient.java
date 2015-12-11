@@ -1,17 +1,16 @@
 package org.apereo.utils;
 
 import android.accounts.AccountManager;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
-import android.webkit.CookieSyncManager;
 
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.apereo.App;
 import org.apereo.R;
+import org.apereo.constants.AppConstants;
 import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
 
@@ -27,8 +26,7 @@ import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ajclisso on 12/4/14.
@@ -36,16 +34,15 @@ import java.util.List;
 @EBean
 public class CasClient {
 
-    @Bean
-    RestApi restApi;
-
     private static final String TAG = CasClient.class.getName();
+    private final Resources resources = App.getInstance().getResources();
+    private final String ACCOUNT_TYPE = resources.getString(R.string.account_type);
 
     private String tgt;
     private HttpURLConnection serviceTicketLocationConnection, serviceTicketConnection; // to be closed outside their methods
 
-    private final Resources resources = App.getInstance().getResources();
-    private final String ACCOUNT_TYPE = resources.getString(R.string.account_type);
+    @Bean
+    RestApi restApi;
 
     AccountManager accountManager;
 
@@ -54,7 +51,7 @@ public class CasClient {
                              UmobileRestCallback<String> callback) {
         try {
             // Perform the CAS authentication dance.
-            List<NameValuePair> postData = generatePostData(username, password);
+            ContentValues postData = generatePostData(username, password);
             String stLocation = postForServiceTicketLocation(postData);
             if (stLocation != null) {
                 String st = postForServiceTicket();
@@ -87,9 +84,9 @@ public class CasClient {
     }
 
     private void clearCookies() {
-        App.getCookieManager().getCookieStore().removeAll();
-        android.webkit.CookieManager.getInstance().removeAllCookie();
-        CookieSyncManager.getInstance().sync();
+        try {
+            App.getCookieManager().getCookieStore().removeAll();
+        } catch (NullPointerException e) {  }
     }
 
     private void removeAccount() {
@@ -118,61 +115,62 @@ public class CasClient {
         }
     }
 
-    private List<NameValuePair> generatePostData(String username, String password)
+    private ContentValues generatePostData(String username, String password)
             throws IOException {
-
-        List<NameValuePair> postData = new ArrayList<NameValuePair>(2);
-        postData.add(new BasicNameValuePair("username", username));
-        postData.add(new BasicNameValuePair("password", password));
-
+        ContentValues postData = new ContentValues();
+        postData.put("username", username);
+        postData.put("password", password);
         return postData;
     }
 
-    private String postForServiceTicketLocation(List<NameValuePair> postData)
-            throws IOException {
+    private String postForServiceTicketLocation(ContentValues postData) throws IOException {
 
         String postPath = resources.getString(R.string.ticket_url);
         URL postUrl = new URL(postPath);
+
         serviceTicketLocationConnection = (HttpURLConnection) postUrl.openConnection();
-        serviceTicketLocationConnection.setDoOutput(true);
-        serviceTicketLocationConnection.addRequestProperty("Content-Type", "text/html");
-
-        OutputStream os = new BufferedOutputStream(serviceTicketLocationConnection.getOutputStream());
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-
-        writer.write(getQuery(postData));
-        writer.flush();
-        writer.close();
-        os.close();
-        serviceTicketLocationConnection.connect();
+        serviceTicketLocationConnection = configureHttpURLConnection(serviceTicketLocationConnection);
+        serviceTicketLocationConnection = configurePost(serviceTicketLocationConnection, postData);
 
         // Service ticket created
         String serviceTicketLocation = serviceTicketLocationConnection.getHeaderField("Location");
         if (serviceTicketLocation != null) {
-            serviceTicketLocation = serviceTicketLocation.replace("http", "https");
             tgt = serviceTicketLocation.split("tickets/")[1];
         }
 
         return serviceTicketLocation;
     }
 
+    private HttpURLConnection configurePost(HttpURLConnection connection, ContentValues postData)
+            throws IOException {
+        OutputStream os = new BufferedOutputStream(connection.getOutputStream());
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+
+        writer.write(getQuery(postData));
+        writer.flush();
+        writer.close();
+        os.close();
+        connection.connect();
+
+        return connection;
+    }
+
+    private HttpURLConnection configureHttpURLConnection(HttpURLConnection connection) {
+        connection.setDoOutput(true);
+        connection.addRequestProperty("Content-Type", "text/html");
+        return connection;
+    }
+
     private String postForServiceTicket() throws IOException {
         String postPath = resources.getString(R.string.ticket_url) + "/" + tgt;
         URL postST = new URL(postPath);
         serviceTicketConnection = (HttpURLConnection) postST.openConnection();
-        serviceTicketConnection.setDoOutput(true);
-        serviceTicketConnection.addRequestProperty("Content-Type", "text/html");
+        serviceTicketConnection = configureHttpURLConnection(serviceTicketConnection);
 
-        List<NameValuePair> postData = new ArrayList<NameValuePair>(1);
-        postData.add(new BasicNameValuePair("service",
-                resources.getString(R.string.login_service)));
-        OutputStream os2 = new BufferedOutputStream(serviceTicketConnection.getOutputStream());
-        BufferedWriter writer2 = new BufferedWriter(new OutputStreamWriter(os2, "UTF-8"));
-        writer2.write(getQuery(postData));
-        writer2.flush();
-        writer2.close();
-        os2.close();
-        serviceTicketConnection.connect();
+        ContentValues postData = new ContentValues(1);
+        postData.put("service", resources.getString(R.string.login_service));
+        serviceTicketConnection = configurePost(serviceTicketConnection, postData);
+
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(serviceTicketConnection.getInputStream()));
 
@@ -183,20 +181,22 @@ public class CasClient {
     private void validateServiceTicket(String serviceTicket) throws IOException {
         URL url = new URL(resources.getString(R.string.login_service) + "?ticket=" + serviceTicket);
         HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
-        getConnection.connect();
+
         // Necessary
         getConnection.getHeaderField("Set-Cookie");
+
+        getConnection.connect();
         getConnection.disconnect();
 
-        setCasCookie();
         setJSession();
-        CookieSyncManager.getInstance().sync();
+        setCasCookie();
     }
 
     private void setJSession() {
         String uPortalDomain = resources.getString(R.string.uportal_domain);
         HttpCookie cookie = App.getCookieManager().getCookieStore().getCookies().get(0);
-        android.webkit.CookieManager.getInstance().setCookie(uPortalDomain, "JSESSIONID=" + cookie.getValue() + "; Path=/; HttpOnly");
+        android.webkit.CookieManager.getInstance().setCookie(uPortalDomain,
+                AppConstants.JSESSIONID + "=" + cookie.getValue() + "; Path=/; HttpOnly");
     }
 
     private void setCasCookie() {
@@ -205,20 +205,20 @@ public class CasClient {
     }
 
     // URL encoding helper method. (http://stackoverflow.com/a/13486223/2546659)
-    private String getQuery(List<NameValuePair> params) throws UnsupportedEncodingException {
+    private String getQuery(ContentValues params) throws UnsupportedEncodingException {
         StringBuilder result = new StringBuilder();
 
         boolean first = true;
-        for (NameValuePair pair : params) {
+        for (Map.Entry<String, Object> pair : params.valueSet()) {
             if (first) {
                 first = false;
             } else {
                 result.append("&");
             }
 
-            result.append(URLEncoder.encode(pair.getName(), "UTF-8"));
+            result.append(URLEncoder.encode(pair.getKey(), "UTF-8"));
             result.append("=");
-            result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
+            result.append(URLEncoder.encode((String) pair.getValue(), "UTF-8"));
         }
 
         return result.toString();

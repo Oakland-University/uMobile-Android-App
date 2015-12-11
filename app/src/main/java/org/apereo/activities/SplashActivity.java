@@ -2,18 +2,16 @@ package org.apereo.activities;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
-import android.webkit.CookieSyncManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.UiThread;
@@ -30,10 +28,11 @@ import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
 import org.apereo.utils.ConfigManager;
 import org.apereo.utils.LayoutManager;
-import org.apereo.utils.Logger;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by schneis on 8/27/14.
@@ -42,24 +41,24 @@ import java.net.CookieManager;
 public class SplashActivity extends BaseActivity {
 
     private final String TAG = SplashActivity.class.getName();
-
     private final String ACCOUNT_TYPE = App.getInstance().getResources().getString(R.string.account_type);
 
     @Bean
     RestApi restApi;
-
     @Bean
     LayoutManager layoutManager;
-
     @Bean
     ConfigManager configManager;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    @AfterViews
+    void init() {
+        manageCookies();
+        getGlobalConfig();
+    }
+
+    private void manageCookies() {
         App.setCookieManager(new CookieManager());
         CookieHandler.setDefault(App.getCookieManager());
-        getGlobalConfig();
     }
 
     private void getGlobalConfig() {
@@ -68,7 +67,7 @@ public class SplashActivity extends BaseActivity {
 
                 @Override
                 public void onError(Exception e, String responseBody) {
-                    Logger.e(TAG, e.getMessage(), e);
+                    showErrorDialog(AppConstants.ERROR_GETTING_CONFIG);
                 }
 
                 @Override
@@ -81,12 +80,12 @@ public class SplashActivity extends BaseActivity {
                     Config config = g.fromJson(response, Config.class);
                     configManager.setConfig(config);
 
+                    getAccountFeed();
+
                     if (config.isUpgradeRequired()) {
                         showErrorDialog(AppConstants.UPGRADE_REQUIRED);
                     } else if (config.isUpgradeRecommended()) {
                         showErrorDialog(AppConstants.UPGRADE_RECOMMENDED);
-                    } else {
-                        getAccountFeed();
                     }
                 }
             });
@@ -111,13 +110,7 @@ public class SplashActivity extends BaseActivity {
             restApi.getMainFeed(this, new UmobileRestCallback<String>() {
 
                 @Override
-                public void onBegin() {
-                    super.onBegin();
-                }
-
-                @Override
                 public void onError(Exception e, String responseBody) {
-                    Logger.e(TAG, e.getMessage(), e);
                     showErrorDialog(AppConstants.ERROR_GETTING_FEED);
                 }
 
@@ -130,19 +123,27 @@ public class SplashActivity extends BaseActivity {
 
                     Layout layout = g.fromJson(response, Layout.class);
 
-                    if (getResources().getBoolean(R.bool.shouldUseGlobalConfig)) {
-                        for (Folder folder : layout.getFolders()) {
-                            for (Portlet p : folder.getPortlets()) {
-                                for (String portletName : configManager.getConfig().getDisabledPortlets()) {
-                                    if (p.getFName().equalsIgnoreCase(portletName)) {
-                                        folder.getPortlets().remove(p);
-                                    }
+                    List<Portlet> portletReferences = new ArrayList<Portlet>();
+                    boolean usingGlobalConfig = getResources().getBoolean(R.bool.shouldUseGlobalConfig);
+                    if (usingGlobalConfig) {
+                        List<String> disabledPortlets = configManager.getConfig().getDisabledPortlets();
+                        for (Folder f : layout.getFolders()) {
+                            for (Portlet p : f.getPortlets()) {
+                                if (disabledPortlets.contains(p.getFName())) {
+                                    portletReferences.add(p);
                                 }
                             }
                         }
                     }
 
+                    for (Folder f : layout.getFolders()) {
+                        for (Portlet p : portletReferences) {
+                            f.getPortlets().remove(p);
+                        }
+                    }
+
                     layoutManager.setLayout(layout);
+
                     HomePageActivity_
                             .intent(SplashActivity.this)
                             .start();
@@ -158,90 +159,114 @@ public class SplashActivity extends BaseActivity {
 
     @UiThread
     protected void showErrorDialog(int msgId) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setIcon(R.drawable.ic_launcher);
-        Dialog dialog = builder.setTitle(getString(R.string.error_title)).create();
-
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+        DialogInterface.OnClickListener positiveAction = null;
+        DialogInterface.OnClickListener negativeAction = null;
         switch (msgId) {
             case AppConstants.ERROR_GETTING_FEED:
-                builder.setMessage(getString(R.string.error_network_connection));
-                dialog = builder.setCancelable(false)
-                        .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                finish();
-                            }
-                        })
-                        .create();
+                positiveAction = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                };
+                dialog = buildDialog(dialog,
+                        null, getString(R.string.error_network_connection),
+                        getString(R.string.dialog_ok), positiveAction, null, null);
                 break;
             case AppConstants.ERROR_GETTING_CONFIG:
-                builder.setMessage(getString(R.string.config_unavailable));
-                dialog = builder.setCancelable(false)
-                        .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                finish();
-                            }
-                        })
-                        .create();
+
+                positiveAction = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                };
+
+                dialog = buildDialog(dialog,
+                        null, getString(R.string.config_unavailable),
+                        getString(R.string.dialog_ok), positiveAction, null, null);
                 break;
             case AppConstants.UPGRADE_REQUIRED:
-                builder.setTitle(R.string.upgrade_required_title);
-                builder.setMessage(getString(R.string.upgrade_required));
-                dialog = builder.setCancelable(false)
-                        .setPositiveButton(R.string.dialog_play_store, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                try {
-                                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                                    intent.setData(Uri.parse("market://details?id="
-                                            + getApplicationContext().getPackageName()));
-                                    startActivity(intent);
-                                } catch (ActivityNotFoundException e) {
-                                    Logger.d(TAG, e.getMessage());
-                                    finish();
-                                }
-                            }
-                        })
-                        .setNegativeButton(R.string.dialog_close, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                finish();
-                            }
-                        })
-                        .create();
+                positiveAction = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        try {
+                            openPlayStore();
+                        } catch (ActivityNotFoundException e) {
+                            finish();
+                        }
+                    }
+                };
+
+                negativeAction = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                };
+
+                dialog = buildDialog(dialog,
+                        getString(R.string.upgrade_required_title), getString(R.string.upgrade_required),
+                        getString(R.string.dialog_play_store), positiveAction,
+                        getString(R.string.dialog_close), negativeAction);
                 break;
             case AppConstants.UPGRADE_RECOMMENDED:
-                builder.setTitle(R.string.upgrade_recommended_title);
-                builder.setMessage(getString(R.string.upgrade_recommended));
-                dialog = builder.setCancelable(false)
-                        .setPositiveButton(R.string.dialog_play_store, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                try {
-                                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                                    intent.setData(Uri.parse("market://details?id="
-                                            + getApplicationContext().getPackageName()));
-                                    startActivity(intent);
-                                } catch (ActivityNotFoundException e) {
-                                    Logger.d(TAG, e.getMessage());
-                                    finish();
-                                }
-                            }
-                        })
-                        .setNegativeButton(R.string.dialog_later, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                getAccountFeed();
-                            }
-                        })
-                        .create();
+                positiveAction = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        try {
+                            openPlayStore();
+                        } catch (ActivityNotFoundException e) {
+                            finish();
+                        }
+                    }
+                };
+
+                negativeAction = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        getAccountFeed();
+                    }
+                };
+
+                dialog = buildDialog(dialog,
+                        getString(R.string.upgrade_recommended_title), getString(R.string.upgrade_recommended),
+                        getString(R.string.dialog_play_store), positiveAction,
+                        getString(R.string.dialog_later), negativeAction);
                 break;
             default:
                 break;
         }
 
         dialog.show();
+    }
+
+    private void openPlayStore() {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse("market://details?id="
+                + getApplicationContext().getPackageName()));
+        startActivity(intent);
+    }
+
+    private AlertDialog.Builder buildDialog(AlertDialog.Builder dialog,
+                                               String title, String message,
+                                               String positiveTitle, DialogInterface.OnClickListener positiveAction,
+                                               String negativeTitle, DialogInterface.OnClickListener negativeAction) {
+
+        if (title != null) {
+            dialog.setTitle(title);
+        }
+        if (message != null) {
+            dialog.setMessage(message);
+        }
+        if (positiveTitle != null && positiveAction != null) {
+            dialog.setPositiveButton(positiveTitle, positiveAction);
+        }
+        if (negativeTitle != null && negativeAction != null) {
+            dialog.setNegativeButton(negativeTitle, negativeAction);
+        }
+        return dialog;
     }
 
     @Override

@@ -13,7 +13,7 @@ import org.springframework.http.converter.json.GsonHttpMessageConverter;
 
 @Rest(
     converters = { StringHttpMessageConverter.class, FormHttpMessageConverter.class, GsonHttpMessageConverter.class},
-    interceptors = {UmobileHeaderInterceptor.class })
+    interceptors = { UmobileHeaderInterceptor.class })
 public interface RestInterface extends RestClientRootUrl, RestClientSupport, RestClientHeaders {
 
     @Get("/uPortal/layout.json")
