@@ -9,6 +9,8 @@ public class AppConstants {
     public static final String POSITION = "position";
     public static final String LOGINKEY = "CASTGC";
     public static final String JSESSIONID = "JSESSIONID";
+    public static final String PORTLET_NAME = "portletName";
+    public static final String URL = "url";
 
     // int constants
     public static final int ERROR_GETTING_FEED = 0x01;

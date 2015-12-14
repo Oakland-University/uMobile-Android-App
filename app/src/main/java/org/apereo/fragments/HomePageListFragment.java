@@ -9,6 +9,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,34 +34,28 @@ import java.util.List;
 
 @EFragment(R.layout.activity_listview)
 public class HomePageListFragment extends ListFragment {
+    private final String TAG = HomePageListFragment.class.getName();
     private Bundle mArguments;
-    private View view;
+    private Activity activity;
     private PortletListAdapter adapter;
     private List<Portlet> portlets = null;
-    private final String TAG = HomePageListFragment.class.getName();
-    private Activity activity;
+    private ListView list;
+    private View header;
+    private IActionListener actionListener;
     private int position;
     private float parallaxRate = 1.9f;
 
     @org.androidannotations.annotations.res.ColorRes(R.color.theme_accent)
     int themeAccent;
-
     @org.androidannotations.annotations.res.ColorRes(R.color.theme_accent_dark)
     int themeAccentDark;
-
     @org.androidannotations.annotations.res.ColorRes(R.color.theme_light)
     int themeLight;
-
     @org.androidannotations.annotations.res.ColorRes(R.color.theme_dark)
     int themeDark;
 
-    ListView list;
-    View header;
-
     @Bean
     LayoutManager layoutManager;
-
-    private IActionListener actionListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,9 +67,12 @@ public class HomePageListFragment extends ListFragment {
 
     @AfterViews
     void initialize() {
+        setUpListView();
+    }
+
+    private void setUpListView() {
         list = getListView();
-        header = getActivity().getLayoutInflater().inflate(R.layout.header, null);
-        list.addHeaderView(header, null, false);
+        setUpListViewHeader();
         fetchLayout();
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -91,13 +89,20 @@ public class HomePageListFragment extends ListFragment {
         list.setOnScrollListener(onScrollListener);
     }
 
+    private void setUpListViewHeader() {
+        header = getActivity().getLayoutInflater().inflate(R.layout.header, null);
+        list.addHeaderView(header, null, false);
+    }
+
     private void fetchLayout() {
         try {
             portlets = layoutManager.getLayout().getFolders().get(position).getPortlets();
             adapter = new PortletListAdapter(activity, R.layout.portlet_row, portlets);
             setListAdapter(adapter);
         } catch (NullPointerException e) {
-            LaunchActivity_.intent(App.getInstance());
+            LaunchActivity_
+                    .intent(getActivity())
+                    .start();
         }
     }
 
@@ -126,7 +131,7 @@ public class HomePageListFragment extends ListFragment {
                         updateStatusBarColor(ratio);
                     }
                 } else {
-                    ((ActionBarActivity) getActivity()).getSupportActionBar()
+                    ((AppCompatActivity) getActivity()).getSupportActionBar()
                             .setBackgroundDrawable(new ColorDrawable(themeAccent));
                     if (Build.VERSION.SDK_INT >= 21) {
                         getActivity().getWindow().setStatusBarColor(themeAccentDark);
@@ -152,7 +157,7 @@ public class HomePageListFragment extends ListFragment {
 
         int newColor = Color.rgb(newRed, newGreen, newBlue);
 
-        ((ActionBarActivity) getActivity()).getSupportActionBar()
+        ((AppCompatActivity) getActivity()).getSupportActionBar()
                 .setBackgroundDrawable(new ColorDrawable(newColor));
 
     }
@@ -188,13 +193,6 @@ public class HomePageListFragment extends ListFragment {
         super.onAttach(activity);
         mArguments = getArguments();
         this.activity = activity;
-    }
-
-    public void update() {
-        try {
-            portlets = layoutManager.getLayout().getFolders().get(position).getPortlets();
-            adapter.notifyDataSetChanged();
-        } catch (NullPointerException e) { }
     }
 
     public static Fragment getFragment(IActionListener actionListener) {

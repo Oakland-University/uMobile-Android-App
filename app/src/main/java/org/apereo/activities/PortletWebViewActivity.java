@@ -7,10 +7,9 @@ import android.app.DownloadManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,6 +29,7 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
+import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.ViewById;
 import org.apache.commons.lang.StringUtils;
 import org.apereo.App;
@@ -73,6 +73,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     @Bean
     CasClient casClient;
 
+    @SystemService
     DownloadManager downloadManager;
 
     @Extra
@@ -86,42 +87,42 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     @AfterViews
     void initialize() {
+        setUpToolbar();
         setUpNavigationDrawer();
+        setUpWebView();
+        setUpProgressBar();
+        setUpDownloadManager();
 
-        final Activity activity = this;
+        // TODO find better way to do this
+        url = url.replaceAll("/f/welcome","");
+        webView.loadUrl(url);
+    }
 
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webView.setWebViewClient(new WebViewClient() {
-            public void onPageFinished(WebView view, final String url) {
-                if (url.startsWith(getResources().getString(R.string.login_url))) {
-                    showSnackBar("It's been a while. Logging you back in...");
-                    AccountManager accountManager = AccountManager.get(App.getInstance());
-                    if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
-                        Account account = accountManager.getAccountsByType(ACCOUNT_TYPE)[0];
-                        casClient.authenticate(account.name, accountManager.getPassword(account), activity, new UmobileRestCallback<String>() {
-
-                            @Override
-                            public void onError(Exception e, String response) { }
-
-                            @Override
-                            public void onSuccess(String response) {
-                                PortletWebViewActivity_.intent(activity)
-                                        .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                                        .url(url)
-                                        .portletName(portletName)
-                                        .start();
-                            }
-                        });
-                    } else {
-                        LaunchActivity_
-                                .intent(getApplicationContext())
-                                .flags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                .start();
-                    }
-                }
+    private void setUpDownloadManager() {
+        webView.setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent,
+                                        String contentDisposition, String mimetype,
+                                        long contentLength) {
+                // This is a general solution that is only confirmed working for Moodle.
+                String domain = url.substring(0, StringUtils.ordinalIndexOf(url, "/", 3));
+                String cookie = CookieManager.getInstance().getCookie(domain);
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url))
+                        .addRequestHeader("Cookie", cookie)
+                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                downloadManager.enqueue(request);
             }
         });
+    }
+
+    private void setUpWebView() {
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setUserAgentString("Android.uMobile");
+        webSettings.setJavaScriptEnabled(true);
+        setUpAutomaticReauthentication(this);
+    }
+
+    private void setUpProgressBar() {
         webView.setWebChromeClient(new WebChromeClient() {
             public void onProgressChanged(WebView view, int progress) {
                 if (progress < 100 && progressBar.getVisibility() == ProgressBar.GONE) {
@@ -134,40 +135,64 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
             }
         });
         progressBar.setY(mDrawerLayout.getTop());
+    }
 
-        downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-        webView.setDownloadListener(new DownloadListener() {
-            @Override
-            public void onDownloadStart(String url, String userAgent,
-                    String contentDisposition, String mimetype,
-                    long contentLength) {
-                // This is a general solution that is only confirmed working for Moodle.
-                String domain = url.substring(0, StringUtils.ordinalIndexOf(url, "/", 3));
-                String cookie = CookieManager.getInstance().getCookie(domain);
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url))
-                        .addRequestHeader("Cookie", cookie)
-                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                downloadManager.enqueue(request);
+    private void setUpAutomaticReauthentication(final Activity activity) {
+        webView.setWebViewClient(new WebViewClient() {
+            public void onPageFinished(WebView view, final String url) {
+                if (url.startsWith(App.getInstance().getResources().getString(R.string.login_url))) {
+                    View.OnClickListener listener = new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            AccountManager accountManager = AccountManager.get(App.getInstance());
+                            if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
+                                Account account = accountManager.getAccountsByType(ACCOUNT_TYPE)[0];
+                                casClient.authenticate(account.name, accountManager.getPassword(account), activity, new UmobileRestCallback<String>() {
+                                    @Override
+                                    public void onError(Exception e, String response) {
+                                        showSnackBar(PortletWebViewActivity.this, App.getInstance().getString(R.string.error) + " " + App.getInstance().getString(R.string.lockout_reminder));
+                                    }
+                                    @Override
+                                    public void onSuccess(String response) {
+                                        PortletWebViewActivity_
+                                                .intent(activity)
+                                                .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                                .url(url)
+                                                .portletName(portletName)
+                                                .start();
+                                    }
+                                });
+                            } else {
+                                LoginActivity_
+                                        .intent(activity)
+                                        .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                        .url(url)
+                                        .portletName(portletName)
+                                        .start();
+                            }
+                        }
+                    };
+                    showSnackBarWithAction(PortletWebViewActivity.this, getString(R.string.reauthenticating), listener, getString(R.string.login));
+                }
             }
         });
 
-        //TODO find better way to do this
-        url = url.replaceAll("/f/welcome","");
+    }
 
-        webView.loadUrl(url);
+    private void setUpToolbar() {
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(portletName);
     }
 
     private void setUpNavigationDrawer() {
 
-        setSupportActionBar(toolbar);
-
-        // workaround for layoutManager/mDrawerList being possibly garbage collected
+        // Workaround for layoutManager/mDrawerList being possibly garbage collected
         try {
             List<Folder> folders = layoutManager.getLayout().getFolders();
             mDrawerList.setAdapter(new FolderListAdapter(this,
                     R.layout.drawer_list_item, folders, folderPosition));
         } catch (NullPointerException e) {
-            LaunchActivity_.intent(this);
+            restartApp();
         }
 
         mDrawerList.setOnItemClickListener(this);
@@ -184,7 +209,13 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
         );
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-        getSupportActionBar().setTitle(portletName);
+    }
+
+    private void restartApp() {
+        LaunchActivity_
+                .intent(this)
+                .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                .start();
     }
 
     @Override
@@ -240,6 +271,7 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     private void logOut() {
         HomePageActivity_
                 .intent(PortletWebViewActivity.this)
+                .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK)
                 .shouldLogOut(true)
                 .start();
     }

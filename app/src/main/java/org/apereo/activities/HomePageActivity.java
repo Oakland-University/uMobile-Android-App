@@ -2,8 +2,10 @@ package org.apereo.activities;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -36,7 +38,6 @@ import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
 import org.apereo.utils.CasClient;
 import org.apereo.utils.LayoutManager;
-import org.apereo.utils.Logger;
 
 import java.util.List;
 
@@ -47,30 +48,24 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
 
     @ViewById(R.id.toolbar)
     Toolbar toolbar;
-
     @ViewById(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
-
     @ViewById(R.id.left_drawer)
     ListView mDrawerList;
 
     @Bean
     RestApi restApi;
-
     @Bean
     CasClient casClient;
-
     @Bean
     LayoutManager layoutManager;
 
     @Extra
     int ePosition;
-
     @Extra
     boolean shouldLogOut;
 
     private ActionBarDrawerToggle mDrawerToggle;
-
     private CharSequence mTitle;
 
     @Override
@@ -82,15 +77,27 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Bundle args = new Bundle();
+        args.putInt(AppConstants.POSITION, ePosition);
+        replaceFragment(args);
+        invalidateOptionsMenu();
+    }
+
     @AfterViews
     void init() {
+        setUpToolbar();
         setUpNavigationDrawer();
     }
 
-    private void setUpNavigationDrawer() {
-
+    private void setUpToolbar() {
         setSupportActionBar(toolbar);
         mTitle = toolbar.getTitle();
+    }
+
+    private void setUpNavigationDrawer() {
 
         // workaround for layoutManager/mDrawerList being possibly garbage collected
         try {
@@ -98,7 +105,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
             mDrawerList.setAdapter(new FolderListAdapter(this,
                     R.layout.drawer_list_item, folders, ePosition));
         } catch (NullPointerException e) {
-            LaunchActivity_.intent(this);
+            restartApp();
         }
 
         mDrawerList.setOnItemClickListener(this);
@@ -166,17 +173,19 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
     }
 
     private void logOut() {
-        showSpinner();
+        showSpinner("Logging out...");
 
         casClient.logOut(new UmobileRestCallback<Integer>() {
             @Override
             public void onError(Exception e, Integer response) {
                 dismissSpinner();
-                showSnackBar(getString(R.string.error));
+                showSnackBar(HomePageActivity.this, getString(R.string.error));
             }
 
             @Override
             public void onSuccess(Integer response) {
+                SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.account_type), MODE_PRIVATE);
+                sharedPreferences.edit().putBoolean("rememberMe", false).apply();
                 getFeed();
             }
         });
@@ -206,7 +215,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         try {
             ((FolderListAdapter) mDrawerList.getAdapter()).setSelectedIndex(position);
         } catch (NullPointerException e) {
-            LaunchActivity_.intent(this);
+            restartApp();
         }
 
         ePosition = position;
@@ -214,14 +223,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         // update the main content by replacing fragments
         Bundle args = new Bundle();
         args.putInt(AppConstants.POSITION, position);
-
-        Fragment fragment = HomePageListFragment.getFragment(this);
-        fragment.setArguments(args);
-
-        getFragmentManager()
-                .beginTransaction()
-                .replace(R.id.content_frame, fragment)
-                .commit();
+        replaceFragment(args);
 
         // update selected item and title, then close the drawer
         mDrawerList.setItemChecked(position, true);
@@ -230,10 +232,27 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         try {
             setTitle(layoutManager.getLayout().getFolders().get(position).getName());
         } catch (NullPointerException e) {
-            LaunchActivity_.intent(this);
+            restartApp();
         }
 
         mDrawerLayout.closeDrawer(mDrawerList);
+    }
+
+    private void replaceFragment(Bundle args) {
+        Fragment fragment = HomePageListFragment.getFragment(this);
+        fragment.setArguments(args);
+
+        getFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
+                .replace(R.id.content_frame, fragment)
+                .commit();
+    }
+
+    private void restartApp() {
+        LaunchActivity_
+                .intent(this)
+                .start();
     }
 
     @Override
@@ -246,8 +265,6 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         restApi.getMainFeed(this, new UmobileRestCallback<String>() {
             @Override
             public void onError(Exception e, String responseBody) {
-                Logger.e(TAG, responseBody, e);
-                dismissSpinner();
             }
 
             @Override
@@ -258,8 +275,12 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
 
                 Layout layout = g.fromJson(response, Layout.class);
                 layoutManager.setLayout(layout);
+            }
 
+            @Override
+            public void onFinish() {
                 reconfigureViews();
+                dismissSpinner();
             }
         });
     }
@@ -267,18 +288,13 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
     // Resets the activity's UI based on the current JSON layout, for example after logging out.
     @UiThread
     protected void reconfigureViews() {
+        clearBackStack();
+
         // Update the portlet list.
         Bundle args = new Bundle();
         args.putInt(AppConstants.POSITION, 0);
 
-        Fragment fragment = HomePageListFragment.getFragment(this);
-        fragment.setArguments(args);
-
-        getFragmentManager()
-                .beginTransaction()
-                .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
-                .replace(R.id.content_frame, fragment)
-                .commit();
+        replaceFragment(args);
 
         // Update the login/logout button.
         invalidateOptionsMenu();
@@ -290,14 +306,21 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
             mDrawerList.setAdapter(new FolderListAdapter(this,
                     R.layout.drawer_list_item, folders, ePosition));
         } catch (NullPointerException e) {
-            Logger.d(TAG, e.getMessage());
-            LaunchActivity_.intent(this);
+            restartApp();
         }
 
         // Switch back to the first tab.
         selectItem(0);
 
         dismissSpinner();
+    }
+
+    private void clearBackStack() {
+        FragmentManager manager = getSupportFragmentManager();
+        if (manager.getBackStackEntryCount() > 0) {
+            FragmentManager.BackStackEntry first = manager.getBackStackEntryAt(0);
+            manager.popBackStack(first.getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
     }
 
     @UiThread

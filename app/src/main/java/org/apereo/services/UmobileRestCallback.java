@@ -11,11 +11,9 @@ public abstract class UmobileRestCallback<T> implements RestCallback.OnBegin<T>,
     public abstract void onSuccess(T response);
 
     @Override
-    public void onBegin() {
-    }
+    public void onBegin() { }
 
     @Override
-    public void onFinish() {
-    }
+    public void onFinish() { }
 
 }

@@ -2,10 +2,10 @@ package org.apereo.activities;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.support.annotation.DrawableRes;
 import android.support.v7.widget.Toolbar;
 import android.text.method.PasswordTransformationMethod;
 import android.view.KeyEvent;
@@ -13,16 +13,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.nispok.snackbar.Snackbar;
-import com.nispok.snackbar.listeners.ActionClickListener;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
@@ -30,6 +25,7 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.ViewById;
+import org.apache.commons.lang.StringUtils;
 import org.apereo.App;
 import org.apereo.R;
 import org.apereo.deserializers.LayoutDeserializer;
@@ -41,7 +37,9 @@ import org.apereo.services.UmobileRestCallback;
 import org.apereo.utils.CasClient;
 import org.apereo.utils.ConfigManager;
 import org.apereo.utils.LayoutManager;
-import org.apereo.utils.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by schneis on 8/28/14.
@@ -50,8 +48,8 @@ import org.apereo.utils.Logger;
 public class LoginActivity extends BaseActivity {
 
     private static final String TAG = LoginActivity.class.getName();
-
     private final String ACCOUNT_TYPE = App.getInstance().getResources().getString(R.string.account_type);
+    private boolean usingConfig = false;
 
     @ViewById(R.id.login_container)
     RelativeLayout container;
@@ -72,16 +70,15 @@ public class LoginActivity extends BaseActivity {
     String password;
     @Extra
     String url;
+    @Extra
+    String portletName;
 
     @Bean
     RestApi restApi;
-
     @Bean
     CasClient casClient;
-
     @Bean
     LayoutManager layoutManager;
-
     @Bean
     ConfigManager configManager;
 
@@ -90,9 +87,15 @@ public class LoginActivity extends BaseActivity {
 
     @AfterViews
     void initialize() {
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setUpToolbar();
+        setUpPasswordView();
 
+        usingConfig = getResources().getBoolean(R.bool.shouldUseGlobalConfig);
+
+        checkAccount(true);
+    }
+
+    private void setUpPasswordView() {
         passwordView.setTypeface(Typeface.DEFAULT);
         passwordView.setTransformationMethod(new PasswordTransformationMethod());
         passwordView.setOnKeyListener(new View.OnKeyListener() {
@@ -105,8 +108,11 @@ public class LoginActivity extends BaseActivity {
                 return false;
             }
         });
+    }
 
-        checkAccount(true);
+    private void setUpToolbar() {
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -122,30 +128,25 @@ public class LoginActivity extends BaseActivity {
     private void checkAccount(boolean initialCheck) {
         if (username != null) {
             Account newAccount = new Account(username, ACCOUNT_TYPE);
-
             accountManager.addAccountExplicitly(newAccount, password, null);
-
             if (initialCheck) {
                 container.setVisibility(View.GONE);
-                logIn();
+                logInWithConfig();
             }
         }
     }
-
 
     @Click(R.id.login_button)
     protected void loginClick() {
         if (!userNameView.getText().toString().isEmpty() &&
                 !passwordView.getText().toString().isEmpty()) {
-            username = userNameView.getText().toString();
+            username = userNameView.getText().toString().toLowerCase();
             password = passwordView.getText().toString();
-
-            logIn();
+            logInWithConfig();
         } else {
-            showSnackBar(getResources().getString(R.string.form_error));
+            showSnackBar(this, getResources().getString(R.string.form_error));
         }
     }
-
 
     @Click(R.id.forgot_password)
     protected void forgotPasswordClick() {
@@ -155,9 +156,25 @@ public class LoginActivity extends BaseActivity {
                 .start();
     }
 
-    protected void logIn() {
+    protected void logInWithConfig() {
         showSpinner("Logging in...");
 
+        if (usingConfig) {
+            restApi.getGlobalConfig(this, new UmobileRestCallback<String>() {
+                @Override
+                public void onError(Exception e, String response) { }
+
+                @Override
+                public void onSuccess(String response) {
+                    logInToCas();
+                }
+            });
+        } else {
+            logInToCas();
+        }
+    }
+
+    private void logInToCas() {
         casClient.authenticate(username, password, this, new UmobileRestCallback<String>() {
             @Override
             public void onSuccess(String response) {
@@ -167,13 +184,13 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onError(final Exception e, final String responseBody) {
                 dismissSpinner();
-                ActionClickListener listener = new ActionClickListener() {
+                View.OnClickListener listener = new View.OnClickListener() {
                     @Override
-                    public void onActionClicked(Snackbar snackbar) {
+                    public void onClick(View v) {
                         loginClick();
                     }
                 };
-                showSnackBarWithAction(responseBody, listener);
+                showSnackBarWithAction(LoginActivity.this, responseBody + " " + getString(R.string.lockout_reminder), listener, getString(R.string.retry));
                 deleteAccount();
             }
         });
@@ -184,15 +201,14 @@ public class LoginActivity extends BaseActivity {
             casClient.logOut(new UmobileRestCallback<Integer>() {
                 @Override
                 public void onError(Exception e, Integer response) {
-                    Logger.e(TAG, "error logging out (received status code " + response + ")", e);
                     dismissSpinner();
-                    ActionClickListener listener = new ActionClickListener() {
+                    View.OnClickListener listener = new View.OnClickListener() {
                         @Override
-                        public void onActionClicked(Snackbar snackbar) {
+                        public void onClick(View v) {
                             deleteAccount();
                         }
                     };
-                    showSnackBarWithAction(getString(R.string.error), listener);
+                    showSnackBarWithAction(LoginActivity.this, getString(R.string.error), listener, getString(R.string.retry));
                 }
                 @Override
                 public void onSuccess(Integer response) { }
@@ -200,18 +216,11 @@ public class LoginActivity extends BaseActivity {
         }
     }
 
-    private void restartActivity() {
-        finish();
-        LoginActivity_.intent(this).start();
-    }
-
     private void getFeed() {
         restApi.getMainFeed(this, new UmobileRestCallback<String>() {
 
             @Override
-            public void onError(Exception e, String responseBody) {
-                Logger.e(TAG, responseBody, e);
-            }
+            public void onError(Exception e, String responseBody) { }
 
             @Override
             public void onSuccess(String response) {
@@ -221,28 +230,51 @@ public class LoginActivity extends BaseActivity {
 
                 Layout layout = g.fromJson(response, Layout.class);
 
-                if (getResources().getBoolean(R.bool.shouldUseGlobalConfig)) {
-                    for (Folder folder : layout.getFolders()) {
-                        for (Portlet p : folder.getPortlets()) {
-                            for (String portletName : configManager.getConfig().getDisabledPortlets()) {
-                                if (p.getFName().equalsIgnoreCase(portletName)) {
-                                    folder.getPortlets().remove(p);
-                                }
+                List<Portlet> portletReferences = new ArrayList<Portlet>();
+                boolean usingGlobalConfig = getResources().getBoolean(R.bool.shouldUseGlobalConfig);
+                if (usingGlobalConfig) {
+                    List<String> disabledPortlets = configManager.getConfig().getDisabledPortlets();
+                    for (Folder f : layout.getFolders()) {
+                        for (Portlet p : f.getPortlets()) {
+                            if (disabledPortlets.contains(p.getFName())) {
+                                portletReferences.add(p);
                             }
                         }
                     }
                 }
 
-                layoutManager.setLayout(layout);
-
-                if (rememberMe.isChecked()) {
-                    checkAccount(false);
+                for (Folder f : layout.getFolders()) {
+                    for (Portlet p : portletReferences) {
+                        f.getPortlets().remove(p);
+                    }
                 }
 
-                HomePageActivity_
-                        .intent(LoginActivity.this)
-                        .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        .start();
+                layoutManager.setLayout(layout);
+
+                SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.account_type), Context.MODE_PRIVATE);
+                if (rememberMe.isChecked()) {
+                    sharedPreferences.edit().putBoolean("rememberMe", true).apply();
+                    checkAccount(false);
+                } else {
+                    sharedPreferences.edit().putBoolean("rememberMe", false).apply();
+                }
+
+                App.setIsAuth(true);
+
+                if (StringUtils.isNotEmpty(url) && StringUtils.isNotEmpty(portletName)) {
+                    PortletWebViewActivity_
+                            .intent(LoginActivity.this)
+                            .url(url)
+                            .portletName(portletName)
+                            .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            .start();
+                } else {
+                    HomePageActivity_
+                            .intent(LoginActivity.this)
+                            .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            .start();
+                }
+
                 finish();
             }
 
