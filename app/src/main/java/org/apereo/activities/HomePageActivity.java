@@ -2,6 +2,7 @@ package org.apereo.activities;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -183,6 +184,8 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
 
             @Override
             public void onSuccess(Integer response) {
+                SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.account_type), MODE_PRIVATE);
+                sharedPreferences.edit().putBoolean("rememberMe", false).apply();
                 getFeed();
             }
         });
