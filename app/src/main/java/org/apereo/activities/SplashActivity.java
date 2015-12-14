@@ -2,13 +2,12 @@ package org.apereo.activities;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.support.v7.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
-import android.util.Log;
+import android.support.v7.app.AlertDialog;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -54,14 +53,8 @@ public class SplashActivity extends BaseActivity {
 
     @AfterViews
     void init() {
-        setAppAuth();
         manageCookies();
         getGlobalConfig();
-    }
-
-    private void setAppAuth() {
-        SharedPreferences sharedPreferences = getSharedPreferences(ACCOUNT_TYPE, MODE_PRIVATE);
-        App.setIsAuth(sharedPreferences.getBoolean("rememberMe", true));
     }
 
     private void manageCookies() {
@@ -113,6 +106,7 @@ public class SplashActivity extends BaseActivity {
                     .password(accountManager.getPassword(account))
                     .start();
         } else {
+            App.setIsAuth(false);
             clearCookies();
 
             restApi.getMainFeed(this, new UmobileRestCallback<String>() {
@@ -168,8 +162,8 @@ public class SplashActivity extends BaseActivity {
     @UiThread
     protected void showErrorDialog(int msgId) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
-        DialogInterface.OnClickListener positiveAction = null;
-        DialogInterface.OnClickListener negativeAction = null;
+        DialogInterface.OnClickListener positiveAction;
+        DialogInterface.OnClickListener negativeAction;
         switch (msgId) {
             case AppConstants.ERROR_GETTING_FEED:
                 positiveAction = new DialogInterface.OnClickListener() {

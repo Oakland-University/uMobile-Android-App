@@ -211,7 +211,9 @@ public class LoginActivity extends BaseActivity {
                     showSnackBarWithAction(LoginActivity.this, getString(R.string.error), listener, getString(R.string.retry));
                 }
                 @Override
-                public void onSuccess(Integer response) { }
+                public void onSuccess(Integer response) {
+                    App.setIsAuth(false);
+                }
             });
         }
     }

@@ -184,8 +184,7 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
 
             @Override
             public void onSuccess(Integer response) {
-                SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.account_type), MODE_PRIVATE);
-                sharedPreferences.edit().putBoolean("rememberMe", false).apply();
+                App.setIsAuth(false);
                 getFeed();
             }
         });
