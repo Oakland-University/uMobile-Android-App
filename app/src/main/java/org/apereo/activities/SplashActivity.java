@@ -3,10 +3,12 @@ package org.apereo.activities;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -52,8 +54,14 @@ public class SplashActivity extends BaseActivity {
 
     @AfterViews
     void init() {
+        setAppAuth();
         manageCookies();
         getGlobalConfig();
+    }
+
+    private void setAppAuth() {
+        SharedPreferences sharedPreferences = getSharedPreferences(ACCOUNT_TYPE, MODE_PRIVATE);
+        App.setIsAuth(sharedPreferences.getBoolean("rememberMe", true));
     }
 
     private void manageCookies() {

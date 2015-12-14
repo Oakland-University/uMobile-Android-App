@@ -2,7 +2,9 @@ package org.apereo.activities;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.support.v7.widget.Toolbar;
 import android.text.method.PasswordTransformationMethod;
@@ -249,8 +251,12 @@ public class LoginActivity extends BaseActivity {
 
                 layoutManager.setLayout(layout);
 
+                SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.account_type), Context.MODE_PRIVATE);
                 if (rememberMe.isChecked()) {
+                    sharedPreferences.edit().putBoolean("rememberMe", true).apply();
                     checkAccount(false);
+                } else {
+                    sharedPreferences.edit().putBoolean("rememberMe", false).apply();
                 }
 
                 App.setIsAuth(true);
