@@ -33,11 +33,14 @@ import org.apereo.fragments.HomePageListFragment;
 import org.apereo.interfaces.IActionListener;
 import org.apereo.models.Folder;
 import org.apereo.models.Layout;
+import org.apereo.models.Portlet;
 import org.apereo.services.RestApi;
 import org.apereo.services.UmobileRestCallback;
 import org.apereo.utils.CasClient;
+import org.apereo.utils.ConfigManager;
 import org.apereo.utils.LayoutManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @EActivity(R.layout.activity_home_page)
@@ -58,6 +61,8 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
     CasClient casClient;
     @Bean
     LayoutManager layoutManager;
+    @Bean
+    ConfigManager configManager;
 
     @Extra
     int ePosition;
@@ -272,6 +277,26 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
                         .create();
 
                 Layout layout = g.fromJson(response, Layout.class);
+
+                List<Portlet> portletReferences = new ArrayList<>();
+                boolean usingGlobalConfig = getResources().getBoolean(R.bool.shouldUseGlobalConfig);
+                if (usingGlobalConfig) {
+                    List<String> disabledPortlets = configManager.getConfig().getDisabledPortlets();
+                    for (Folder f : layout.getFolders()) {
+                        for (Portlet p : f.getPortlets()) {
+                            if (disabledPortlets.contains(p.getFName())) {
+                                portletReferences.add(p);
+                            }
+                        }
+                    }
+                }
+
+                for (Folder f : layout.getFolders()) {
+                    for (Portlet p : portletReferences) {
+                        f.getPortlets().remove(p);
+                    }
+                }
+
                 layoutManager.setLayout(layout);
             }
 
