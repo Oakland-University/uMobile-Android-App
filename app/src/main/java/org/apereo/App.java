@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo;
 
 import org.androidannotations.annotations.EApplication;
 
+import java.net.CookieHandler;
 import java.net.CookieManager;
 
 /**
@@ -16,10 +17,6 @@ public class App extends Application {
     private static CookieManager cookieManager;
 
     private static boolean isAuth;
-
-    public static CookieManager getCookieManager() {
-        return cookieManager;
-    }
 
     @Override
     public void onCreate() {
@@ -49,6 +46,16 @@ public class App extends Application {
 
     public static String getRootUrl() {
         return getInstance().getResources().getString(R.string.root_url);
+    }
+
+    public static CookieManager getCookieManager() {
+        return cookieManager;
+    }
+
+    public void resetCookies() {
+        android.webkit.CookieManager.getInstance().removeAllCookie();
+        App.setCookieManager(new CookieManager());
+        CookieHandler.setDefault(App.getCookieManager());
     }
 
     public static boolean isDebugMode() {

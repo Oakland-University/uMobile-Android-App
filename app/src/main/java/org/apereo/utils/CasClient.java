@@ -73,7 +73,7 @@ public class CasClient {
     public void logOut(UmobileRestCallback<Integer> callback) {
         Integer responseCode = sendLogOutRequest();
         if (responseCode == 200) {
-            clearCookies();
+            App.getInstance().resetCookies();
             removeAccount();
             App.setIsAuth(false);
             callback.onSuccess(responseCode);
@@ -81,12 +81,6 @@ public class CasClient {
             callback.onError(null, responseCode);
         }
         callback.onFinish();
-    }
-
-    private void clearCookies() {
-        try {
-            App.getCookieManager().getCookieStore().removeAll();
-        } catch (NullPointerException e) {  }
     }
 
     private void removeAccount() {
@@ -108,6 +102,9 @@ public class CasClient {
             URL url = new URL(App.getInstance().getResources().getString(R.string.logout_url));
             HttpURLConnection getConnection = (HttpURLConnection) url.openConnection();
             getConnection.connect();
+
+            App.getInstance().resetCookies();
+
             return getConnection.getResponseCode();
         } catch (IOException e) {
             Logger.e(TAG, "error sending logout request", e);

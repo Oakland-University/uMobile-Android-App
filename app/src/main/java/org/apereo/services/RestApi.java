@@ -47,7 +47,7 @@ public class RestApi {
 
         SimpleClientHttpRequestFactory requestFactory;
         requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setReadTimeout(30 * 1000); // 30 seconds
+        requestFactory.setReadTimeout(15 * 1000); // 15 seconds
         requestFactory.setConnectTimeout(5 * 1000); // 5 seconds
         template.setRequestFactory(requestFactory);
     }

@@ -140,7 +140,9 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
     private void setUpAutomaticReauthentication(final Activity activity) {
         webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, final String url) {
-                if (url.startsWith(App.getInstance().getResources().getString(R.string.login_url))) {
+                // if not logged in anymore
+                if (url.contains(getString(R.string.cas_login_root)) ||
+                    url.contains(getString(R.string.moodle_login_root))) {
                     View.OnClickListener listener = new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
