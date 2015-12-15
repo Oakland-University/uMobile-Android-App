@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -54,22 +55,17 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     @ViewById(R.id.webView)
     WebView webView;
-
     @ViewById(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
-
     @ViewById(R.id.toolbar)
     Toolbar toolbar;
-
     @ViewById(R.id.left_drawer)
     ListView mDrawerList;
-
     @ViewById(R.id.progress_bar)
     ProgressBar progressBar;
 
     @Bean
     LayoutManager layoutManager;
-
     @Bean
     CasClient casClient;
 
@@ -78,10 +74,8 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
 
     @Extra
     String url;
-
     @Extra
     String portletName;
-
     @Extra
     int folderPosition;
 
@@ -142,39 +136,34 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
             public void onPageFinished(WebView view, final String url) {
                 // if not logged in anymore
                 if (url.contains(getString(R.string.cas_login_root)) ||
-                    url.contains(getString(R.string.moodle_login_root))) {
-                    View.OnClickListener listener = new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            AccountManager accountManager = AccountManager.get(App.getInstance());
-                            if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
-                                Account account = accountManager.getAccountsByType(ACCOUNT_TYPE)[0];
-                                casClient.authenticate(account.name, accountManager.getPassword(account), activity, new UmobileRestCallback<String>() {
-                                    @Override
-                                    public void onError(Exception e, String response) {
-                                        showSnackBar(PortletWebViewActivity.this, App.getInstance().getString(R.string.error) + " " + App.getInstance().getString(R.string.lockout_reminder));
-                                    }
-                                    @Override
-                                    public void onSuccess(String response) {
-                                        PortletWebViewActivity_
-                                                .intent(activity)
-                                                .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                                                .url(url)
-                                                .portletName(portletName)
-                                                .start();
-                                    }
-                                });
-                            } else {
-                                LoginActivity_
+                        url.contains(getString(R.string.moodle_login_root))) {
+                    AccountManager accountManager = AccountManager.get(App.getInstance());
+                    if (accountManager.getAccountsByType(ACCOUNT_TYPE).length != 0) {
+                        Account account = accountManager.getAccountsByType(ACCOUNT_TYPE)[0];
+                        casClient.authenticate(account.name, accountManager.getPassword(account), activity, new UmobileRestCallback<String>() {
+                            @Override
+                            public void onError(Exception e, String response) {
+                                showSnackBar(PortletWebViewActivity.this, App.getInstance().getString(R.string.error) + " " + App.getInstance().getString(R.string.lockout_reminder));
+                            }
+
+                            @Override
+                            public void onSuccess(String response) {
+                                PortletWebViewActivity_
                                         .intent(activity)
                                         .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                                         .url(url)
                                         .portletName(portletName)
                                         .start();
                             }
-                        }
-                    };
-                    showSnackBarWithAction(PortletWebViewActivity.this, getString(R.string.reauthenticating), listener, getString(R.string.login));
+                        });
+                    } else {
+                        LoginActivity_
+                                .intent(activity)
+                                .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                .url(url)
+                                .portletName(portletName)
+                                .start();
+                    }
                 }
             }
         });
@@ -227,7 +216,11 @@ public class PortletWebViewActivity extends BaseActivity implements AdapterView.
         } else if (webView.canGoBack()) {
             webView.goBack();
         } else {
-            super.onBackPressed();
+            HomePageActivity_
+                    .intent(this)
+                    .ePosition(folderPosition)
+                    .flags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    .start();
         }
     }
 

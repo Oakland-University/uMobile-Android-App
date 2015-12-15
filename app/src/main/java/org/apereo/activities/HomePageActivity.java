@@ -2,7 +2,6 @@ package org.apereo.activities;
 
 import android.app.Fragment;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -307,9 +306,6 @@ public class HomePageActivity extends BaseActivity implements IActionListener, A
         } catch (NullPointerException e) {
             restartApp();
         }
-
-        // Switch back to the first tab.
-        selectItem(0);
 
         dismissSpinner();
     }
