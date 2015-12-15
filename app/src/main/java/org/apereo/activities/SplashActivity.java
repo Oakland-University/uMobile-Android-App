@@ -81,12 +81,12 @@ public class SplashActivity extends BaseActivity {
                     Config config = g.fromJson(response, Config.class);
                     configManager.setConfig(config);
 
-                    getAccountFeed();
-
                     if (config.isUpgradeRequired()) {
                         showErrorDialog(AppConstants.UPGRADE_REQUIRED);
                     } else if (config.isUpgradeRecommended()) {
                         showErrorDialog(AppConstants.UPGRADE_RECOMMENDED);
+                    } else {
+                        getAccountFeed();
                     }
                 }
             });
