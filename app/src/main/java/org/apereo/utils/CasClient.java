@@ -72,7 +72,7 @@ public class CasClient {
     @Background
     public void logOut(UmobileRestCallback<Integer> callback) {
         Integer responseCode = sendLogOutRequest();
-        if (responseCode == 200) {
+        if (responseCode == 200 || responseCode == 302) {
             App.getInstance().resetCookies();
             removeAccount();
             App.setIsAuth(false);
