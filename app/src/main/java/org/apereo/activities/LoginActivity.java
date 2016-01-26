@@ -225,6 +225,12 @@ public class LoginActivity extends BaseActivity {
                 @Override
                 public void onSuccess(Integer response) {
                     App.setIsAuth(false);
+                    if(response == 302) {
+                        SplashActivity_
+                                .intent(LoginActivity.this)
+                                .start();
+                        finish();
+                    }
                 }
             });
         }
