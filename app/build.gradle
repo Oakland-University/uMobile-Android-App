@@ -45,8 +45,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 23
-        versionCode 1
-        versionName "2.1.0"
+        versionCode 13
+        versionName "3.0.0"
     }
     packagingOptions {
         exclude 'META-INF/notice.txt'
